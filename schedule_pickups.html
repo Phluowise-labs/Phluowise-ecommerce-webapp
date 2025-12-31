@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phluowise - Schedule Pickups</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#007ACC',
+                        tabActive: '#3B74FF',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+        :root {
+            --bg-color: #060606;
+            --bg-second: #1D1D1DF2;
+            --header-bg: #101010;
+            --btn-color: #007ACC66;
+            --btn-border: #3B74FF;
+            --card-bg: #1D1D1D;
+            --card-border: #2C2D2E;
+        }
+
+        body.dark-theme {
+            --bg-color: #060606;
+            --header-bg: #101010;
+            --card-bg: #1D1D1D;
+            --card-border: #8080804D;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: white;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+
+<body class="dark-theme h-screen flex flex-col overflow-hidden">
+
+    <!-- Header (Matching _layout.tsx) -->
+    <div class="w-full flex flex-col pt-10 pb-4 px-4 border-b-0"
+        style="background-color: var(--header-bg); height: 110px;">
+        <h1 class="text-white text-xl font-medium text-center w-[250px] mx-auto truncate font-sans">
+            Schedule Pickups
+        </h1>
+    </div>
+
+    <!-- Status Tabs (Status.tsx) -->
+    <div class="w-full px-10 py-4 flex flex-row justify-between items-center gap-1"
+        style="background-color: var(--header-bg);">
+        <button onclick="setStatus('status')" id="tab-status"
+            class="h-[40px] px-4 rounded-lg flex items-center justify-center flex-1 transition-colors">
+            <span class="text-white font-semibold">Status</span>
+        </button>
+        <button onclick="setStatus('ongoing')" id="tab-ongoing"
+            class="h-[40px] px-4 rounded-lg flex items-center justify-center flex-1 transition-colors">
+            <span class="text-white font-semibold">Ongoing</span>
+        </button>
+        <button onclick="setStatus('completed')" id="tab-completed"
+            class="h-[40px] px-4 rounded-lg flex items-center justify-center flex-1 transition-colors">
+            <span class="text-white font-semibold">Completed</span>
+        </button>
+    </div>
+
+    <!-- Main Content (ScheduleProduct.tsx) -->
+    <div class="flex-1 overflow-y-auto hide-scrollbar p-0 bg-[#060606]">
+        <div class="flex flex-col gap-[6px]" id="ordersList">
+            <!-- Orders injected here via JS -->
+        </div>
+        <div class="h-[100px]"></div> <!-- Spacer for bottom tab -->
+    </div>
+
+
+    <!-- Bottom Tab Navigation -->
+    <div
+        class="tab-bar fixed bottom-0 left-0 right-0 h-[64px] flex flex-row justify-around items-center px-4 border-t-0 bg-[#101010] z-50">
+        <a href="home.html" class="flex flex-col items-center justify-center gap-1 flex-1">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.5">
+                <path
+                    d="M9.02 2.84004L3.63 7.04004C2.73 7.74004 2 9.23004 2 10.36V17.77C2 20.09 3.89 21.99 6.21 21.99H17.79C20.11 21.99 22 20.09 22 17.78V10.5C22 9.29004 21.19 7.74004 20.2 7.05004L14.02 2.72004C12.62 1.74004 10.37 1.79004 9.02 2.84004Z"
+                    stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M12 17.99V14.99" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <span class="text-sm text-white font-normal mt-1">Home</span>
+        </a>
+        <a href="services.html" class="flex flex-col items-center justify-center gap-1 flex-1">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#FFFFFF" stroke-width="1.5">
+                <path
+                    fill="#FFFFFF"
+                    d="m31.696 15.098-1.75-4.376a1.742 1.742 0 0 0-1.625-1.1H23.75V8.376a.75.75 0 0 0-.75-.75H4a1.75 1.75 0 0 0-1.75 1.75v14A1.75 1.75 0 0 0 4 25.125h2.325a3.75 3.75 0 0 0 7.35 0h6.65a3.75 3.75 0 0 0 7.35 0H30a1.75 1.75 0 0 0 1.75-1.75v-8a.752.752 0 0 0-.054-.277Zm-7.946-3.973h4.573a.25.25 0 0 1 .232.158l1.337 3.342H23.75v-3.5Zm-20-1.75a.25.25 0 0 1 .25-.25h18.25v8.5H3.75v-8.25ZM10 26.625a2.25 2.25 0 1 1 0-4.5 2.25 2.25 0 0 1 0 4.5Zm10.325-3h-6.65a3.75 3.75 0 0 0-7.35 0H4a.25.25 0 0 1-.25-.25v-4.25h18.5v1.935a3.763 3.763 0 0 0-1.925 2.565Zm3.675 3a2.25 2.25 0 1 1 0-4.5 2.25 2.25 0 0 1 0 4.5Zm6.25-3.25a.25.25 0 0 1-.25.25h-2.325a3.756 3.756 0 0 0-3.675-3c-.084 0-.168 0-.25.009v-4.509h6.5v7.25Z"
+                />
+            </svg>
+            <span class="text-sm text-white font-normal mt-1">Services</span>
+        </a>
+        <a href="schedule.html" class="flex flex-col items-center justify-center gap-1 flex-1">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3B74FF" stroke-width="1.5">
+                <path d="M8 2V5" />
+                <path d="M16 2V5" />
+                <path d="M3.5 9.09H20.5" />
+                <path
+                    d="M18.2 21.4C19.9673 21.4 21.4 19.9673 21.4 18.2C21.4 16.4327 19.9673 15 18.2 15C16.4327 15 15 16.4327 15 18.2C15 19.9673 16.4327 21.4 18.2 21.4Z" />
+                <path d="M22 22L21 21" />
+                <path
+                    d="M21 8.5V13.63C20.27 13.14 19.38 12.85 18.43 12.85C15.86 12.85 13.78 14.95 13.78 17.54C13.78 18.45 14.04 19.29 14.49 20H8C4.5 20 3 18 3 15V8.5C3 5.5 4.5 3.5 8 3.5H16C19.5 3.5 21 5.5 21 8.5Z" />
+            </svg>
+            <span class="text-sm text-[#3B74FF] font-normal mt-1">Schedule Pickups</span>
+        </a>
+    </div>
+
+    <!-- Modal for Order Details -->
+    <div id="orderModal"
+        class="fixed inset-0 z-50 flex items-center justify-center pointer-events-none opacity-0 transition-opacity duration-300"
+        style="background-color: rgba(0,0,0,0.5);">
+        <div class="pointer-events-auto bg-[#1D1D1D] rounded-[10px] w-full max-w-[327px] p-5 flex flex-col items-center relative transform scale-95 transition-transform duration-300"
+            id="orderModalContent">
+            <!-- Modal Content Injected by JS -->
+            <button onclick="closeModal()"
+                class="mt-4 bg-[#007ACC66] border border-[#3B74FF] text-white px-6 py-2 rounded-full">Okay</button>
+        </div>
+    </div>
+
+
+    <script src="../public/js/appwriteConfig.js"></script>
+    <script src="../public/js/theme.js"></script>
+    <script>
+        // Exact data from ScheduleProduct.tsx
+        const orders = [
+            { id: 1, status: 'pending', company: '<a href=schedule.html?branch_id=1 class=hover:text-blue-400 transition-colors>Company Name</a>', location: 'location', price: 20, time: '12:30am', date: 'July 20, 2023', type: 'Pending', typeColor: '#F2A78C', payment: 'Mobile Money: MTN' },
+            { id: 2, status: 'accepted', company: '<a href=schedule.html?branch_id=1 class=hover:text-blue-400 transition-colors>Company Name</a>', location: 'location', price: 20, time: '12:30am', date: 'July 20, 2023', type: 'Order accepted', typeColor: '#2C9043', payment: 'Mobile Money: MTN' },
+            { id: 3, status: 'denied', company: '<a href=schedule.html?branch_id=1 class=hover:text-blue-400 transition-colors>Company Name</a>', location: 'location', price: 20, time: '12:30am', date: 'July 20, 2023', type: 'Order denied', typeColor: '#F85D5D', payment: 'Mobile Money: MTN' },
+            { id: 4, status: 'completed', company: '<a href=schedule.html?branch_id=1 class=hover:text-blue-400 transition-colors>Company Name</a>', location: 'location', price: 20, time: '12:30am', date: 'July 20, 2023', type: 'Completed', typeColor: '#2CAA48', payment: '' },
+        ];
+
+        let currentStatus = 'status';
+
+        function setStatus(status) {
+            currentStatus = status;
+            ['status', 'ongoing', 'completed'].forEach(s => {
+                const btn = document.getElementById('tab-' + s);
+                if (s === status) {
+                    btn.classList.add('bg-[#007ACC66]'); // var(--btn-color)
+                    // btn.style.border = '1px solid var(--btn-border)'; // React Native doesn't show border on tabs in Status.tsx? Checking code: just bg change
+                } else {
+                    btn.classList.remove('bg-[#007ACC66]');
+                }
+            });
+            renderOrders();
+        }
+
+        function renderOrders() {
+            const container = document.getElementById('ordersList');
+            container.innerHTML = '';
+
+            // In RN: Status view shows all? Or filters? Code just renders ScheduleProduct which has static hardcoded cards.
+            // I will render all purely for visual replication as seen in ScheduleProduct.tsx
+
+            orders.forEach(order => {
+                const card = document.createElement('div');
+                card.className = "w-full flex items-center justify-center px-4";
+                card.style.height = "120px";
+                card.style.backgroundColor = "#1D1D1DF2"; // backgroundSecondColor
+
+                card.onclick = () => openModal(order);
+
+                card.innerHTML = `
+                    <div class="flex flex-row w-full items-center gap-2">
+                        <!-- Image -->
+                        <div class="rounded-[10px] bg-[#808080] overflow-hidden" 
+                             style="width: 22%; height: 89px;">
+                             <img src="../public/images/main/ScheduleImage1.png" class="w-full h-full object-cover">
+                        </div>
+                        
+                        <!-- Details -->
+                        <div class="flex flex-col ml-2" style="width: 44%; gap: 2px;">
+                            <span class="text-white text-xl font-medium truncate">${order.company}</span>
+                            <span class="text-white text-lg font-medium truncate">${order.location}</span>
+                            <span class="text-white text-base font-medium truncate">${order.payment}</span>
+                            <div class="flex flex-row gap-3">
+                                <span class="text-white text-sm font-normal">${order.time}</span>
+                                <span class="text-white text-sm font-normal">${order.date}</span>
+                            </div>
+                        </div>
+
+                        <!-- Price/Status -->
+                        <div class="flex flex-col items-center justify-center gap-1" style="width: 25%; height: 60px;">
+                            <span class="text-xl font-bold text-center text-white">GH₵${order.price}</span>
+                            <span class="text-sm font-medium text-center" style="color: ${order.typeColor}">${order.type}</span>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function openModal(order) {
+            const modal = document.getElementById('orderModal');
+            const content = document.getElementById('orderModalContent');
+
+            // Content logic based on Status (Partial implementation of ModelUI logic)
+            let modalHTML = '';
+            if (order.status === 'pending') {
+                modalHTML = `
+                    <p class="text-white text-center text-xl font-medium">
+                        Your order is still <span style="color: #F9A24B">pending</span>.<br>
+                        Wait for ${order.company} to<br>accept your order
+                    </p>
+                    <button class="text-white text-center text-xl underline font-semibold mt-4">See details of Order</button>
+                    <button onclick="closeModal()" class="mt-8 h-[40px] w-[94px] rounded-[100px] flex items-center justify-center border border-[#3B74FF] bg-[#007ACC66] text-white">okay</button>
+                `;
+            } else if (order.status === 'denied') {
+                modalHTML = `
+                    <p class="text-white text-center text-xl font-medium">
+                        Your order has been <br><span style="color: #F85D5D">denied</span>.
+                    </p>
+                    <button class="text-white text-center text-xl underline font-semibold mt-4">See details of Order</button>
+                     <button onclick="closeModal()" class="mt-8 h-[40px] w-[94px] rounded-[100px] flex items-center justify-center border border-[#3B74FF] bg-[#007ACC66] text-white">okay</button>
+                `;
+            } else { // Accepted/Completed
+                modalHTML = `
+                    <p class="text-white text-center text-xl font-medium">
+                        Your order has been <br><span style="color: #2C9043">accepted</span>.
+                    </p>
+                    <button class="text-white text-center text-xl underline font-semibold mt-4">See details of Order</button>
+                     <button onclick="closeModal()" class="mt-8 h-[40px] w-[94px] rounded-[100px] flex items-center justify-center border border-[#3B74FF] bg-[#007ACC66] text-white">okay</button>
+                `;
+            }
+
+            content.innerHTML = modalHTML;
+
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modal.classList.add('opacity-100');
+            setTimeout(() => content.classList.remove('scale-95'), 10);
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('orderModal');
+            const content = document.getElementById('orderModalContent');
+            content.classList.add('scale-95');
+            setTimeout(() => {
+                modal.classList.remove('opacity-100');
+                modal.classList.add('opacity-0', 'pointer-events-none');
+            }, 300);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.body.classList.remove('dark-theme', 'gray-theme', 'light-theme');
+            document.body.classList.add(savedTheme + '-theme');
+            setStatus('status');
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notification System Test</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="../public/css/notifications.css" />
+    <script src="../public/js/notifications.js"></script>
+    <style>
+        body {
+            background-color: #060606;
+            color: white;
+            font-family: 'Inter', sans-serif;
+            padding: 20px;
+        }
+        .test-section {
+            background-color: #1D1D1D;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .btn {
+            background-color: #3B74FF;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin: 5px;
+            transition: all 0.3s ease;
+        }
+        .btn:hover {
+            background-color: #2563EB;
+            transform: translateY(-2px);
+        }
+        .btn.danger {
+            background-color: #EF4444;
+        }
+        .btn.danger:hover {
+            background-color: #DC2626;
+        }
+        .status-display {
+            background-color: #292B2F;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 15px;
+        }
+        .demo-nav {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            padding: 20px;
+            background-color: #101010;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1 class="text-3xl font-bold text-center mb-8">Schedule History Notification System Test</h1>
+    
+    <!-- Demo Navigation -->
+    <div class="demo-nav">
+        <a href="home.html" class="flex flex-col items-center justify-center gap-1 flex-1">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.5">
+                <path d="M9.02 2.84004L3.63 7.04004C2.73 7.74004 2 9.23004 2 10.36V17.77C2 20.09 3.89 21.99 6.21 21.99H17.79C20.11 21.99 22 20.09 22 17.78V10.5C22 9.29004 21.19 7.74004 20.2 7.05004L14.02 2.72004C12.62 1.74004 10.37 1.79004 9.02 2.84004Z" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M12 17.99V14.99" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <span class="text-sm text-white font-normal mt-1">Home</span>
+        </a>
+        
+        <a href="services.html" class="flex flex-col items-center justify-center gap-1 flex-1">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#FFFFFF" stroke-width="1.5">
+                <path fill="#FFFFFF" d="m31.696 15.098-1.75-4.376a1.742 1.742 0 0 0-1.625-1.1H23.75V8.376a.75.75 0 0 0-.75-.75H4a1.75 1.75 0 0 0-1.75 1.75v14A1.75 1.75 0 0 0 4 25.125h2.325a3.75 3.75 0 0 0 7.35 0h6.65a3.75 3.75 0 0 0 7.35 0H30a1.75 1.75 0 0 0 1.75-1.75v-8a.752.752 0 0 0-.054-.277Zm-7.946-3.973h4.573a.25.25 0 0 1 .232.158l1.337 3.342H23.75v-3.5Zm-20-1.75a.25.25 0 0 1 .25-.25h18.25v8.5H3.75v-8.25ZM10 26.625a2.25 2.25 0 1 1 0-4.5 2.25 2.25 0 0 1 0 4.5Zm10.325-3h-6.65a3.75 3.75 0 0 0-7.35 0H4a.25.25 0 0 1-.25-.25v-4.25h18.5v1.935a3.763 3.763 0 0 0-1.925 2.565Zm3.675 3a2.25 2.25 0 1 1 0-4.5 2.25 2.25 0 0 1 0 4.5Zm6.25-3.25a.25.25 0 0 1-.25.25h-2.325a3.756 3.756 0 0 0-3.675-3c-.084 0-.168 0-.25.009v-4.509h6.5v7.25Z" />
+            </svg>
+            <span class="text-sm text-white font-normal mt-1">Services</span>
+        </a>
+        
+        <a href="schedule-history.html" class="flex flex-col items-center justify-center gap-1 flex-1">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.5">
+                <path d="M8 2V5" />
+                <path d="M16 2V5" />
+                <path d="M3.5 9.09H20.5" />
+                <path d="M18.2 21.4C19.9673 21.4 21.4 19.9673 21.4 18.2C21.4 16.4327 19.9673 15 18.2 15C16.4327 15 15 16.4327 15 18.2C15 19.9673 16.4327 21.4 18.2 21.4Z" />
+                <path d="M22 22L21 21" />
+                <path d="M21 8.5V13.63C20.27 13.14 19.38 12.85 18.43 12.85C15.86 12.85 13.78 14.95 13.78 17.54C13.78 18.45 14.04 19.29 14.49 20H8C4.5 20 3 18 3 15V8.5C3 5.5 4.5 3.5 8 3.5H16C19.5 3.5 21 5.5 21 8.5Z" />
+            </svg>
+            <span class="text-sm text-white font-normal mt-1">Schedule History</span>
+        </a>
+    </div>
+
+    <!-- Test Controls -->
+    <div class="test-section">
+        <h2 class="text-xl font-bold mb-4">Test Notification Scenarios</h2>
+        
+        <div class="mb-4">
+            <h3 class="text-lg font-semibold mb-2">Add Test Orders:</h3>
+            <button class="btn" onclick="addTestOrder('pending')">Add Pending Order</button>
+            <button class="btn" onclick="addTestOrder('accepted')">Add Accepted Order</button>
+            <button class="btn" onclick="addTestOrder('completed')">Add Completed Order</button>
+        </div>
+
+        <div class="mb-4">
+            <h3 class="text-lg font-semibold mb-2">Test Multiple Notifications:</h3>
+            <button class="btn" onclick="addMultipleOrders()">Add Pending + Accepted</button>
+            <button class="btn" onclick="addAllTypes()">Add All Order Types</button>
+        </div>
+
+        <div class="mb-4">
+            <h3 class="text-lg font-semibold mb-2">Clear Orders:</h3>
+            <button class="btn danger" onclick="clearAllOrders()">Clear All Orders</button>
+        </div>
+
+        <div class="mb-4">
+            <h3 class="text-lg font-semibold mb-2">Manual Controls:</h3>
+            <button class="btn" onclick="forceUpdate()">Force Update Notifications</button>
+        </div>
+
+        <div class="status-display">
+            <h3 class="text-lg font-semibold mb-2">Current Order Status:</h3>
+            <div id="statusInfo">Loading...</div>
+        </div>
+    </div>
+
+    <div class="test-section">
+        <h2 class="text-xl font-bold mb-4">Expected Behavior</h2>
+        <ul class="list-disc list-inside space-y-2">
+            <li><strong>Yellow dot:</strong> Shows when there are pending orders</li>
+            <li><strong>Green dot:</strong> Shows when there are accepted/ongoing orders</li>
+            <li><strong>Grey dot:</strong> Shows when there are only completed orders</li>
+            <li><strong>Multiple dots:</strong> Shows when there are both pending and accepted orders</li>
+            <li><strong>No dot:</strong> Shows when there are no orders</li>
+        </ul>
+    </div>
+
+    <script>
+        // Test functions
+        function addTestOrder(status) {
+            const manager = window.getNotificationManager();
+            if (manager) {
+                manager.addTestOrder(status);
+                updateStatusDisplay();
+            }
+        }
+
+        function addMultipleOrders() {
+            const manager = window.getNotificationManager();
+            if (manager) {
+                manager.addTestOrder('pending');
+                setTimeout(() => {
+                    manager.addTestOrder('accepted');
+                    updateStatusDisplay();
+                }, 500);
+            }
+        }
+
+        function addAllTypes() {
+            const manager = window.getNotificationManager();
+            if (manager) {
+                manager.addTestOrder('pending');
+                setTimeout(() => {
+                    manager.addTestOrder('accepted');
+                    setTimeout(() => {
+                        manager.addTestOrder('completed');
+                        updateStatusDisplay();
+                    }, 500);
+                }, 500);
+            }
+        }
+
+        function clearAllOrders() {
+            localStorage.removeItem('phluowiseOrders');
+            const manager = window.getNotificationManager();
+            if (manager) {
+                manager.forceUpdate();
+                updateStatusDisplay();
+            }
+        }
+
+        function forceUpdate() {
+            const manager = window.getNotificationManager();
+            if (manager) {
+                manager.forceUpdate();
+                updateStatusDisplay();
+            }
+        }
+
+        function updateStatusDisplay() {
+            const savedOrders = localStorage.getItem('phluowiseOrders');
+            const orders = savedOrders ? JSON.parse(savedOrders) : [];
+            
+            const counts = {
+                pending: 0,
+                accepted: 0,
+                completed: 0
+            };
+
+            orders.forEach(order => {
+                const status = (order.status || '').toLowerCase();
+                if (counts.hasOwnProperty(status)) {
+                    counts[status]++;
+                }
+            });
+
+            const statusInfo = document.getElementById('statusInfo');
+            statusInfo.innerHTML = `
+                <p><strong>Total Orders:</strong> ${orders.length}</p>
+                <p><strong>Pending:</strong> ${counts.pending}</p>
+                <p><strong>Accepted:</strong> ${counts.accepted}</p>
+                <p><strong>Completed:</strong> ${counts.completed}</p>
+                <p><strong>Expected Notification:</strong> ${getExpectedNotification(counts)}</p>
+            `;
+        }
+
+        function getExpectedNotification(counts) {
+            if (counts.pending > 0 && counts.accepted > 0) {
+                return 'Yellow + Green dots';
+            } else if (counts.pending > 0) {
+                return 'Yellow dot';
+            } else if (counts.accepted > 0) {
+                return 'Green dot';
+            } else if (counts.completed > 0 && counts.pending === 0 && counts.accepted === 0) {
+                return 'Grey dot';
+            } else {
+                return 'No dot';
+            }
+        }
+
+        // Initialize status display
+        document.addEventListener('DOMContentLoaded', () => {
+            updateStatusDisplay();
+            
+            // Update status every 2 seconds
+            setInterval(updateStatusDisplay, 2000);
+        });
+    </script>
+</body>
+</html>

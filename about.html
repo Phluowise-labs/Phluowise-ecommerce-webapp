@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phluowise - About</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#007ACC',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        :root {
+            --bg-color: #060606;
+            --bg-third: #101010;
+        }
+
+        body.dark-theme {
+            --bg-color: #060606;
+            --bg-third: #101010;
+        }
+
+        body.gray-theme {
+            --bg-color: #202225;
+            --bg-third: #292B2F;
+        }
+
+        body.light-theme {
+            --bg-color: #202225;
+            --bg-third: #292B2F;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: white;
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+
+<body class="dark-theme h-screen flex flex-col overflow-hidden">
+
+    <!-- Header with Back Button -->
+    <div class="w-full h-[60px] flex items-center px-5" style="background-color: var(--bg-color);">
+        <button onclick="goBack()" class="w-10 h-10 flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+        </button>
+        <h1 class="flex-1 text-center text-white text-xl font-medium pr-10">About</h1>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 overflow-y-auto hide-scrollbar" style="background-color: var(--bg-color);">
+        <div class="p-4">
+
+            <!-- About Content Card -->
+            <div class="rounded-[15px] overflow-hidden border-[0.5px]" style="border-color: #DADADA;">
+
+                <!-- Newsletter -->
+                <a href="newsletter.html"
+                    class="h-[60px] flex flex-row justify-between items-center px-6 border-b border-[#3A3B3F]"
+                    style="background-color: var(--bg-third);">
+                    <div class="flex flex-row items-center gap-[30px]">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                        </svg>
+                        <span class="text-white text-lg font-semibold">Newsletter</span>
+                    </div>
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+
+                <!-- Disclaimer -->
+                <a href="disclaimer.html"
+                    class="h-[60px] flex flex-row justify-between items-center px-6 border-b border-[#3A3B3F]"
+                    style="background-color: var(--bg-third);">
+                    <div class="flex flex-row items-center gap-[30px]">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span class="text-white text-lg font-semibold">Disclaimer</span>
+                    </div>
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+
+                <!-- Terms of Service -->
+                <a href="terms.html"
+                    class="h-[60px] flex flex-row justify-between items-center px-6 border-b border-[#3A3B3F]"
+                    style="background-color: var(--bg-third);">
+                    <div class="flex flex-row items-center gap-[30px]">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                        </svg>
+                        <span class="text-white text-lg font-semibold">Terms of Service</span>
+                    </div>
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+
+                <!-- Privacy Policy -->
+                <a href="privacy.html" class="h-[60px] flex flex-row justify-between items-center px-6"
+                    style="background-color: var(--bg-third);">
+                    <div class="flex flex-row items-center gap-[30px]">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        <span class="text-white text-lg font-semibold">Privacy Policy</span>
+                    </div>
+                    <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+
+            </div>
+
+            <!-- Share Button -->
+            <button onclick="shareApp()"
+                class="h-[62px] flex flex-row justify-between items-center px-6 mt-4 w-full rounded-[15px] shadow-md"
+                style="background-color: var(--bg-third);">
+                <div class="flex flex-row items-center gap-[30px]">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.368 2.684 3 3 0 00-5.368-2.684z" />
+                    </svg>
+                    <span class="text-white text-lg font-semibold">Share Phluowise</span>
+                </div>
+                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </button>
+
+        </div>
+    </div>
+
+    <script src="../public/js/theme.js"></script>
+    <script>
+        // Navigation State Management
+        function goBack() {
+            const previousPage = localStorage.getItem('previousPage');
+            if (previousPage) {
+                window.location.href = previousPage;
+            } else {
+                // Fallback to home if no previous page is stored
+                window.location.href = 'home.html';
+            }
+        }
+
+        function shareApp() {
+            if (navigator.share) {
+                navigator.share({
+                    title: 'Phluowise',
+                    text: 'Check out Phluowise - Your water delivery companion!',
+                    url: window.location.origin
+                });
+            } else {
+                alert('Share feature not supported on this browser. Copy link: ' + window.location.origin);
+            }
+        }
+    </script>
+
+</body>
+
+</html>

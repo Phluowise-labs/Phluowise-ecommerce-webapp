@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Phluowise - Schedule History</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=verified" />
+    <link rel="stylesheet" href="../public/css/notifications.css" />
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#007ACC',
+                        tabActive: '#3B74FF',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+        :root {
+            --bg-color: #060606;
+            --bg-second: #1D1D1DF2;
+            --header-bg: #101010;
+            --btn-color: #007ACC66;
+            --btn-border: #3B74FF;
+            --text-color: #FFFFFF;
+            --bottom-sheet-color: #1D1D1D;
+            --input-bg: #292B2F;
+            --input-border: #40444B;
+        }
+
+        body.dark-theme {
+            --bg-color: #060606;
+            --bg-second: #1D1D1DF2;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: white;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Material Symbols Styles */
+        .material-symbols-outlined {
+            font-variation-settings:
+                'FILL' 1,
+                'wght' 400,
+                'GRAD' 0,
+                'opsz' 24
+        }
+
+        .verified-checkmark {
+            color: #FFD700;
+            font-size: 20px;
+            margin-left: 4px;
+            vertical-align: middle;
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Sliding Menu Styles */
+        .menu-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+
+        .menu-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .sliding-menu {
+            position: fixed;
+            top: 0;
+            right: -100%;
+            width: 80%;
+            max-width: 400px;
+            height: 100%;
+            background-color: var(--bg-color);
+            z-index: 1000;
+            transition: right 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .sliding-menu.active {
+            right: 0;
+        }
+
+        /* Prevent unwanted scrolling */
+        .no-scroll {
+            overscroll-behavior: none;
+            touch-action: pan-y;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        /* Bottom sheet touch handling */
+        .bottom-sheet {
+            touch-action: pan-y;
+            overscroll-behavior: contain;
+        }
+
+        /* Prevent horizontal scrolling */
+        .no-horizontal-scroll {
+            overflow-x: hidden;
+            touch-action: pan-y;
+        }
+
+        /* Mobile-specific fixes */
+        @media (max-width: 768px) {
+
+            html,
+            body {
+                position: fixed;
+                width: 100%;
+                height: 100%;
+                overflow: hidden;
+                touch-action: none;
+            }
+
+            body {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                overscroll-behavior: none;
+                touch-action: none;
+                -webkit-overflow-scrolling: auto;
+            }
+
+            .mobile-container {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                overflow: hidden;
+                touch-action: none;
+            }
+
+            .mobile-scrollable {
+                -webkit-overflow-scrolling: touch;
+                overflow-y: auto;
+                overflow-x: hidden;
+                touch-action: pan-y;
+            }
+        }
+    </style>
+</head>
+
+<body class="dark-theme h-screen flex flex-col overflow-hidden no-scroll mobile-container">
+
+    <!-- Header (exact from RN layout: height: 110, bg: #101010) -->
+    <div class="flex flex-row items-center justify-between px-4"
+        style="height: 110px; background-color: var(--header-bg);">
+        <h1 class="text-white text-xl font-medium">Schedule History</h1>
+        <button onclick="toggleMenu()"
+            class="relative overflow-hidden rounded-full flex justify-center items-center border"
+            style="height: 45px; width: 45px; border-width: 0.5px; border-color: #808080; background-color: #40444B4D;">
+            <div class="w-full h-full flex justify-center items-center">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                    <line x1="4" y1="6" x2="20" y2="6" />
+                    <line x1="4" y1="12" x2="20" y2="12" />
+                    <line x1="4" y1="18" x2="20" y2="18" />
+                </svg>
+            </div>
+        </button>
+    </div>
+
+    <!-- Menu Overlay -->
+    <div class="menu-overlay" id="menuOverlay" onclick="closeMenu()"></div>
+    <!-- Sliding Menu -->
+    <div class="sliding-menu" id="slidingMenu">
+        <!-- Avatar Section -->
+        <div class="flex flex-col items-center justify-center gap-4 py-6">
+            <!-- Profile Image Container -->
+            <div class="relative flex items-center justify-center rounded-full border-[0.5px] border-[#292B2F]"
+                style="height: 110px; width: 110px; background-color: #292B2F;">
+                <img src="../public/images/main/ProfileImage.png" class="w-[62px] h-[62px] object-contain"
+                    alt="Profile">
+
+                <!-- Edit Button -->
+                <button onclick="openProfileImagePicker()"
+                    class="absolute rounded-full flex items-center justify-center"
+                    style="top: 2px; right: 0; height: 38px; width: 38px; background-color: #40444B;">
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                    </svg>
+                </button>
+
+                <!-- Hidden file input -->
+                <input type="file" id="profileImageInput" accept="image/*" style="display: none;"
+                    onchange="handleProfileImageChange(event)">
+            </div>
+
+            <!-- User Name -->
+            <h2 class="text-white text-xl font-semibold">John Doe</h2>
+            <p class="text-[#808080] text-base">john@example.com</p>
+        </div>
+
+        <!-- Menu Content -->
+        <div class="p-4">
+            <div class="rounded-[15px] overflow-hidden border-[0.5px]" style="border-color: #DADADA;">
+
+                <!-- History -->
+                <a href="schedule-history.html"
+                    class="h-[60px] flex flex-row justify-between items-center px-6 border-b border-[#3A3B3F]"
+                    style="background-color: #101010;">
+                    <div class="flex flex-row items-center gap-[30px]">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        <span class="text-white text-lg font-semibold">History</span>
+                    </div>
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+
+                <!-- About -->
+                <a href="about.html" onclick="navigateToPage('about.html')"
+                    class="h-[60px] flex flex-row justify-between items-center px-6 border-b border-[#3A3B3F]"
+                    style="background-color: #101010;">
+                    <div class="flex flex-row items-center gap-[30px]">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="text-white text-lg font-semibold">About</span>
+                    </div>
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+
+                <!-- Report -->
+                <a href="report.html" onclick="navigateToPage('report.html')"
+                    class="h-[60px] flex flex-row justify-between items-center px-6 border-b border-[#3A3B3F]"
+                    style="background-color: #101010;">
+                    <div class="flex flex-row items-center gap-[30px]">
+                        <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                        </svg>
+                        <span class="text-white text-lg font-semibold">Report</span>
+                    </div>
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+
+                <!-- Theme -->
+                <button onclick="openThemeModal()"
+                    class="w-full h-[60px] flex flex-row justify-between items-center px-6 border-b border-[#3A3B3F]"
+                    style="background-color: #101010;">
+                    <div class="flex flex-row items-center gap-[30px]">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z" />
+                        </svg>
+                        <span class="text-white text-lg font-semibold">Theme</span>
+                    </div>
+                    <div class="py-2 px-4 rounded-[5px]" style="background-color: #FFFFFF1A;">
+                        <span id="currentThemeDisplay" class="capitalize text-white text-sm font-medium">Dark</span>
+                    </div>
+                </button>
+
+                <!-- Profile -->
+                <a href="profile.html" onclick="navigateToPage('profile.html')"
+                    class="h-[60px] flex flex-row justify-between items-center px-6 border-b border-[#3A3B3F]"
+                    style="background-color: #101010;">
+                    <div class="flex flex-row items-center gap-[30px]">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                        </svg>
+                        <span class="text-white text-lg font-semibold">Profile</span>
+                    </div>
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+
+                <!-- Delete Account -->
+                <button onclick="showDeleteConfirm()"
+                    class="w-full h-[60px] flex flex-row justify-between items-center px-6"
+                    style="background-color: #101010;">
+                    <div class="flex flex-row items-center gap-[30px]">
+                        <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        <span class="text-white text-lg font-semibold">Delete Account</span>
+                    </div>
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </button>
+
+                <!-- Visit Website -->
+                <a href="https://phluowise.com" target="_blank"
+                    class="h-[60px] flex flex-row justify-between items-center px-6 border-t border-[#3A3B3F]"
+                    style="background-color: #101010;">
+                    <div class="flex flex-row items-center gap-[30px]">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span class="text-white text-lg font-semibold">Visit us on our website</span>
+                    </div>
+                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                    </svg>
+                </a>
+
+            </div>
+
+            <!-- Logout Button -->
+            <button onclick="logout()"
+                class="mt-4 h-[62px] w-full rounded-[15px] flex flex-row justify-between items-center px-6 shadow-md"
+                style="background-color: #1D1D1D;">
+                <div class="flex flex-row items-center gap-[30px]">
+                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    <span class="text-white text-lg font-semibold">Logout</span>
+                </div>
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Version -->
+        <div class="flex flex-col items-center gap-2 mt-4 pb-8">
+            <span class="text-lg font-semibold text-[#808080]">Phluowise</span>
+            <span class="text-xs font-medium text-white">version 1.0.0</span>
+        </div>
+    </div>
+
+    <!-- Status Tabs Component (Exact from Status.tsx: bg: #101010, height: 40, py-4, px-10) -->
+    <div style="background-color: #101010;">
+        <div class="py-4 px-10 flex flex-row justify-between items-center gap-1">
+            <!-- Status Button -->
+            <button onclick="setStatusView('status')" id="btn-status" class="rounded-lg px-4" style="height: 40px;">
+                <div class="items-center justify-center flex flex-1">
+                    <span class="text-white flex justify-center items-center font-[600]">Status</span>
+                </div>
+            </button>
+            <!-- Ongoing Button -->
+            <button onclick="setStatusView('ongoing')" id="btn-ongoing" class="rounded-lg px-4"
+                style="height: 40px; background-color: transparent;">
+                <div class="items-center justify-center flex-1">
+                    <span class="text-white flex justify-center items-center font-[600]">Ongoing</span>
+                </div>
+            </button>
+            <!-- Completed Button -->
+            <button onclick="setStatusView('completed')" id="btn-completed" class="rounded-lg px-4"
+                style="height: 40px; background-color: transparent;">
+                <div class="items-center justify-center flex-1">
+                    <span class="text-white flex justify-center items-center font-[600]">Completed</span>
+                </div>
+            </button>
+        </div>
+    </div>
+
+    <!-- Order Cards List (ScheduleProduct.tsx - Exact) -->
+    <div class="flex-1 overflow-y-auto hide-scrollbar no-horizontal-scroll mobile-scrollable" id="ordersList"
+        style="background-color: var(--bg-color); gap: 6px;">
+        <!-- Cards rendered by JS -->
+    </div>
+
+    <!-- Order Status Modal (Exact from schedulepickup.tsx) -->
+    <div id="orderModal"
+        class="fixed inset-0 z-30 flex items-center justify-center pointer-events-none opacity-0 transition-all duration-300 bottom-sheet"
+        style="background-color: rgba(0,0,0,0.5);">
+        <div id="orderModalContent"
+            class="pointer-events-auto w-full max-w-[400px] p-5 flex flex-col items-center relative transform translate-y-full transition-transform duration-300">
+            <!-- Back Button -->
+            <div class="relative w-full">
+                <button onclick="closeOrderModal()" class="relative w-10 h-10 flex justify-center items-center">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
+                        <path d="M15 18l-6-6 6-6" />
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Modal Content (height varies by type) -->
+            <div class="flex-1 w-full items-center justify-center relative p-5">
+                <div id="modalInner"
+                    class="border rounded-[10px] w-full px-10 py-7 flex flex-col items-center justify-center"
+                    style="background-color: var(--bottom-sheet-color); border-color: #40444B; border-width: 0.2px; height: 250px;">
+                    <div class="flex-1 w-full flex-col gap-4 justify-center items-center relative">
+                        <div class="w-full flex-col items-center justify-center relative" id="modalMessage">
+                            <!-- Message rendered by JS -->
+                        </div>
+                        <div class="w-full flex-col relative">
+                            <div class="flex w-full items-center justify-center mt-6">
+                                <button onclick="closeOrderModal()"
+                                    class="rounded-[100px] flex items-center justify-center border backdrop-blur-xl bg-blue-500/20 border-blue-500/40 hover:bg-blue-500/30 transition-all duration-300 shadow-lg"
+                                    style="height: 40px; width: 94px;">
+                                    <span class="text-white text-base font-[500] capitalize leading-5">okay</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Details Bottom Sheet -->
+    <div id="orderDetailsSheet"
+        class="fixed inset-0 z-20 flex items-end justify-center pointer-events-none opacity-0 transition-all duration-300 bottom-sheet"
+        style="background-color: rgba(0,0,0,0.5);">
+        <div id="orderDetailsContent"
+            class="pointer-events-auto w-full max-w-[400px] transform translate-y-full transition-transform duration-300">
+
+            <!-- Bottom Sheet Container -->
+            <div class="w-full rounded-t-[20px] overflow-hidden backdrop-blur-xl bg-black/40 shadow-2xl"
+                style="border: 1px solid rgba(255, 255, 255, 0.1);">
+
+                <!-- Handle Bar -->
+                <div class="w-full flex justify-center py-3">
+                    <div class="w-12 h-1 rounded-full bg-white/30"></div>
+                </div>
+
+                <!-- Header -->
+                <div class="px-6 pb-4 flex justify-between items-center">
+                    <h2 class="text-white text-2xl font-bold">Order Details</h2>
+                    <button onclick="closeOrderDetailsSheet()"
+                        class="text-white text-2xl backdrop-blur-xl bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition-all duration-300 shadow-lg p-2">×</button>
+                </div>
+
+                <!-- Order Details Content -->
+                <div class="px-6 pb-6 overflow-y-auto" style="max-height: 70vh;">
+                    <div id="orderDetailsContentArea" class="space-y-6">
+                        <!-- Content will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Return Pickups Bottom Sheet -->
+    <div id="returnPickupsSheet"
+        class="fixed inset-0 z-20 flex items-end justify-center pointer-events-none opacity-0 transition-all duration-300 bottom-sheet"
+        style="background-color: rgba(0,0,0,0.5);">
+        <div id="returnPickupsContent"
+            class="pointer-events-auto w-full max-w-[400px] transform translate-y-full transition-transform duration-300">
+
+            <!-- Bottom Sheet Container -->
+            <div class="w-full rounded-t-[20px] overflow-hidden backdrop-blur-xl bg-black/40 shadow-2xl"
+                style="border: 1px solid rgba(255, 255, 255, 0.1);">
+
+                <!-- Handle Bar -->
+                <div class="w-full flex justify-center py-3">
+                    <div class="w-12 h-1 rounded-full bg-white/30"></div>
+                </div>
+
+                <!-- Header -->
+                <div class="px-6 pb-4">
+                    <h2 class="text-white text-2xl font-bold text-center">Return pickups</h2>
+                </div>
+
+                <!-- Return Options -->
+                <div class="px-6 pb-6 space-y-3">
+                    <!-- Return Option 1 -->
+                    <button onclick="selectReturnOption('damaged')"
+                        class="w-full h-[60px] rounded-[16px] border border-white/20 backdrop-blur-xl bg-white/10 hover:bg-white/20 transition-all duration-300 shadow-lg flex items-center px-4">
+                        <div class="w-10 h-10 rounded-full bg-red-500/20 flex items-center justify-center mr-4">
+                            <svg class="w-6 h-6 text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                            </svg>
+                        </div>
+                        <div class="flex-1 text-left">
+                            <span class="text-white text-base font-medium">Damaged</span>
+                        </div>
+                        <svg class="w-5 h-5 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+
+                    <!-- Return Option 2 -->
+                    <button onclick="selectReturnOption('wrong_item')"
+                        class="w-full h-[60px] rounded-[16px] border border-white/20 backdrop-blur-xl bg-white/10 hover:bg-white/20 transition-all duration-300 shadow-lg flex items-center px-4">
+                        <div class="w-10 h-10 rounded-full bg-yellow-500/20 flex items-center justify-center mr-4">
+                            <svg class="w-6 h-6 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                            </svg>
+                        </div>
+                        <div class="flex-1 text-left">
+                            <span class="text-white text-base font-medium">Wrong item</span>
+                        </div>
+                        <svg class="w-5 h-5 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+
+                    <!-- Return Option 3 -->
+                    <button onclick="selectReturnOption('other')"
+                        class="w-full h-[60px] rounded-[16px] border border-white/20 backdrop-blur-xl bg-white/10 hover:bg-white/20 transition-all duration-300 shadow-lg flex items-center px-4">
+                        <div class="w-10 h-10 rounded-full bg-blue-500/20 flex items-center justify-center mr-4">
+                            <svg class="w-6 h-6 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div class="flex-1 text-left">
+                            <span class="text-white text-base font-medium">Other</span>
+                        </div>
+                        <svg class="w-5 h-5 text-white/60" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
+                </div>
+
+                <!-- Cancel Button -->
+                <div class="px-6 pb-6">
+                    <button onclick="closeReturnPickupsSheet()"
+                        class="w-full h-[50px] rounded-[16px] border border-white/20 backdrop-blur-xl bg-white/10 hover:bg-white/20 transition-all duration-300 shadow-lg flex items-center justify-center">
+                        <span class="text-white text-base font-medium">Cancel</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation -->
+    <div class="tab-bar fixed bottom-0 left-0 right-0 h-[64px] flex flex-row justify-around items-center px-4 border-t-0 z-40"
+        style="background-color: #101010;">
+        <a href="home.html" class="flex flex-col items-center justify-center gap-1 flex-1">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.5">
+                <path
+                    d="M9.02 2.84004L3.63 7.04004C2.73 7.74004 2 9.23004 2 10.36V17.77C2 20.09 3.89 21.99 6.21 21.99H17.79C20.11 21.99 22 20.09 22 17.78V10.5C22 9.29004 21.19 7.74004 20.2 7.05004L14.02 2.72004C12.62 1.74004 10.37 1.79004 9.02 2.84004Z"
+                    stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M12 17.99V14.99" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <span class="text-sm text-white font-normal mt-1">Home</span>
+        </a>
+        <a href="services.html" class="flex flex-col items-center justify-center gap-1 flex-1">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#FFFFFF" stroke-width="1.5">
+                <path fill="#FFFFFF"
+                    d="m31.696 15.098-1.75-4.376a1.742 1.742 0 0 0-1.625-1.1H23.75V8.376a.75.75 0 0 0-.75-.75H4a1.75 1.75 0 0 0-1.75 1.75v14A1.75 1.75 0 0 0 4 25.125h2.325a3.75 3.75 0 0 0 7.35 0h6.65a3.75 3.75 0 0 0 7.35 0H30a1.75 1.75 0 0 0 1.75-1.75v-8a.752.752 0 0 0-.054-.277Zm-7.946-3.973h4.573a.25.25 0 0 1 .232.158l1.337 3.342H23.75v-3.5Zm-20-1.75a.25.25 0 0 1 .25-.25h18.25v8.5H3.75v-8.25ZM10 26.625a2.25 2.25 0 1 1 0-4.5 2.25 2.25 0 0 1 0 4.5Zm10.325-3h-6.65a3.75 3.75 0 0 0-7.35 0H4a.25.25 0 0 1-.25-.25v-4.25h18.5v1.935a3.763 3.763 0 0 0-1.925 2.565Zm3.675 3a2.25 2.25 0 1 1 0-4.5 2.25 2.25 0 0 1 0 4.5Zm6.25-3.25a.25.25 0 0 1-.25.25h-2.325a3.756 3.756 0 0 0-3.675-3c-.084 0-.168 0-.25.009v-4.509h6.5v7.25Z" />
+            </svg>
+            <span class="text-sm text-white font-normal mt-1">Services</span>
+        </a>
+        <a href="schedule-history.html" class="flex flex-col items-center justify-center gap-1 flex-1">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#3B74FF" stroke-width="1.5">
+                <path d="M8 2V5" />
+                <path d="M16 2V5" />
+                <path d="M3.5 9.09H20.5" />
+                <path
+                    d="M18.2 21.4C19.9673 21.4 21.4 19.9673 21.4 18.2C21.4 16.4327 19.9673 15 18.2 15C16.4327 15 15 16.4327 15 18.2C15 19.9673 16.4327 21.4 18.2 21.4Z" />
+                <path d="M22 22L21 21" />
+                <path
+                    d="M21 8.5V13.63C20.27 13.14 19.38 12.85 18.43 12.85C15.86 12.85 13.78 14.95 13.78 17.54C13.78 18.45 14.04 19.29 14.49 20H8C4.5 20 3 18 3 15V8.5C3 5.5 4.5 3.5 8 3.5H16C19.5 3.5 21 5.5 21 8.5Z" />
+            </svg>
+            <span class="text-sm text-[#3B74FF] font-normal mt-1">Schedule History</span>
+        </a>
+    </div>
+
+    <script src="../public/js/appwriteConfig.js"></script>
+    <script src="../public/js/theme.js"></script>
+    <script>
+        let currentView = 'status';
+        let orders = [];
+        let currentOrderForDetails = null;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 Schedule History page loading...');
+
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.body.classList.remove('dark-theme', 'gray-theme', 'light-theme');
+            document.body.classList.add(savedTheme + '-theme');
+
+            // Load orders from localStorage
+            console.log('📋 Loading orders from localStorage...');
+            loadOrders();
+
+            // Set initial view
+            setStatusView('status');
+
+            // Listen for new orders from services.html
+            window.addEventListener('storage', (e) => {
+                console.log('🔄 Storage event detected:', e.key);
+                if (e.key === 'phluowiseOrders') {
+                    console.log('📦 Orders updated, reloading...');
+                    loadOrders();
+                    renderOrders();
+                }
+            });
+
+            // Check for new orders every 2 seconds (for demo purposes)
+            setInterval(() => {
+                const currentOrders = localStorage.getItem('phluowiseOrders');
+                if (currentOrders && JSON.parse(currentOrders).length !== orders.length) {
+                    console.log('🔄 New orders detected, reloading...');
+                    loadOrders();
+                    renderOrders();
+                }
+            }, 2000);
+
+            console.log('✅ Schedule History page initialized');
+        });
+
+        // Load orders from localStorage when page loads
+        function loadOrders() {
+            console.log('🔄 Loading orders from localStorage...');
+            const savedOrders = localStorage.getItem('phluowiseOrders');
+            console.log('📦 Raw localStorage data:', savedOrders);
+
+            if (savedOrders) {
+                try {
+                    orders = JSON.parse(savedOrders);
+                    console.log('✅ Successfully parsed orders:', orders);
+                    console.log('📊 Total orders loaded:', orders.length);
+
+                    // Log each order for debugging
+                    orders.forEach((order, index) => {
+                        console.log(`📋 Order ${index + 1}:`, {
+                            orderId: order.orderId,
+                            company: order.company,
+                            product: order.product,
+                            quantity: order.quantity || 1,
+                            subtotal: order.subtotal,
+                            serviceFee: order.serviceFee,
+                            total: order.total,
+                            status: order.status,
+                            price: order.price
+                        });
+                    });
+                } catch (parseError) {
+                    console.error('❌ Error parsing orders from localStorage:', parseError);
+                    orders = [];
+                }
+            } else {
+                console.log('⚠️ No orders found in localStorage, creating sample data...');
+                // If no saved orders, create sample data for demonstration
+                orders = [
+                    {
+                        orderId: 'ORD' + Date.now(),
+                        company: 'Voltic Water Company',
+                        location: 'Accra, Ghana',
+                        payment: 'MTN Mobile Money',
+                        time: '12:30 PM',
+                        date: new Date().toLocaleDateString(),
+                        price: 'GH₵25.00',
+                        quantity: 1,
+                        subtotal: 20.00,
+                        serviceFee: 5.00,
+                        total: 25.00,
+                        status: 'pending',
+                        statusText: 'Pending',
+                        statusColor: '#F2A78C',
+                        product: 'Sachets water',
+                        recipient: { name: 'John Doe', phone: '0201234567', email: 'john@example.com' },
+                        timestamp: new Date().toISOString()
+                    },
+                    {
+                        orderId: 'ORD' + (Date.now() - 86400000), // Yesterday
+                        company: 'Bel-Aqua Ghana',
+                        location: 'Tema, Ghana',
+                        payment: 'Card',
+                        time: '10:15 AM',
+                        date: new Date(Date.now() - 86400000).toLocaleDateString(),
+                        price: 'GH₵27.00',
+                        quantity: 1,
+                        subtotal: 22.00,
+                        serviceFee: 5.00,
+                        total: 27.00,
+                        status: 'accepted',
+                        statusText: 'Order accepted',
+                        statusColor: '#2C9043',
+                        product: 'Bottle water',
+                        recipient: { name: 'Jane Smith', phone: '0239876543', email: 'jane@example.com' },
+                        timestamp: new Date(Date.now() - 86400000).toISOString()
+                    },
+                    {
+                        orderId: 'ORD' + (Date.now() - 172800000), // 2 days ago
+                        company: 'Special Ice Water',
+                        location: 'Kumasi, Ghana',
+                        payment: 'Bank Transfer',
+                        time: '2:45 PM',
+                        date: new Date(Date.now() - 172800000).toLocaleDateString(),
+                        price: 'GH₵29.00',
+                        quantity: 1,
+                        subtotal: 24.00,
+                        serviceFee: 5.00,
+                        total: 29.00,
+                        status: 'completed',
+                        statusText: 'Completed',
+                        statusColor: '#2CAA48',
+                        product: 'Dispenser',
+                        recipient: { name: 'Mike Johnson', phone: '0245678901', email: 'mike@example.com' },
+                        timestamp: new Date(Date.now() - 172800000).toISOString()
+                    }
+                ];
+                console.log('📋 Using sample orders:', orders);
+            }
+
+            console.log('🎯 Final orders array length:', orders.length);
+        }
+
+        // Save orders to localStorage
+        function saveOrders() {
+            localStorage.setItem('phluowiseOrders', JSON.stringify(orders));
+            console.log('💾 Orders saved to localStorage');
+        }
+
+        // Add new order from schedule flow
+        function addOrder(orderData) {
+            const newOrder = {
+                orderId: orderData.orderId || 'ORD' + Date.now(),
+                company: orderData.product.company,
+                location: orderData.recipient ? 'Delivery Location' : 'Accra, Ghana',
+                payment: orderData.payment ? getPaymentMethodText(orderData.payment.method) : 'Pending',
+                time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                date: new Date().toLocaleDateString(),
+                price: 'GH₵' + orderData.total.toFixed(2),
+                quantity: orderData.quantity || 1,
+                subtotal: orderData.subtotal,
+                serviceFee: orderData.serviceFee,
+                total: orderData.total,
+                status: 'pending',
+                statusText: 'Pending',
+                statusColor: '#F2A78C',
+                product: orderData.product.name,
+                recipient: orderData.recipient,
+                paymentDetails: orderData.payment,
+                timestamp: new Date().toISOString(),
+                rating: orderData.rating,
+                comment: orderData.comment
+            };
+
+            orders.unshift(newOrder); // Add to beginning of array
+            saveOrders();
+            console.log('➕ New order added:', newOrder);
+            renderOrders();
+        }
+
+        // Get payment method text
+        function getPaymentMethodText(method) {
+            const methods = {
+                'card': 'Credit/Debit Card',
+                'mobile': 'Mobile Money',
+                'bank': 'Bank Transfer'
+            };
+            return methods[method] || method;
+        }
+
+        // Format full date for display (e.g., "Wednesday, December 31, 2025")
+        function formatFullDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        // Format short date for display (e.g., "12/31/2025")
+        function formatShortDate(dateString) {
+            const date = new Date(dateString);
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${month}/${day}/${year}`;
+        }
+
+        // Update order status
+        function updateOrderStatus(orderId, newStatus) {
+            const order = orders.find(o => o.orderId === orderId);
+            if (order) {
+                order.status = newStatus;
+                order.statusText = getStatusText(newStatus);
+                order.statusColor = getStatusColor(newStatus);
+
+                if (newStatus === 'completed') {
+                    order.completedAt = new Date().toISOString();
+                }
+
+                saveOrders();
+                renderOrders();
+                console.log('🔄 Order status updated:', orderId, '->', newStatus);
+            }
+        }
+
+        // Get status text
+        function getStatusText(status) {
+            const texts = {
+                'pending': 'Pending',
+                'accepted': 'Order accepted',
+                'denied': 'Order denied',
+                'completed': 'Completed'
+            };
+            return texts[status] || status;
+        }
+
+        // Get status color
+        function getStatusColor(status) {
+            const colors = {
+                'pending': '#F2A78C',
+                'accepted': '#2C9043',
+                'denied': '#F85D5D',
+                'completed': '#2CAA48'
+            };
+            return colors[status] || '#F2A78C';
+        }
+
+        // Status tab switching (exact logic from Status.tsx)
+        function setStatusView(view) {
+            currentView = view;
+            const btns = ['status', 'ongoing', 'completed'];
+            btns.forEach(btn => {
+                const button = document.getElementById('btn-' + btn);
+                if (btn === view) {
+                    button.style.backgroundColor = 'var(--btn-color)';
+                } else {
+                    button.style.backgroundColor = 'transparent';
+                }
+            });
+            renderOrders();
+        }
+
+        // Render order cards (exact from ScheduleProduct.tsx)
+        function renderOrders() {
+            console.log('🎨 Rendering orders for view:', currentView);
+            console.log('📊 Total orders to render:', orders.length);
+
+            const container = document.getElementById('ordersList');
+            container.innerHTML = '';
+
+            let renderedCount = 0;
+            orders.forEach((order, index) => {
+                console.log(`🔍 Processing order ${index + 1}:`, order.status, '->', currentView);
+
+                // Filter based on current view
+                if (currentView === 'ongoing' && order.status !== 'accepted') {
+                    console.log(`⏭️ Skipping order ${order.orderId} - not accepted`);
+                    return;
+                }
+                if (currentView === 'completed' && order.status !== 'completed') {
+                    console.log(`⏭️ Skipping order ${order.orderId} - not completed`);
+                    return;
+                }
+                if (currentView === 'status' && (order.status === 'accepted' || order.status === 'completed')) {
+                    console.log(`⏭️ Skipping order ${order.orderId} - not pending/denied`);
+                    return;
+                }
+
+                console.log(`✅ Rendering order ${order.orderId}`);
+                renderedCount++;
+
+                // Exact card dimensions: height: 120, bg: backgroundSecondColor
+                const card = document.createElement('button');
+                card.className = 'w-full flex items-center justify-center px-4 mb-3';
+                card.style.height = '120px';
+                card.style.backgroundColor = 'var(--bg-second)';
+
+                // Store the order data on the card element for later use
+                card.dataset.orderId = order.orderId;
+
+                // Special handling for completed cards
+                if (order.status === 'completed') {
+                    card.onclick = () => openReturnPickupsSheet(order);
+                } else {
+                    card.onclick = () => openOrderModal(order.status, order);
+                }
+
+                card.innerHTML = `
+                    <div class="flex flex-row w-full items-center gap-2">
+                        <!-- Image (width: 22%, height: 89, rounded: 10, bg: #808080) -->
+                        <div class="rounded-[10px] bg-[#808080] overflow-hidden" style="width: 22%; height: 89px;">
+                            <img src="../public/images/main/ScheduleImage1.png" class="w-full h-full object-cover">
+                        </div>
+                        
+                        <!-- Info Section (width: 44%) -->
+                        <div class="flex flex-col ml-2 items-start" style="width: 44%; gap: 2px;">
+                            <span class="text-white text-xl font-[500] truncate text-left w-full">${order.company}<span class="material-symbols-outlined verified-checkmark">verified</span></span>
+                            <span class="text-white text-lg font-[500] truncate text-left w-full">${order.location}</span>
+                            ${order.payment ? `<span class="text-white text-base font-[500] truncate text-left w-full">${order.payment}</span>` : ''}
+                            <div class="text-white flex flex-row gap-3 text-left">
+                                <span class="font-[400] text-sm text-left">${order.time}</span>
+                                <span class="font-[400] text-sm text-left">${formatShortDate(order.date)}</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Price & Status Section (width: 25%, height: 60) -->
+                        <div class="flex flex-col items-center justify-center gap-1" style="height: 60px; width: 25%;">
+                            <span class="text-xl font-[700] text-center text-white">${order.price}</span>
+                            <span class="text-sm font-[500] text-center" style="color: ${order.statusColor};">${order.statusText}</span>
+                        </div>
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+
+            console.log(`🎯 Rendered ${renderedCount} cards for view: ${currentView}`);
+
+            // Show message if no cards
+            if (renderedCount === 0) {
+                container.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-full text-white text-center p-8">
+                        <div class="mb-4">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" class="text-gray-400">
+                                <path d="M9 2L3 7v10c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V7l-6-5H9z"/>
+                                <path d="M3 7h18"/>
+                                <path d="M9 2v5"/>
+                                <path d="M13 16v-4"/>
+                                <circle cx="13" cy="16" r="1"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">No orders found</h3>
+                        <p class="text-gray-400">No ${currentView} orders to display</p>
+                        <button onclick="loadOrders()" class="mt-4 px-6 py-2 backdrop-blur-xl bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition-all duration-300 shadow-lg">
+                            Refresh
+                        </button>
+                    </div>
+                `;
+                console.log(`📭 No orders to display for view: ${currentView}`);
+            }
+        }
+
+        // Order modal (exact from schedulepickup.tsx)
+        function openOrderModal(status, order) {
+            currentOrderForDetails = order;
+            const modal = document.getElementById('orderModal');
+            const content = document.getElementById('orderModalContent');
+            const inner = document.getElementById('modalInner');
+            const message = document.getElementById('modalMessage');
+
+            // Set modal height based on type
+            if (status === 'accepted') {
+                inner.style.height = '350px';
+            } else {
+                inner.style.height = '250px';
+            }
+
+            // Set message content
+            if (status === 'pending') {
+                message.innerHTML = `
+                    <div class="flex flex-col items-center justify-center gap-4">
+                        <div class="flex flex-col items-center justify-center">
+                            <span class="text-white text-center text-xl font-[500]">
+                    Your order is still <span style="color: #F9A24B;">pending</span>.<br>
+                                Wait for company name to<br>accept your order
+                            </span>
+                        </div>
+                        <button onclick="openOrderDetailsSheet()" class="flex flex-col items-center justify-center backdrop-blur-xl bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition-all duration-300 shadow-lg px-4 py-2">
+                            <span class="text-white text-center text-xl font-[600]">See details of Order</span>
+                        </button>
+                    </div>
+                `;
+            } else if (status === 'denied') {
+                message.innerHTML = `
+                    <div class="flex flex-col items-center justify-center gap-4">
+                        <div class="flex flex-col items-center justify-center">
+                            <span class="text-white text-center text-xl font-[500]">
+                                Your order has been <br><span style="color: #F85D5D;">denied</span>.
+                            </span>
+                        </div>
+                        <button onclick="openOrderDetailsSheet()" class="flex flex-col items-center justify-center backdrop-blur-xl bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition-all duration-300 shadow-lg px-4 py-2">
+                            <span class="text-white text-center text-xl font-[600]">See details of Order</span>
+                        </button>
+                    </div>
+                `;
+            } else if (status === 'accepted') {
+                message.innerHTML = `
+                    <div class="flex flex-col items-center justify-center gap-4">
+                        <div class="flex flex-col items-center justify-center">
+                            <span class="text-white text-center text-xl font-[500]">
+                                Your order has been <br><span style="color: #2C9043;">accepted</span>.
+                            </span>
+                        </div>
+                        <button onclick="openOrderDetailsSheet()" class="flex flex-col items-center justify-center backdrop-blur-xl bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition-all duration-300 shadow-lg px-4 py-2">
+                            <span class="text-white text-center text-xl font-[600]">See details of Order</span>
+                        </button>
+                        <div class="flex flex-col items-center justify-center gap-4 mt-2">
+                            <button class="rounded-[10px] flex items-center justify-center border backdrop-blur-xl bg-white/10 border-white/20 hover:bg-white/20 transition-all duration-300 shadow-lg" style="height: 48px; width: 250px;">
+                                <div class="p-2 flex flex-row items-center justify-between gap-2">
+                                    <span class="text-white text-center font-[600]" style="font-size: 16.5px;">Marked as complete</span>
+                                    <span class="text-white">🚩</span>
+                                </div>
+                            </button>
+                            <button class="rounded-[10px] flex items-center justify-center border backdrop-blur-xl bg-white/10 border-white/20 hover:bg-white/20 transition-all duration-300 shadow-lg" style="height: 48px; width: 250px;">
+                                <div class="p-2 flex flex-row items-center justify-between gap-3">
+                                    <span class="text-white text-center font-[600]" style="font-size: 16.5px;">Marked complete</span>
+                                    <span class="text-white">✓</span>
+                                </div>
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modal.classList.add('opacity-100');
+            setTimeout(() => content.classList.remove('translate-y-full'), 10);
+        }
+
+        function closeOrderModal() {
+            const modal = document.getElementById('orderModal');
+            const content = document.getElementById('orderModalContent');
+            content.classList.add('translate-y-full');
+            setTimeout(() => {
+                modal.classList.remove('opacity-100');
+                modal.classList.add('opacity-0', 'pointer-events-none');
+            }, 300);
+        }
+
+        // Order Details Bottom Sheet Functions
+        function openOrderDetailsSheet() {
+            closeOrderModal(); // Close the status modal first
+
+            if (!currentOrderForDetails) {
+                // Try to find the order from orders array
+                currentOrderForDetails = orders[0];
+            }
+
+            if (!currentOrderForDetails) {
+                console.error('No order found for details');
+                return;
+            }
+
+            const sheet = document.getElementById('orderDetailsSheet');
+            const content = document.getElementById('orderDetailsContent');
+            const detailsArea = document.getElementById('orderDetailsContentArea');
+
+            // Populate order details
+            detailsArea.innerHTML = `
+                <div class="space-y-4">
+                    <!-- Product Image -->
+                    <div class="bg-gray-800/50 rounded-xl p-4">
+                        <h3 class="text-white text-lg font-bold mb-3">Product</h3>
+                        <div class="flex items-center space-x-4">
+                            <div class="rounded-[10px] bg-[#808080] overflow-hidden flex-shrink-0" style="width: 80px; height: 80px;">
+                                <img src="../public/images/main/ScheduleImage1.png" class="w-full h-full object-cover">
+                            </div>
+                            <div class="flex-1">
+                                <h4 class="text-white text-lg font-semibold">${currentOrderForDetails.product || 'N/A'}</h4>
+                                <p class="text-gray-400 text-sm">${currentOrderForDetails.company || 'N/A'}<span class="material-symbols-outlined verified-checkmark" style="font-size: 16px; margin-left: 2px;">verified</span></p>
+                                <p class="text-gray-400 text-sm">Quantity: ${currentOrderForDetails.quantity || 1}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Order Summary -->
+                    <div class="bg-gray-800/50 rounded-xl p-4">
+                        <h3 class="text-white text-lg font-bold mb-3">Order Summary</h3>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Order ID:</span>
+                                <span class="text-white font-medium">${currentOrderForDetails.orderId || 'N/A'}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Company:</span>
+                                <span class="text-white font-medium">${currentOrderForDetails.company || 'N/A'}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Product:</span>
+                                <span class="text-white font-medium">${currentOrderForDetails.product || 'N/A'}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Quantity:</span>
+                                <span class="text-white font-medium">${currentOrderForDetails.quantity || 1}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Price Breakdown -->
+                    <div class="bg-gray-800/50 rounded-xl p-4">
+                        <h3 class="text-white text-lg font-bold mb-3">Price Breakdown</h3>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Unit Price:</span>
+                                <span class="text-white font-medium">GH₵${currentOrderForDetails.unitPrice || (currentOrderForDetails.subtotal / (currentOrderForDetails.quantity || 1) || 0).toFixed(2)}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Subtotal:</span>
+                                <span class="text-white font-medium">GH₵${currentOrderForDetails.subtotal || 0}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Service Fee:</span>
+                                <span class="text-white font-medium">GH₵${currentOrderForDetails.serviceFee || 5}</span>
+                            </div>
+                            <div class="flex justify-between pt-2 border-t border-gray-700">
+                                <span class="text-white font-bold text-lg">Total:</span>
+                                <span class="text-white font-bold text-lg">${currentOrderForDetails.price || 'N/A'}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Payment & Status -->
+                    <div class="bg-gray-800/50 rounded-xl p-4">
+                        <h3 class="text-white text-lg font-bold mb-3">Payment & Status</h3>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Payment Method:</span>
+                                <span class="text-white font-medium">${currentOrderForDetails.payment || 'N/A'}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Status:</span>
+                                <span class="font-medium" style="color: ${currentOrderForDetails.statusColor || '#F2A78C'};">${currentOrderForDetails.statusText || 'Pending'}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Delivery Date:</span>
+                                <span class="text-white font-medium">${currentOrderForDetails.deliveryDate ? formatFullDate(currentOrderForDetails.deliveryDate) : (currentOrderForDetails.date || 'N/A')}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Delivery Time:</span>
+                                <span class="text-white font-medium">${currentOrderForDetails.deliveryTime || (currentOrderForDetails.time || 'N/A')}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Order Placed:</span>
+                                <span class="text-white font-medium">${currentOrderForDetails.date || 'N/A'}</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Recipient Information -->
+                    ${currentOrderForDetails.recipient ? `
+                    <div class="bg-gray-800/50 rounded-xl p-4">
+                        <h3 class="text-white text-lg font-bold mb-3">Recipient Information</h3>
+                        <div class="space-y-2">
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Name:</span>
+                                <span class="text-white font-medium">${currentOrderForDetails.recipient.name}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Phone:</span>
+                                <span class="text-white font-medium">${currentOrderForDetails.recipient.phone}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Email:</span>
+                                <span class="text-white font-medium">${currentOrderForDetails.recipient.email}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Delivery Location:</span>
+                                <span class="text-white font-medium">${currentOrderForDetails.recipient.address || currentOrderForDetails.location || 'N/A'}</span>
+                            </div>
+                            ${currentOrderForDetails.recipient.instructions ? `
+                            <div class="pt-2 border-t border-gray-700 mt-2">
+                                <div class="flex justify-between">
+                                    <span class="text-gray-400">Special Instructions:</span>
+                                </div>
+                                <p class="text-gray-300 text-sm mt-1">${currentOrderForDetails.recipient.instructions}</p>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    ` : ''}
+                    
+                    <!-- Rating -->
+                    ${currentOrderForDetails.rating ? `
+                    <div class="bg-gray-800/50 rounded-xl p-4">
+                        <h3 class="text-white text-lg font-bold mb-3">Your Rating</h3>
+                        <div class="space-y-2">
+                            <div class="flex items-center gap-2">
+                                <div class="flex">
+                                    ${Array(5).fill(0).map((_, i) =>
+                `<span class="text-xl">${i < currentOrderForDetails.rating ? '★' : '☆'}</span>`
+            ).join('')}
+                                </div>
+                                <span class="text-white font-medium">${currentOrderForDetails.rating}/5</span>
+                            </div>
+                            ${currentOrderForDetails.comment ? `
+                            <div class="pt-2 border-t border-gray-700 mt-2">
+                                <p class="text-gray-300">${currentOrderForDetails.comment}</p>
+                            </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    ` : ''}
+                    
+                    <!-- Actions -->
+                    <div class="flex space-x-3">
+                        <button onclick="closeOrderDetailsSheet()" class="flex-1 py-3 rounded-lg backdrop-blur-xl bg-white/10 border border-white/20 text-white font-medium hover:bg-white/20 transition-all duration-300 shadow-lg">
+                            Close
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            sheet.classList.remove('opacity-0', 'pointer-events-none');
+            sheet.classList.add('opacity-100', 'z-50');
+            setTimeout(() => content.classList.remove('translate-y-full'), 10);
+        }
+
+        function closeOrderDetailsSheet() {
+            const sheet = document.getElementById('orderDetailsSheet');
+            const content = document.getElementById('orderDetailsContent');
+            content.classList.add('translate-y-full');
+            setTimeout(() => {
+                sheet.classList.remove('opacity-100', 'z-50');
+                sheet.classList.add('opacity-0', 'pointer-events-none');
+            }, 300);
+            currentOrderForDetails = null;
+        }
+
+        function cancelOrder(orderId) {
+            if (confirm('Are you sure you want to cancel this order?')) {
+                updateOrderStatus(orderId, 'denied');
+                closeOrderDetailsSheet();
+                alert('Order has been cancelled.');
+            }
+        }
+
+        // Return Pickups Sheet Functions
+        function openReturnPickupsSheet(order) {
+            const sheet = document.getElementById('returnPickupsSheet');
+            const content = document.getElementById('returnPickupsContent');
+
+            // Store the current order for later use
+            window.currentReturnOrder = order;
+
+            sheet.classList.remove('opacity-0', 'pointer-events-none');
+            sheet.classList.add('opacity-100', 'z-50');
+            setTimeout(() => content.classList.remove('translate-y-full'), 10);
+        }
+
+        function closeReturnPickupsSheet() {
+            const sheet = document.getElementById('returnPickupsSheet');
+            const content = document.getElementById('returnPickupsContent');
+            content.classList.add('translate-y-full');
+            setTimeout(() => {
+                sheet.classList.remove('opacity-100', 'z-50');
+                sheet.classList.add('opacity-0', 'pointer-events-none');
+            }, 300);
+        }
+
+        function selectReturnOption(reason) {
+            if (window.currentReturnOrder) {
+                console.log('Return request for order:', window.currentReturnOrder);
+                console.log('Return reason:', reason);
+
+                // Show success message
+                alert(`Return request submitted for: ${reason}\n\nOrder ID: ${window.currentReturnOrder.orderId}`);
+
+                // Close the sheet
+                closeReturnPickupsSheet();
+            }
+        }
+
+        // Sliding Menu Functions
+        function toggleMenu() {
+            const menuOverlay = document.getElementById('menuOverlay');
+            const slidingMenu = document.getElementById('slidingMenu');
+
+            if (menuOverlay.classList.contains('active')) {
+                closeMenu();
+            } else {
+                openMenu();
+            }
+        }
+
+        function openMenu() {
+            const menuOverlay = document.getElementById('menuOverlay');
+            const slidingMenu = document.getElementById('slidingMenu');
+
+            menuOverlay.classList.add('active');
+            slidingMenu.classList.add('active');
+            document.body.style.overflow = 'hidden'; // Prevent background scrolling
+        }
+
+        function closeMenu() {
+            const menuOverlay = document.getElementById('menuOverlay');
+            const slidingMenu = document.getElementById('slidingMenu');
+
+            menuOverlay.classList.remove('active');
+            slidingMenu.classList.remove('active');
+            document.body.style.overflow = ''; // Restore background scrolling
+        }
+
+        // Profile image functions (from menu.html)
+        function openProfileImagePicker() {
+            document.getElementById('profileImageInput').click();
+        }
+
+        function handleProfileImageChange(event) {
+            const file = event.target.files[0];
+            if (file && file.type.startsWith('image/')) {
+                const reader = new FileReader();
+                reader.onload = function (e) {
+                    // Update the profile image src
+                    const profileImg = document.querySelector('.w-\\[62px\\].h-\\[62px\\].object-contain');
+                    if (profileImg) {
+                        profileImg.src = e.target.result;
+                        // Save to localStorage
+                        localStorage.setItem('profileImage', e.target.result);
+                    }
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('userName');
+            localStorage.removeItem('userEmail');
+            window.location.href = 'signin.html';
+        }
+
+        // Navigation State Management
+        function saveCurrentPage() {
+            localStorage.setItem('previousPage', window.location.pathname.split('/').pop());
+        }
+
+        function navigateToPage(page) {
+            saveCurrentPage();
+            window.location.href = page;
+        }
+
+        // Handle browser back button
+        window.addEventListener('popstate', function (event) {
+            const previousPage = localStorage.getItem('previousPage');
+            if (previousPage && previousPage !== window.location.pathname.split('/').pop()) {
+                // Navigate back to the saved page
+                window.location.href = previousPage;
+            }
+        });
+
+        // Initialize navigation state on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            // Clear previous page when landing directly on this page
+            if (!localStorage.getItem('previousPage')) {
+                localStorage.setItem('previousPage', 'schedule-history.html');
+            }
+        });
+    </script>
+    <script src="../public/js/notifications.js"></script>
+</body>
+
+</html>

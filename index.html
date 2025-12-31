@@ -1,27 +1,107 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phluowise</title>
-    <link href="css/output.css" rel="stylesheet">
-    <meta name="format-detection" content="telephone=no">
-    <meta name="msapplication-tap-highlight" content="no">
+    <title>Phluowise - Welcome</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#007ACC',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        body {
+            background-color: #060606;
+            color: white;
+        }
+    </style>
+    <!-- Basic Swiper CSS Mock -->
+    <style>
+        .swiper-container {
+            width: 100%;
+            height: 60%;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .swiper-slide {
+            display: none;
+            width: 100%;
+            height: 100%;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+        }
+
+        .swiper-slide.active {
+            display: flex;
+        }
+    </style>
 </head>
-<body style="background-color: #101010; margin: 0; padding: 0;">
-    <div id="app">
-        <!-- Loading screen -->
-        <div style="display: flex; justify-content: center; align-items: center; height: 100vh; color: white;">
-            <div style="text-align: center;">
-                <h1 style="font-size: 2rem; margin-bottom: 1rem;">Phluowise</h1>
-                <p>Loading...</p>
+
+<body class="h-screen flex flex-col items-center justify-center">
+
+    <!-- Swiper UI Mock (SwiperUi.tsx) -->
+    <div class="flex-1 w-full flex items-center justify-center">
+        <div class="swiper-container">
+            <!-- Slide 1 -->
+            <div class="swiper-slide active">
+                <img src="../public/images/main/ScheduleImage1.png" class="w-[80%] h-auto object-contain">
+                <h2 class="text-2xl font-bold mt-4">Welcome to Phluowise</h2>
+                <p class="text-gray-400 text-center px-6 mt-2">Manage your water delivery with ease.</p>
             </div>
+            <!-- Slide 2 -->
+            <div class="swiper-slide">
+                <img src="../public/images/main/TruckImage.png" class="w-[80%] h-auto object-contain">
+                <h2 class="text-2xl font-bold mt-4">Fast Delivery</h2>
+                <p class="text-gray-400 text-center px-6 mt-2">Get your water delivered in no time.</p>
+            </div>
+        </div>
+        <!-- Basic Dots -->
+        <div class="flex flex-row gap-2 mt-4">
+            <div class="w-2 h-2 rounded-full bg-[#007ACC]"></div>
+            <div class="w-2 h-2 rounded-full bg-gray-600"></div>
         </div>
     </div>
 
-    <script>
-        // Redirect to main app
-        window.location.href = '/home.html';
-    </script>
+    <!-- Bottom Section (Index.tsx) -->
+    <div class="h-[200px] w-full flex flex-col justify-end pb-12">
+        <div class="flex-1 items-center px-6">
+            <!-- Create Account Button -->
+            <button onclick="window.location.href='signup.html'"
+                class="h-[56px] w-full rounded-2xl flex items-center justify-center border border-[#007ACC] bg-[#007ACC]">
+                <span class="text-white text-xl font-medium capitalize">Create An Account</span>
+            </button>
+
+            <!-- Sign In Link -->
+            <button onclick="window.location.href='signin.html'"
+                class="h-[40px] items-center justify-center mt-5 w-[114px]">
+                <span class="text-[#007ACC] text-xl font-medium capitalize">Sign in</span>
+            </button>
+        </div>
+
+        <!-- Terms -->
+        <div class="mb-4">
+            <p class="text-base font-normal text-white text-center leading-4">
+                By Continuing You <a href="#" class="underline text-white">Accept Our Terms</a> Of<br>
+                <a href="#" class="underline text-white">Service & Privacy Policy</a>
+            </p>
+        </div>
+    </div>
+
 </body>
+
 </html>

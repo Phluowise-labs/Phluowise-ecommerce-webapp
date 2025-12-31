@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phluowise - Report</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#007ACC',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+        :root {
+            --bg-color: #060606;
+            --bg-third: #101010;
+        }
+
+        body.dark-theme {
+            --bg-color: #060606;
+            --bg-third: #101010;
+        }
+
+        body.gray-theme {
+            --bg-color: #202225;
+            --bg-third: #292B2F;
+        }
+
+        body.light-theme {
+            --bg-color: #202225;
+            --bg-third: #292B2F;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: white;
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+
+<body class="dark-theme h-screen flex flex-col overflow-hidden">
+
+    <!-- Header with Back Button -->
+    <div class="w-full h-[60px] flex items-center px-5" style="background-color: var(--bg-color);">
+        <button onclick="goBack()" class="w-10 h-10 flex items-center justify-center">
+            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+        </button>
+        <h1 class="flex-1 text-center text-white text-xl font-medium pr-10">Report a Problem</h1>
+    </div>
+
+    <!-- Main Content -->
+    <div class="flex-1 overflow-y-auto hide-scrollbar" style="background-color: var(--bg-color);">
+        <div class="p-6 flex flex-col gap-6">
+
+            <!-- Description -->
+            <p class="text-white text-base text-center opacity-80">
+                Help us improve Phluowise by reporting any issues you encounter.
+            </p>
+
+            <!-- Report Type Selection -->
+            <div class="flex flex-col gap-2">
+                <label class="text-white text-lg font-medium">Issue Type</label>
+                <select id="issueType"
+                    class="h-[56px] rounded-2xl px-6 bg-[#292B2F] border border-[#292B2F] text-white text-lg outline-none">
+                    <option value="bug">Bug / Error</option>
+                    <option value="feature">Feature Request</option>
+                    <option value="payment">Payment Issue</option>
+                    <option value="delivery">Delivery Problem</option>
+                    <option value="account">Account Issue</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+
+            <!-- Subject -->
+            <div class="flex flex-col gap-2">
+                <label class="text-white text-lg font-medium">Subject</label>
+                <input type="text" id="subject" placeholder="Brief description of the issue"
+                    class="h-[56px] rounded-2xl px-6 bg-[#292B2F] border border-[#292B2F] text-white text-lg placeholder-white/50 outline-none">
+            </div>
+
+            <!-- Description -->
+            <div class="flex flex-col gap-2">
+                <label class="text-white text-lg font-medium">Description</label>
+                <textarea id="description" rows="5" placeholder="Please describe the issue in detail..."
+                    class="rounded-2xl px-6 py-4 bg-[#292B2F] border border-[#292B2F] text-white text-lg placeholder-white/50 outline-none resize-none"></textarea>
+            </div>
+
+            <!-- Email (optional) -->
+            <div class="flex flex-col gap-2">
+                <label class="text-white text-lg font-medium">Email (for follow-up)</label>
+                <input type="email" id="email" placeholder="your@email.com"
+                    class="h-[56px] rounded-2xl px-6 bg-[#292B2F] border border-[#292B2F] text-white text-lg placeholder-white/50 outline-none">
+            </div>
+
+            <!-- Submit Button -->
+            <button onclick="submitReport()"
+                class="h-[56px] w-full mt-4 rounded-2xl flex items-center justify-center border border-[#007ACC] bg-[#007ACC] shadow-lg active:scale-95 transition-transform">
+                <span class="text-white text-xl font-medium capitalize">Submit Report</span>
+            </button>
+
+            <!-- Contact Info -->
+            <div class="mt-4 p-4 rounded-[15px] text-center" style="background-color: var(--bg-third);">
+                <p class="text-white/60 text-sm">For urgent issues, contact us at:</p>
+                <p class="text-[#007ACC] text-base font-medium mt-1">info@phluowise.com</p>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="../public/js/theme.js"></script>
+    <script>
+        // Navigation State Management
+        function goBack() {
+            const previousPage = localStorage.getItem('previousPage');
+            if (previousPage) {
+                window.location.href = previousPage;
+            } else {
+                // Fallback to home if no previous page is stored
+                window.location.href = 'home.html';
+            }
+        }
+
+        function submitReport() {
+            const issueType = document.getElementById('issueType').value;
+            const subject = document.getElementById('subject').value;
+            const description = document.getElementById('description').value;
+            const email = document.getElementById('email').value;
+
+            if (!subject || !description) {
+                alert('Please fill in the subject and description fields.');
+                return;
+            }
+
+            // Here you would typically send to an API
+            alert('Thank you for your report! We will review it shortly.');
+
+            // Clear form
+            document.getElementById('subject').value = '';
+            document.getElementById('description').value = '';
+            document.getElementById('email').value = '';
+        }
+    </script>
+
+</body>
+
+</html>

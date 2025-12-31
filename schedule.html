@@ -1,0 +1,1941 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phluowise - Shop Details</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=verified,flag_2" />
+    <link rel="stylesheet" href="../public/css/notifications.css" />
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#007ACC',
+                        tabActive: '#3B74FF',
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+
+        :root {
+            --bg-color: #060606;
+            --bg-second: #1D1D1DF2;
+            --bg-third: #101010;
+            --header-bg: #101010;
+            --tab-bg: #101010;
+            --btn-color: #007ACC66;
+            --btn-border: #3B74FF;
+            --text-color: #FFFFFF;
+            --bottom-sheet-color: #1D1D1D;
+            --input-bg: #292B2F;
+            --input-border: #40444B;
+            --card-bg-dark: #8080804D;
+        }
+
+        body.dark-theme {
+            --bg-color: #060606;
+            --card-bg-dark: #8080804D;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: white;
+            font-family: 'Inter', sans-serif;
+        }
+
+        /* Material Symbols Styles */
+        .material-symbols-outlined {
+          font-variation-settings:
+          'FILL' 1,
+          'wght' 400,
+          'GRAD' 0,
+          'opsz' 24
+        }
+        
+        .verified-checkmark {
+            color: #F19E39;
+            font-size: 20px;
+            vertical-align: middle;
+            margin-left: 4px;
+        }
+
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Exact blur styling from React Native BlurView */
+        .glass-blur-70 {
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            background-color: rgba(20, 20, 20, 0.4);
+        }
+
+        .glass-blur-50 {
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            background-color: rgba(20, 20, 20, 0.3);
+        }
+
+        /* Exact shadow from React Native */
+        .rn-shadow {
+            box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25);
+        }
+
+        .rn-shadow-lg {
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        /* Dark mode map styles */
+        .leaflet-container {
+            background: #1a1a1a !important;
+        }
+
+        .leaflet-tile {
+            filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
+        }
+
+        .leaflet-control-zoom a {
+            background-color: rgba(30, 30, 30, 0.9) !important;
+            border: 1px solid rgba(59, 116, 255, 0.3) !important;
+            color: white !important;
+        }
+
+        .leaflet-control-zoom a:hover {
+            background-color: rgba(59, 116, 255, 0.2) !important;
+            border-color: rgba(59, 116, 255, 0.5) !important;
+        }
+
+        .leaflet-popup-content-wrapper {
+            background: rgba(16, 16, 16, 0.95) !important;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(59, 116, 255, 0.3);
+            border-radius: 12px;
+            color: white;
+        }
+
+        .leaflet-popup-tip {
+            background: rgba(16, 16, 16, 0.95) !important;
+            border: 1px solid rgba(59, 116, 255, 0.3);
+        }
+
+        .custom-marker {
+            background: linear-gradient(135deg, #3B74FF, #007ACC);
+            border: 2px solid white;
+            border-radius: 50%;
+            box-shadow: 0 4px 12px rgba(59, 116, 255, 0.4);
+        }
+
+        .user-location-marker {
+            background: #00ff88;
+            border: 3px solid white;
+            border-radius: 50%;
+            box-shadow: 0 4px 12px rgba(0, 255, 136, 0.4);
+        }
+    </style>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+
+<body class="dark-theme h-screen flex flex-col overflow-hidden">
+
+    <!-- Header with Back Button and Profile Image (Exact from schedule.tsx) -->
+    <div class="relative w-full">
+        <!-- Banner Background -->
+        <div class="absolute inset-0 w-full h-[180px] overflow-hidden">
+            <img src="../public/images/main/adsBack.png" class="w-full h-full object-cover" alt="Advertisement Banner">
+        </div>
+        
+        <!-- Back Button -->
+        <div class="absolute top-5 left-4 z-20">
+            <button onclick="window.history.back()" class="w-10 h-10 flex items-center justify-center">
+                <img src="../public/images/main/ArrowLeftIcon.png" class="w-6 h-6 object-contain">
+            </button>
+        </div>
+
+        <!-- Header Space (height: 80) -->
+        <div class="h-[80px] w-full"></div>
+
+        <!-- Profile Image Container (top: 40, left: 40, p: 8, rounded: 14, height: 90, width: 95) -->
+        <!-- Increased top margin for spacing -->
+        <div class="absolute top-[60px] left-10 z-10 p-2 rounded-[14px]"
+            style="background-color: var(--bottom-sheet-color); height: 90px; width: 95px;">
+            <div class="w-full h-full rounded-[14px] overflow-hidden">
+                <img id="shopProfileImage" src="../public/images/main/ScheduleImage1.png"
+                    class="w-full h-full object-cover">
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Scrollable Content -->
+    <div class="flex-1 overflow-y-auto hide-scrollbar pb-[70px] mt-2 relative z-0">
+
+        <!-- Top Spacer - Increased to move company data beneath banner -->
+        <div class="h-[100px]"></div>
+
+        <div class="px-0 relative flex flex-col">
+
+            <!-- CompanyDescription Component (Exact) -->
+            <div class="px-10 p-2 relative">
+                <!-- Added spacing before company data -->
+                <div class="mb-6">
+                    <h1 class="text-white text-2xl font-bold">
+                        Voltic Water Company
+                        <span class="material-symbols-outlined verified-checkmark">verified</span>
+                    </h1>
+                    <p class="text-[#808080] text-lg mt-1">Accra, Ghana</p>
+                </div>
+                
+                <div id="descriptionContainer" class="overflow-hidden transition-all duration-300"
+                    style="height: 45px;">
+                    <div class="relative h-full">
+                        <!-- Linear Gradient Overlay (exact from RN) -->
+                        <div class="absolute inset-0 pointer-events-none z-10"
+                            style="background: linear-gradient(to bottom, transparent, var(--bg-color));"
+                            id="descGradient"></div>
+                        <p class="text-white text-base font-normal leading-6 tracking-tighter text-justify">
+                            Voltic Water Company is a leading provider of premium bottled water in Ghana, 
+                            offering a wide range of water products including sachets, bottles, and dispensers. 
+                            Committed to delivering clean, safe, and refreshing water to homes and businesses 
+                            across Accra, we ensure timely delivery and exceptional customer service. 
+                            Our state-of-the-art purification process guarantees the highest quality standards 
+                            for all our products.
+                        </p>
+                    </div>
+                </div>
+                <!-- Read More Button (rounded: 5, shadow, height: 30, width: 60) -->
+                <div class="relative pl-0 mt-[-10px] z-20">
+                    <button onclick="toggleReadMore()"
+                        class="h-[30px] w-[60px] flex items-center justify-center rounded-[5px] rn-shadow"
+                        style="background-color: var(--bottom-sheet-color);">
+                        <span id="readMoreText" class="text-white font-medium text-sm">more +</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- WorkingDays Component (Exact) -->
+            <div class="mt-4 px-10">
+                <div class="flex flex-row items-center gap-2">
+                    <span class="text-white text-base font-medium">Working Days</span>
+                    <!-- Dropdown (exact zIndex and styling) -->
+                    <select id="workingDaysSelect" onchange="updateWorkingHours()"
+                        class="bg-[#202225] text-white border-none rounded-xl px-2 py-1 w-[140px] focus:outline-none">
+                        <option value="monday">Monday</option>
+                        <option value="tuesday">Tuesday</option>
+                        <option value="wednesday">Wednesday</option>
+                        <option value="thursday">Thursday</option>
+                        <option value="friday">Friday</option>
+                        <option value="saturday">Saturday</option>
+                        <option value="sunday">Sunday</option>
+                    </select>
+                </div>
+                <!-- Time Display Row (exact bg #292B2F, rounded, padding) -->
+                <div class="mt-2 w-full flex flex-row items-center justify-center p-1 rounded gap-6"
+                    style="background-color: #292B2F;">
+                    <div class="flex flex-row justify-between w-[40%] items-center">
+                        <span class="text-white text-base font-medium">Opening:</span>
+                        <span id="openingTime" class="text-white text-base font-medium">08:00</span>
+                    </div>
+                    <div class="flex flex-row justify-between w-[40%] items-center">
+                        <span class="text-white text-base font-medium">Closing:</span>
+                        <span id="closingTime" class="text-white text-base font-medium">17:00</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- SocialMedia Component (Exact from React Native) -->
+            <div class="mt-1">
+                <div class="w-full flex flex-row justify-between items-center py-2 px-8" style="gap: 24px; background-color: var(--bottom-sheet-color); height: 42px;">
+                    <span class="text-white font-[500] text-lg">Social media</span>
+                    <div class="flex flex-row justify-center items-center" style="gap: 8px;">
+                        <!-- Facebook -->
+                        <div onclick="showSocialModal('Facebook')" class="flex flex-row justify-center items-center p-1 cursor-pointer hover:opacity-80 transition-opacity" style="background-color: #333333; height: 28px; width: 28px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                            </svg>
+                        </div>
+                        <!-- Instagram -->
+                        <div onclick="showSocialModal('Instagram')" class="flex flex-row justify-center items-center p-1 cursor-pointer hover:opacity-80 transition-opacity" style="background-color: #333333; height: 28px; width: 28px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                            </svg>
+                        </div>
+                        <!-- Twitter -->
+                        <div onclick="showSocialModal('Twitter')" class="flex flex-row justify-center items-center p-1 cursor-pointer hover:opacity-80 transition-opacity" style="background-color: #333333; height: 28px; width: 28px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                                <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z"/>
+                            </svg>
+                        </div>
+                        <!-- LinkedIn -->
+                        <div onclick="showSocialModal('LinkedIn')" class="flex flex-row justify-center items-center p-1 cursor-pointer hover:opacity-80 transition-opacity" style="background-color: #333333; height: 28px; width: 28px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/>
+                            </svg>
+                        </div>
+                        <!-- Discord -->
+                        <div onclick="showSocialModal('Discord')" class="flex flex-row justify-center items-center p-1 cursor-pointer hover:opacity-80 transition-opacity" style="background-color: #333333; height: 28px; width: 28px;">
+                            <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                                <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sub-Navigation Tabs (exact height: 35, rounded: 100, px: 24) -->
+            <div class="mt-4 pl-6">
+                <div class="flex flex-row gap-4 overflow-x-auto hide-scrollbar pb-2">
+                    <button onclick="setSubView('schedule')" id="btn-schedule"
+                        class="h-[35px] px-6 rounded-[100px] flex items-center justify-center border border-transparent transition-all">
+                        <span class="text-white text-xl font-medium capitalize whitespace-nowrap">Schedule Order</span>
+                    </button>
+                    <button onclick="setSubView('products')" id="btn-products"
+                        class="h-[35px] px-6 rounded-[100px] flex items-center justify-center border border-transparent bg-transparent transition-all">
+                        <span class="text-white text-xl font-medium capitalize">Products</span>
+                    </button>
+                    <button onclick="setSubView('rating')" id="btn-rating"
+                        class="h-[35px] px-6 rounded-[100px] flex items-center justify-center border border-transparent bg-transparent transition-all">
+                        <span class="text-white text-xl font-medium capitalize">Rating</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Views Content -->
+            <div class="mt-4 pb-[150px]">
+
+                <!-- SCHEDULE ORDER VIEW (ScheduleOrder.tsx - Exact) -->
+                <div id="view-schedule" class="block">
+                    <!-- Container height: 300 (from RN) - Now with Map -->
+                    <div class="relative w-full" style="height: 300px;">
+                        <!-- Map Container -->
+                        <div id="scheduleMap" class="w-full h-full rounded-lg overflow-hidden">
+                            <!-- Map will be initialized here -->
+                        </div>
+
+                        <!-- View Company Website Button (width: 225, top: 10, left: 20, rounded: 5, elevation: 5) -->
+                        <button
+                            class="flex flex-row items-center gap-2 p-3 rounded-[5px] absolute top-[10px] left-[20px] rn-shadow z-[1000]"
+                            style="background-color: var(--bottom-sheet-color); width: 225px;">
+                            <svg class="w-6 h-6" fill="white" stroke="white" viewBox="0 0 24 24">
+                                <circle cx="12" cy="12" r="10" stroke="white" />
+                                <path d="M2 12h20" stroke="white" />
+                                <path
+                                    d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z" stroke="white" />
+                            </svg>
+                            <span class="text-white text-base font-[500] px-4 leading-5 capitalize whitespace-nowrap">View Company Website</span>
+                        </button>
+
+                        <!-- Contact Popup (width: 250, rounded: 10, bottom: 70, right: 20) -->
+                        <div id="contactPopup" class="absolute bottom-[70px] right-[20px] hidden rounded-[10px] z-[1000]"
+                            style="width: 250px; background-color: var(--bottom-sheet-color);">
+                            <button class="flex flex-row items-center gap-4 pl-4 w-full" style="height: 60px;">
+                                <div class="w-8 h-8 rounded-full border border-white flex items-center justify-center">
+                                    <span class="text-white text-xl font-bold">+</span>
+                                </div>
+                                <span class="text-white text-lg font-[600] capitalize px-4 leading-5 whitespace-nowrap">+234 810 000 0000</span>
+                            </button>
+                        </div>
+
+                        <!-- Call Button (height: 60, width: 60, rounded: 10, bottom: 5, right: 20, elevation: 5) -->
+                        <button onclick="toggleContactPopup()"
+                            class="absolute bottom-[5px] right-[20px] rounded-[10px] flex items-center justify-center z-[1000]"
+                            style="background-color: var(--bottom-sheet-color); width: 60px; height: 60px; box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25);">
+                            <svg class="w-8 h-8" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+                                <path
+                                    d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+                            </svg>
+                        </button>
+
+                        <!-- Map Controls -->
+                        <div class="absolute top-[10px] right-[20px] z-[1000] flex flex-col gap-2">
+                            <button onclick="toggleMapType()" class="w-10 h-10 bg-[rgba(30,30,30,0.9)] backdrop-blur-lg border border-[rgba(59,116,255,0.3)] rounded-lg flex items-center justify-center text-white hover:bg-[rgba(59,116,255,0.2)] transition-all" title="Toggle Map View">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="3"/>
+                                    <path d="M12 1v6m0 6v6m4.22-13.22l4.24 4.24M1.54 1.54l4.24 4.24M20.46 20.46l-4.24-4.24M1.54 20.46l4.24-4.24"/>
+                                    <circle cx="12" cy="12" r="8" stroke-dasharray="2 2"/>
+                                </svg>
+                            </button>
+                            <button onclick="zoomInMap()" class="w-10 h-10 bg-[rgba(30,30,30,0.9)] backdrop-blur-lg border border-[rgba(59,116,255,0.3)] rounded-lg flex items-center justify-center text-white hover:bg-[rgba(59,116,255,0.2)] transition-all">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="11" cy="11" r="8"/>
+                                    <path d="M21 21l-4.35-4.35M11 8v6M8 11h6"/>
+                                </svg>
+                            </button>
+                            <button onclick="zoomOutMap()" class="w-10 h-10 bg-[rgba(30,30,30,0.9)] backdrop-blur-lg border border-[rgba(59,116,255,0.3)] rounded-lg flex items-center justify-center text-white hover:bg-[rgba(59,116,255,0.2)] transition-all">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="11" cy="11" r="8"/>
+                                    <path d="M21 21l-4.35-4.35M8 11h6"/>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Schedule Pickup Button (height: 46, rounded: 30, paddingVertical: 15) -->
+                    <div class="px-4 relative py-[15px] flex justify-center">
+                        <button onclick="startScheduleFlow()"
+                            class="rounded-[30px] flex items-center justify-center border"
+                            style="background-color: var(--btn-color); border-color: var(--btn-border); height: 46px; width: 242px;">
+                            <span class="text-white text-xl font-[500] capitalize leading-5">Schedule Pickup</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- PRODUCTS VIEW (Products.tsx - Exact Grid) -->
+                <div id="view-products" class="hidden px-4">
+                    <!-- flex-wrap, gap-4, px-4 from RN -->
+                    <div class="flex flex-row flex-wrap gap-4" id="productsGrid">
+                        <!-- Products rendered by JS with exact dimensions -->
+                    </div>
+                </div>
+
+                <!-- RATING VIEW (Rating.tsx - Exact with RatingBar, AllRating, Comment) -->
+                <div id="view-rating" class="hidden p-4">
+
+                    <!-- RatingBar Component (Exact) -->
+                    <div class="p-4 rounded-xl mb-4" style="min-height: 200px;">
+                        <div class="flex flex-row justify-between items-center">
+                            <span class="text-white font-bold text-xl">3.0 rating</span>
+                            <span class="text-white font-semibold text-lg">200 reviews</span>
+                        </div>
+                        <!-- Rating bars (exact height: 13, rounded: 100, bg: #40444B) -->
+                        <div class="mt-4 flex flex-col gap-2">
+                            <!-- 5 Star -->
+                            <div class="flex flex-row items-center gap-2">
+                                <span class="text-white font-semibold text-xl">5</span>
+                                <div class="flex flex-row items-center gap-2 flex-grow">
+                                    <div class="w-[86%] rounded-[100px] bg-[#40444B] overflow-hidden"
+                                        style="height: 13px;">
+                                        <div class="bg-white h-full" style="width: 80%"></div>
+                                    </div>
+                                    <span class="text-white font-medium text-lg">80%</span>
+                                </div>
+                            </div>
+                            <!-- 4 Star -->
+                            <div class="flex flex-row items-center gap-2">
+                                <span class="text-white font-semibold text-xl">4</span>
+                                <div class="flex flex-row items-center gap-2 flex-grow">
+                                    <div class="w-[86%] rounded-[100px] bg-[#40444B] overflow-hidden"
+                                        style="height: 13px;">
+                                        <div class="bg-white h-full" style="width: 60%"></div>
+                                    </div>
+                                    <span class="text-white font-medium text-lg">60%</span>
+                                </div>
+                            </div>
+                            <!-- 3 Star -->
+                            <div class="flex flex-row items-center gap-2">
+                                <span class="text-white font-semibold text-xl">3</span>
+                                <div class="flex flex-row items-center gap-2 flex-grow">
+                                    <div class="w-[86%] rounded-[100px] bg-[#40444B] overflow-hidden"
+                                        style="height: 13px;">
+                                        <div class="bg-white h-full" style="width: 40%"></div>
+                                    </div>
+                                    <span class="text-white font-medium text-lg">40%</span>
+                                </div>
+                            </div>
+                            <!-- 2 Star -->
+                            <div class="flex flex-row items-center gap-2">
+                                <span class="text-white font-semibold text-xl">2</span>
+                                <div class="flex flex-row items-center gap-2 flex-grow">
+                                    <div class="w-[86%] rounded-[100px] bg-[#40444B] overflow-hidden"
+                                        style="height: 13px;">
+                                        <div class="bg-white h-full" style="width: 20%"></div>
+                                    </div>
+                                    <span class="text-white font-medium text-lg">20%</span>
+                                </div>
+                            </div>
+                            <!-- 1 Star -->
+                            <div class="flex flex-row items-center gap-2">
+                                <span class="text-white font-semibold text-xl">1</span>
+                                <div class="flex flex-row items-center gap-2 flex-grow">
+                                    <div class="w-[86%] rounded-[100px] bg-[#40444B] overflow-hidden"
+                                        style="height: 13px;">
+                                        <div class="bg-white h-full" style="width: 10%"></div>
+                                    </div>
+                                    <span class="text-white font-medium text-lg">10%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AllRating Component (Exact) -->
+                    <div class="p-4">
+                        <h3 class="text-white text-lg font-medium mb-4">All Reviews</h3>
+                        <div class="flex flex-col gap-4">
+                            <!-- Single Review Item (exact dimensions from AllRating.tsx) -->
+                            <div class="flex flex-col gap-4">
+                                <div class="flex flex-row gap-4">
+                                    <!-- Avatar (height: 63, width: 63, rounded-full, bg: #292B2F99, border: #DADADA) -->
+                                    <div class="rounded-full border"
+                                        style="height: 63px; width: 63px; background-color: #292B2F99; border-color: #DADADA;">
+                                    </div>
+                                    <div class="flex flex-col justify-between py-1">
+                                        <span class="text-white font-medium text-lg pl-8">Anonymous name</span>
+                                        <div class="flex flex-row gap-2">
+                                            <div class="flex flex-row gap-1">
+                                                <span class="text-white text-base">★★★★★</span>
+                                            </div>
+                                            <span class="text-white font-medium text-lg">Time / Day</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                <!-- Comment Bubble (rounded: 12, height: 90, bg: #292B2FCC) -->
+                                <div class="w-full rounded-[12px] p-2"
+                                    style="height: 90px; background-color: #292B2FCC;">
+                                    <p class="text-white px-5 py-2 text-lg font-normal">
+                                        Lorem ipsum dolor sit amet consectetur adipisicing elit.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Comment Component (Exact input with Star trigger and Tags popup) -->
+                    <div class="p-4 relative mb-[150px]" style="z-index: 5; height: 200px;">
+
+                        <!-- Rating/Tags Popup (showRateView from Comment.tsx) -->
+                        <div id="ratingPopup" class="absolute left-0 right-0 hidden bg-transparent"
+                            style="top: -60px; z-index: 10;">
+                            <div
+                                class="flex flex-row items-center gap-4 py-2 overflow-x-auto hide-scrollbar justify-center">
+                                <!-- Stars Container (height: 45, width: 216, rounded: 100, bg: black) -->
+                                <div class="flex flex-row items-center justify-center gap-4 ml-2 rounded-[100px] bg-black"
+                                    style="height: 45px; width: 216px;">
+                                    <button onclick="setStarRating(1)" class="w-6 h-6 star-rating-btn">
+                                        <svg fill="#666" viewBox="0 0 24 24">
+                                            <path
+                                                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                        </svg>
+                                    </button>
+                                    <button onclick="setStarRating(2)" class="w-6 h-6 star-rating-btn">
+                                        <svg fill="#666" viewBox="0 0 24 24">
+                                            <path
+                                                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                        </svg>
+                                    </button>
+                                    <button onclick="setStarRating(3)" class="w-6 h-6 star-rating-btn">
+                                        <svg fill="#666" viewBox="0 0 24 24">
+                                            <path
+                                                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                        </svg>
+                                    </button>
+                                    <button onclick="setStarRating(4)" class="w-6 h-6 star-rating-btn">
+                                        <svg fill="#666" viewBox="0 0 24 24">
+                                            <path
+                                                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                        </svg>
+                                    </button>
+                                    <button onclick="setStarRating(5)" class="w-6 h-6 star-rating-btn">
+                                        <svg fill="#666" viewBox="0 0 24 24">
+                                            <path
+                                                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                        </svg>
+                                    </button>
+                                </div>
+
+                                <!-- Tags Chips (height: 35, px: 24, rounded: 100, bg: #40444B) -->
+                                <button onclick="toggleTag(this)"
+                                    class="flex items-center justify-center rounded-[100px] bg-[#40444B] text-white text-lg font-semibold capitalize border border-transparent"
+                                    style="height: 35px; padding: 0 24px;">
+                                    Sachets
+                                </button>
+                                <button onclick="toggleTag(this)"
+                                    class="flex items-center justify-center rounded-[100px] bg-[#40444B] text-white text-lg font-semibold capitalize border border-transparent"
+                                    style="height: 35px; padding: 0 24px;">
+                                    Bottle
+                                </button>
+                                <button onclick="toggleTag(this)"
+                                    class="flex items-center justify-center rounded-[100px] bg-[#40444B] text-white text-lg font-semibold capitalize border border-transparent"
+                                    style="height: 35px; padding: 0 24px;">
+                                    Dispenser
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Input Row (exact height: 43, rounded: 46, bg: #292B2FCC) -->
+                        <div class="flex flex-row items-center gap-4">
+                            <div class="border flex flex-row items-center px-5 gap-4 mt-3 rounded-[46px]"
+                                style="height: 43px; background-color: #292B2FCC; border-color: var(--input-border); width: calc(100% - 60px);">
+                                <input type="text" placeholder="Write a review.."
+                                    class="bg-transparent border-none outline-none text-white text-lg flex-grow placeholder-white/60">
+                                <!-- Star Icon Trigger -->
+                                <button onclick="toggleRatingPopup()">
+                                    <svg class="w-5 h-5 opacity-50 hover:opacity-100" fill="gold" viewBox="0 0 24 24">
+                                        <path
+                                            d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <!-- Send Button (height: 43, width: 43, rounded-full) -->
+                            <button onclick="submitReview()" class="mt-3 border rounded-full flex items-center justify-center"
+                                style="background-color: var(--btn-color); border-color: var(--btn-border); height: 43px; width: 43px;">
+                                <svg class="w-6 h-6" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+                                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                                </svg>
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Product Details Modal (from schedule.tsx bottom sheet) -->
+    <div id="productModal"
+        class="fixed inset-0 z-50 flex items-center justify-center pointer-events-none opacity-0 transition-opacity duration-300"
+        style="background-color: rgba(0,0,0,0.5);">
+        <div id="productModalContent"
+            class="pointer-events-auto bg-[#1D1D1D] w-full max-w-[400px] h-[400px] rounded-[30px] p-5 flex flex-col items-center relative transform translate-y-full transition-transform duration-300">
+            <button onclick="closeProductModal()"
+                class="absolute top-4 left-4 z-10 w-10 h-10 flex items-center justify-center">
+                <img src="../public/images/main/ArrowLeftIcon.png" class="w-6 h-6">
+            </button>
+            <div class="w-full h-full flex flex-col items-center justify-center gap-4">
+                <img id="modalProductImage" src="../public/images/main/ProductImage1.png"
+                    class="h-[200px] object-contain">
+                <h2 id="modalProductName" class="text-white text-2xl font-bold">Product Name</h2>
+                <p id="modalProductDescription" class="text-white text-lg text-center px-4">Product Description</p>
+                <p id="modalProductPrice" class="text-white text-xl">GHS 0.00</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Social Media Modal -->
+    <div id="socialModal" class="fixed inset-0 z-50 flex items-center justify-center p-9 hidden"
+        style="background-color: rgba(0,0,0,0.5); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
+        <div class="rounded-[30px] w-full max-w-[350px] h-[200px] px-10 py-7 flex flex-col items-center justify-center border-[0.2px]"
+            style="background-color: var(--modal-bg); border-color: var(--modal-border);">
+
+            <div class="flex-1 w-full items-center flex-col justify-center relative">
+                <!-- Icon Section -->
+                <div class="items-center flex-1 w-full relative flex items-center justify-center mb-4">
+                    <div class="w-[60px] h-[60px] rounded-full flex items-center justify-center"
+                         style="background-color: #3B74FF;">
+                        <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                  d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"/>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Text Section -->
+                <div class="w-full flex-1 flex-col items-center justify-center text-center">
+                    <h2 class="text-white text-center text-xl font-semibold mb-2">
+                        Social Media Unavailable
+                    </h2>
+                    <p class="text-white text-center text-base font-normal">
+                        <span id="socialPlatformName">Facebook</span> page is not available at the moment.
+                    </p>
+                    <p class="text-white text-center text-sm font-normal mt-2 opacity-75">
+                        Please try again later or contact us directly.
+                    </p>
+                </div>
+
+                <!-- Button Section -->
+                <div class="w-full flex-1 flex-col items-center justify-end mt-6">
+                    <button onclick="closeSocialModal()"
+                        class="h-[37px] w-[177px] rounded-[100px] flex items-center justify-center border mx-auto"
+                        style="background-color: var(--btn-color); border-color: var(--btn-border);">
+                        <span class="text-white text-base font-semibold capitalize"
+                            style="font-weight: 500;">Close</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Schedule Flow Bottom Sheet (Exact from schedule.tsx) -->
+    <div id="scheduleFlowSheet"
+        class="fixed inset-0 z-50 flex items-end justify-center pointer-events-none opacity-0 transition-opacity duration-300"
+        style="background-color: rgba(0,0,0,0.5);">
+
+        <!-- Content (rounded-t: 30, bg: #1D1D1D, h: 85vh) -->
+        <div id="scheduleFlowContent"
+            class="pointer-events-auto bg-[#1D1D1D] w-full max-w-[400px] rounded-t-[30px] p-4 transform translate-y-full transition-transform duration-300 flex flex-col relative"
+            style="height: 85vh;">
+
+            <!-- Close Button -->
+            <button onclick="closeScheduleFlow()"
+                class="absolute top-[-5px] right-[10px] z-10 w-10 h-10 flex items-center justify-center">
+                <span class="text-white text-2xl">×</span>
+            </button>
+
+            <!-- Steps Container -->
+            <div id="flowSteps" class="flex-1 overflow-y-auto hide-scrollbar pt-5">
+
+                <!-- Step 1: Terms of Service -->
+                <div id="step-terms" class="hidden">
+                    <div class="flex flex-col h-full">
+                        <h2 class="text-white text-2xl font-bold text-center mb-4">Terms of Service</h2>
+                        <div class="flex-1 bg-[#292B2F] rounded-lg p-4 mb-4 overflow-y-auto" style="height: 300px;">
+                            <div class="text-white space-y-3 text-sm">
+                                <h3 class="text-lg font-semibold mb-3">Phluowise Terms of Service</h3>
+                                <p>• By using Phluowise, you agree to these terms and conditions.</p>
+                                <p>• All orders are subject to product availability and confirmation by the service provider.</p>
+                                <p>• Delivery times are estimates and may vary based on location and demand.</p>
+                                <p>• Payment is required at the time of delivery unless otherwise specified.</p>
+                                <p>• Cancellations must be made at least 2 hours before scheduled delivery time.</p>
+                                <p>• Phluowise is not responsible for the quality or condition of products delivered by third-party providers.</p>
+                                <p>• Users must provide accurate contact and delivery information.</p>
+                                <p>• Misuse of the platform may result in account termination.</p>
+                                <p>• Prices are subject to change without prior notice.</p>
+                                <p>• By proceeding with an order, you confirm you have read and agree to these terms.</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 mb-6">
+                            <input type="checkbox" id="termsCheckbox" class="w-5 h-5 rounded">
+                            <label for="termsCheckbox" class="text-white text-lg">I agree to the terms of service</label>
+                        </div>
+                        <div class="flex justify-center">
+                            <button onclick="goToStep('product')" 
+                                    class="rounded-[30px] border flex items-center justify-center shadow-lg"
+                                    style="background-color: var(--btn-color); border-color: var(--btn-border); width: 242px; height: 50px;">
+                                <span class="text-white text-xl font-semibold">Continue</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Product Purchase -->
+                <div id="step-product" class="hidden">
+                    <div class="flex flex-col h-full">
+                        <h2 class="text-white text-2xl font-bold text-center mb-4">Select Products</h2>
+                        
+                        <!-- Total Price Header -->
+                        <div class="mx-auto rounded-[10px] mb-4 flex flex-col justify-center items-center"
+                             style="height: 80px; width: 260px; background-color: var(--input-bg);">
+                            <span class="text-[#808080] text-xl font-semibold">Total Price:</span>
+                            <span id="totalPrice" class="text-[#F5F5F5] text-2xl font-bold">GH₵ 0.00</span>
+                        </div>
+
+                        <!-- Product Cards -->
+                        <div class="flex-1 overflow-y-auto hide-scrollbar mb-4">
+                            <div class="flex flex-col gap-4" id="productCards">
+                                <!-- Products will be rendered here -->
+                            </div>
+                        </div>
+
+                        <div class="flex justify-center">
+                            <button onclick="goToStep('recipient')" 
+                                    class="rounded-[30px] border flex items-center justify-center shadow-lg"
+                                    style="background-color: var(--btn-color); border-color: var(--btn-border); width: 242px; height: 50px;">
+                                <span class="text-white text-xl font-semibold">Continue</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 3: Order Recipient -->
+                <div id="step-recipient" class="hidden">
+                    <div class="flex flex-col h-full">
+                        <h2 class="text-white text-2xl font-bold text-center mb-6">Delivery Information</h2>
+                        
+                        <div class="flex-1 overflow-y-auto hide-scrollbar">
+                            <div class="flex flex-col gap-4">
+                                <div class="border w-full rounded-2xl flex flex-col px-6 py-3"
+                                     style="background-color: #292B2F; border-color: #40444B;">
+                                    <label class="text-[#FFFFFF80] text-xl font-medium mb-2">Full Name</label>
+                                    <input type="text" id="recipientName" placeholder="Enter your full name"
+                                           class="bg-transparent text-white text-xl w-full outline-none placeholder-[#FFFFFF99]">
+                                </div>
+
+                                <div class="border w-full rounded-2xl flex flex-col px-6 py-3"
+                                     style="background-color: #292B2F; border-color: #40444B;">
+                                    <label class="text-[#FFFFFF80] text-xl font-medium mb-2">Phone Number</label>
+                                    <input type="tel" id="recipientPhone" placeholder="Enter your phone number"
+                                           class="bg-transparent text-white text-xl w-full outline-none placeholder-[#FFFFFF99]">
+                                </div>
+
+                                <div class="border w-full rounded-2xl flex flex-col px-6 py-3"
+                                     style="background-color: #292B2F; border-color: #40444B;">
+                                    <label class="text-[#FFFFFF80] text-xl font-medium mb-2">Delivery Address</label>
+                                    <textarea id="recipientAddress" placeholder="Enter your delivery address"
+                                              class="bg-transparent text-white text-xl w-full outline-none placeholder-[#FFFFFF99] resize-none"
+                                              style="height: 80px;"></textarea>
+                                </div>
+
+                                <div class="border w-full rounded-2xl flex flex-col px-6 py-3"
+                                     style="background-color: #292B2F; border-color: #40444B;">
+                                    <label class="text-[#FFFFFF80] text-xl font-medium mb-2">Special Instructions</label>
+                                    <textarea id="specialInstructions" placeholder="Any special delivery instructions"
+                                              class="bg-transparent text-white text-xl w-full outline-none placeholder-[#FFFFFF99] resize-none"
+                                              style="height: 60px;"></textarea>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-center mt-6">
+                            <button onclick="goToStep('review')" 
+                                    class="rounded-[30px] border flex items-center justify-center shadow-lg"
+                                    style="background-color: var(--btn-color); border-color: var(--btn-border); width: 242px; height: 50px;">
+                                <span class="text-white text-xl font-semibold">Continue</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Order Review -->
+                <div id="step-review" class="hidden">
+                    <div class="flex flex-col h-full">
+                        <h2 class="text-white text-2xl font-bold text-center mb-4">Order Review</h2>
+                        
+                        <div class="flex-1 overflow-y-auto hide-scrollbar">
+                            <div class="bg-[#292B2F] rounded-lg p-4 mb-4">
+                                <h3 class="text-white text-lg font-semibold mb-3">Order Summary</h3>
+                                <div id="orderSummary" class="flex flex-col gap-2">
+                                    <!-- Order items will be displayed here -->
+                                </div>
+                                <div class="border-t border-[#808080] mt-3 pt-3">
+                                    <div class="flex justify-between items-center">
+                                        <span class="text-white text-lg font-semibold">Total:</span>
+                                        <span id="reviewTotal" class="text-white text-xl font-bold">GH₵ 0.00</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-[#292B2F] rounded-lg p-4 mb-4">
+                                <h3 class="text-white text-lg font-semibold mb-3">Delivery Information</h3>
+                                <div id="deliveryInfo" class="flex flex-col gap-2 text-white">
+                                    <!-- Delivery info will be displayed here -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-center">
+                            <button onclick="goToStep('payment-terms')" 
+                                    class="rounded-[30px] border flex items-center justify-center shadow-lg"
+                                    style="background-color: var(--btn-color); border-color: var(--btn-border); width: 242px; height: 50px;">
+                                <span class="text-white text-xl font-semibold">Proceed to Payment</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 5: Payment Terms of Service -->
+                <div id="step-payment-terms" class="hidden">
+                    <div class="flex flex-col h-full">
+                        <h2 class="text-white text-2xl font-bold text-center mb-4">Payment Terms</h2>
+                        <div class="flex-1 bg-[#292B2F] rounded-lg p-4 mb-4 overflow-y-auto">
+                            <div class="text-white space-y-3">
+                                <p>• Payment is processed securely through our payment partners</p>
+                                <p>• Your payment information is encrypted and protected</p>
+                                <p>• Refunds are processed according to our refund policy</p>
+                                <p>• By proceeding, you agree to our payment terms and conditions</p>
+                                <p>• All transactions are subject to verification</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center gap-3 mb-6">
+                            <input type="checkbox" id="paymentTermsCheckbox" class="w-5 h-5 rounded">
+                            <label for="paymentTermsCheckbox" class="text-white text-lg">I agree to the payment terms</label>
+                        </div>
+                        <div class="flex justify-center">
+                            <button onclick="goToStep('select-payment')" 
+                                    class="rounded-[30px] border flex items-center justify-center shadow-lg"
+                                    style="background-color: var(--btn-color); border-color: var(--btn-border); width: 242px; height: 50px;">
+                                <span class="text-white text-xl font-semibold">Continue</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 6: Select Payment -->
+                <div id="step-select-payment" class="hidden">
+                    <div class="flex flex-col h-full">
+                        <h2 class="text-white text-2xl font-bold text-center mb-6">Select Payment Method</h2>
+                        
+                        <div class="flex-1 overflow-y-auto hide-scrollbar">
+                            <div class="flex flex-col gap-4">
+                                <button onclick="selectPaymentMethod('cash')" 
+                                        class="border w-full rounded-2xl p-4 flex flex-row items-center justify-between payment-option"
+                                        style="background-color: #292B2F; border-color: #40444B; height: 65px;"
+                                        data-payment="cash">
+                                    <span class="text-white text-xl font-medium">Pay with Cash</span>
+                                    <div class="w-5 h-5 rounded-full border-2 border-white payment-radio"></div>
+                                </button>
+
+                                <button onclick="selectPaymentMethod('mtn')" 
+                                        class="border w-full rounded-2xl p-4 flex flex-row items-center justify-between payment-option"
+                                        style="background-color: #292B2F; border-color: #40444B; height: 65px;"
+                                        data-payment="mtn">
+                                    <span class="text-white text-xl font-medium">MTN Mobile Money</span>
+                                    <div class="w-5 h-5 rounded-full border-2 border-white payment-radio"></div>
+                                </button>
+
+                                <button onclick="selectPaymentMethod('vodafone')" 
+                                        class="border w-full rounded-2xl p-4 flex flex-row items-center justify-between payment-option"
+                                        style="background-color: #292B2F; border-color: #40444B; height: 65px;"
+                                        data-payment="vodafone">
+                                    <span class="text-white text-xl font-medium">Vodafone Cash</span>
+                                    <div class="w-5 h-5 rounded-full border-2 border-white payment-radio"></div>
+                                </button>
+
+                                <button onclick="selectPaymentMethod('airtel')" 
+                                        class="border w-full rounded-2xl p-4 flex flex-row items-center justify-between payment-option"
+                                        style="background-color: #292B2F; border-color: #40444B; height: 65px;"
+                                        data-payment="airtel">
+                                    <span class="text-white text-xl font-medium">AirtelTigo Money</span>
+                                    <div class="w-5 h-5 rounded-full border-2 border-white payment-radio"></div>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-center mt-6">
+                            <button onclick="goToPaymentDetails()" 
+                                    class="rounded-[30px] border flex items-center justify-center shadow-lg"
+                                    style="background-color: var(--btn-color); border-color: var(--btn-border); width: 242px; height: 50px;">
+                                <span class="text-white text-xl font-semibold">Continue</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 7: Input Payment Details -->
+                <div id="step-payment-details" class="hidden">
+                    <div class="flex flex-col h-full">
+                        <h2 class="text-white text-2xl font-bold text-center mb-4">Payment Details</h2>
+                        
+                        <div class="flex-1 overflow-y-auto hide-scrollbar">
+                            <div class="flex flex-col gap-4">
+                                <div id="cashPaymentInfo" class="bg-[#292B2F] rounded-lg p-4">
+                                    <p class="text-white text-lg">Please have the exact amount ready for delivery.</p>
+                                    <p class="text-white text-lg mt-2">Total amount: <span id="cashTotal" class="font-bold">GH₵ 0.00</span></p>
+                                </div>
+
+                                <div id="mobileMoneyInfo" class="hidden">
+                                    <div class="border w-full rounded-2xl flex flex-col px-6 py-3"
+                                         style="background-color: #292B2F; border-color: #40444B;">
+                                        <label class="text-[#FFFFFF80] text-xl font-medium mb-2">Mobile Money Number</label>
+                                        <input type="tel" id="mobileNumber" placeholder="Enter your mobile money number"
+                                               class="bg-transparent text-white text-xl w-full outline-none placeholder-[#FFFFFF99]">
+                                    </div>
+
+                                    <div class="border w-full rounded-2xl flex flex-col px-6 py-3"
+                                         style="background-color: #292B2F; border-color: #40444B;">
+                                        <label class="text-[#FFFFFF80] text-xl font-medium mb-2">PIN Code</label>
+                                        <input type="password" id="mobilePin" placeholder="Enter your PIN"
+                                               class="bg-transparent text-white text-xl w-full outline-none placeholder-[#FFFFFF99]">
+                                    </div>
+
+                                    <div class="bg-[#292B2F] rounded-lg p-4">
+                                        <p class="text-white text-lg">Amount to be charged: <span id="mobileTotal" class="font-bold">GH₵ 0.00</span></p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="flex justify-center mt-6">
+                            <button onclick="goToStep('payment-processing')" 
+                                    class="rounded-[30px] border flex items-center justify-center shadow-lg"
+                                    style="background-color: var(--btn-color); border-color: var(--btn-border); width: 242px; height: 50px;">
+                                <span class="text-white text-xl font-semibold">Process Payment</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 8: Payment Processing -->
+                <div id="step-payment-processing" class="hidden">
+                    <div class="flex flex-col h-full items-center justify-center">
+                        <div class="w-16 h-16 border-4 border-[#3B74FF] border-t-transparent rounded-full animate-spin mb-6"></div>
+                        <h2 class="text-white text-2xl font-bold text-center mb-4">Processing Payment</h2>
+                        <p class="text-white text-lg text-center">Please wait while we process your payment...</p>
+                    </div>
+                </div>
+
+                <!-- Step 9: Payment Success -->
+                <div id="step-payment-success" class="hidden">
+                    <div class="flex flex-col h-full items-center justify-center">
+                        <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mb-6">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        <h2 class="text-white text-2xl font-bold text-center mb-4">Payment Successful!</h2>
+                        <p class="text-white text-lg text-center mb-6">Your payment has been processed successfully</p>
+                        <div class="flex justify-center">
+                            <button onclick="goToStep('pickup-sent')" 
+                                    class="rounded-[30px] border flex items-center justify-center shadow-lg"
+                                    style="background-color: var(--btn-color); border-color: var(--btn-border); width: 242px; height: 50px;">
+                                <span class="text-white text-xl font-semibold">Continue</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 10: Schedule Pickup Sent -->
+                <div id="step-pickup-sent" class="hidden">
+                    <div class="flex flex-col h-full items-center justify-center">
+                        <div class="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mb-6">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                            </svg>
+                        </div>
+                        <h2 class="text-white text-2xl font-bold text-center mb-4">Schedule Pickup Sent!</h2>
+                        <p class="text-white text-lg text-center mb-6">Your pickup schedule has been sent to the company</p>
+                        <p class="text-white text-base text-center mb-6">You will receive a confirmation once they accept your order</p>
+                        <div class="flex justify-center">
+                            <button onclick="goToStep('rate-phluowise')" 
+                                    class="rounded-[30px] border flex items-center justify-center shadow-lg"
+                                    style="background-color: var(--btn-color); border-color: var(--btn-border); width: 242px; height: 50px;">
+                                <span class="text-white text-xl font-semibold">Continue</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 11: Rate Phluowise -->
+                <div id="step-rate-phluowise" class="hidden">
+                    <div class="flex flex-col h-full">
+                        <h2 class="text-white text-2xl font-bold text-center mb-4">Rate Phluowise</h2>
+                        <p class="text-white text-lg text-center mb-6">How would you rate your experience?</p>
+                        
+                        <div class="flex-1 flex flex-col items-center justify-center">
+                            <div class="flex gap-4 mb-8">
+                                <button onclick="setRating(1)" class="star-button text-4xl text-gray-400 hover:text-yellow-400 transition-colors">★</button>
+                                <button onclick="setRating(2)" class="star-button text-4xl text-gray-400 hover:text-yellow-400 transition-colors">★</button>
+                                <button onclick="setRating(3)" class="star-button text-4xl text-gray-400 hover:text-yellow-400 transition-colors">★</button>
+                                <button onclick="setRating(4)" class="star-button text-4xl text-gray-400 hover:text-yellow-400 transition-colors">★</button>
+                                <button onclick="setRating(5)" class="star-button text-4xl text-gray-400 hover:text-yellow-400 transition-colors">★</button>
+                            </div>
+
+                            <textarea placeholder="Tell us about your experience (optional)"
+                                      class="w-full rounded-2xl p-4 border text-white bg-transparent placeholder-[#FFFFFF99] resize-none mb-6"
+                                      style="background-color: #292B2F; border-color: #40444B; height: 100px;"
+                                      id="ratingComment"></textarea>
+
+                            <div class="flex justify-center">
+                                <button onclick="goToStep('rating-done')" 
+                                        class="rounded-[30px] border flex items-center justify-center shadow-lg"
+                                        style="background-color: var(--btn-color); border-color: var(--btn-border); width: 242px; height: 50px;">
+                                    <span class="text-white text-xl font-semibold">Submit Rating</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 12: Rating Done -->
+                <div id="step-rating-done" class="hidden">
+                    <div class="flex flex-col h-full items-center justify-center">
+                        <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mb-6">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                            </svg>
+                        </div>
+                        <h2 class="text-white text-2xl font-bold text-center mb-4">Thank You!</h2>
+                        <p class="text-white text-lg text-center mb-6">Your rating has been submitted successfully</p>
+                        <p class="text-white text-base text-center mb-6">We appreciate your feedback and will use it to improve our service</p>
+                        <div class="flex justify-center">
+                            <button onclick="closeScheduleFlow()" 
+                                    class="rounded-[30px] border flex items-center justify-center shadow-lg"
+                                    style="background-color: var(--btn-color); border-color: var(--btn-border); width: 242px; height: 50px;">
+                                <span class="text-white text-xl font-semibold">Done</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 2: Date & Time (Exact from schedule.tsx) -->
+                <div id="step-date" class="hidden">
+                    <div class="w-full gap-4 pt-[10px]">
+                        <!-- Date Picker (matching ScheduleDatePicker.tsx) -->
+                        <div class="border w-full rounded-2xl flex flex-row items-center gap-4 my-2 px-6 justify-between"
+                            style="background-color: #292B2F; border-color: #40444B; height: 65px;">
+                            <div>
+                                <span class="text-[#FFFFFF80] text-xl font-medium">Date</span>
+                                <span id="selectedDate" class="text-[#FFFFFF80] text-lg font-normal block">Select
+                                    Date</span>
+                            </div>
+                            <input type="date" id="scheduleDatePicker"
+                                class="bg-transparent text-white border-none outline-none cursor-pointer"
+                                style="min-width: 120px;" min="">
+                        </div>
+
+                        <!-- Time Input -->
+                        <div class="border w-full rounded-2xl flex flex-row items-center gap-4 my-2 px-6 justify-between"
+                            style="background-color: #292B2F; border-color: #40444B; height: 65px;">
+                            <div>
+                                <span class="text-[#FFFFFF80] text-xl font-medium">Time</span>
+                                <span class="text-[#FFFFFF80] text-lg font-normal">15:46</span>
+                            </div>
+                            <button class="text-white">›</button>
+                        </div>
+
+                        <!-- Additional Info Textarea (from schedule.tsx) -->
+                        <div class="mt-4">
+                            <textarea placeholder="Add additional information"
+                                class="w-full rounded-2xl p-4 border text-white bg-transparent placeholder-[#FFFFFF80] resize-none"
+                                style="background-color: #292B2F; border-color: #40444B; height: 100px;"></textarea>
+                        </div>
+
+                        <div class="flex justify-center mt-8">
+                            <button onclick="goToStep('payment')"
+                                class="rounded-[30px] border flex items-center justify-center shadow-lg"
+                                style="background-color: var(--btn-color); border-color: var(--btn-border); width: 242px; height: 50px;">
+                                <span class="text-white text-xl font-semibold">Confirm</span>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Navigation (Schedule History renamed) -->
+    <div
+        class="tab-bar fixed bottom-0 left-0 right-0 h-[64px] flex flex-row justify-around items-center px-4 border-t-0 bg-[#101010] z-50">
+        <a href="home.html" class="flex flex-col items-center justify-center gap-1 flex-1">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.5">
+                <path
+                    d="M9.02 2.84004L3.63 7.04004C2.73 7.74004 2 9.23004 2 10.36V17.77C2 20.09 3.89 21.99 6.21 21.99H17.79C20.11 21.99 22 20.09 22 17.78V10.5C22 9.29004 21.19 7.74004 20.2 7.05004L14.02 2.72004C12.62 1.74004 10.37 1.79004 9.02 2.84004Z"
+                    stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M12 17.99V14.99" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+            <span class="text-sm text-white font-normal mt-1">Home</span>
+        </a>
+        <a href="services.html" class="flex flex-col items-center justify-center gap-1 flex-1">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none" stroke="#FFFFFF" stroke-width="1.5">
+                <path
+                    fill="#FFFFFF"
+                    d="m31.696 15.098-1.75-4.376a1.742 1.742 0 0 0-1.625-1.1H23.75V8.376a.75.75 0 0 0-.75-.75H4a1.75 1.75 0 0 0-1.75 1.75v14A1.75 1.75 0 0 0 4 25.125h2.325a3.75 3.75 0 0 0 7.35 0h6.65a3.75 3.75 0 0 0 7.35 0H30a1.75 1.75 0 0 0 1.75-1.75v-8a.752.752 0 0 0-.054-.277Zm-7.946-3.973h4.573a.25.25 0 0 1 .232.158l1.337 3.342H23.75v-3.5Zm-20-1.75a.25.25 0 0 1 .25-.25h18.25v8.5H3.75v-8.25ZM10 26.625a2.25 2.25 0 1 1 0-4.5 2.25 2.25 0 0 1 0 4.5Zm10.325-3h-6.65a3.75 3.75 0 0 0-7.35 0H4a.25.25 0 0 1-.25-.25v-4.25h18.5v1.935a3.763 3.763 0 0 0-1.925 2.565Zm3.675 3a2.25 2.25 0 1 1 0-4.5 2.25 2.25 0 0 1 0 4.5Zm6.25-3.25a.25.25 0 0 1-.25.25h-2.325a3.756 3.756 0 0 0-3.675-3c-.084 0-.168 0-.25.009v-4.509h6.5v7.25Z"
+                />
+            </svg>
+            <span class="text-sm text-white font-normal mt-1">Services</span>
+        </a>
+        <a href="schedule-history.html" class="flex flex-col items-center justify-center gap-1 flex-1">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="1.5">
+                <path d="M8 2V5" />
+                <path d="M16 2V5" />
+                <path
+                    d="M3.5 9.09H20.5" />
+                <path d="M3.5 9.09H20.5" />
+                <path
+                    d="M18.2 21.4C19.9673 21.4 21.4 19.9673 21.4 18.2C21.4 16.4327 19.9673 15 18.2 15C16.4327 15 15 16.4327 15 18.2C15 19.9673 16.4327 21.4 18.2 21.4Z" />
+                <path d="M22 22L21 21" />
+                <path
+                    d="M21 8.5V13.63C20.27 13.14 19.38 12.85 18.43 12.85C15.86 12.85 13.78 14.95 13.78 17.54C13.78 18.45 14.04 19.29 14.49 20H8C4.5 20 3 18 3 15V8.5C3 5.5 4.5 3.5 8 3.5H16C19.5 3.5 21 5.5 21 8.5Z" />
+            </svg>
+            <span class="text-sm text-white font-normal mt-1">Schedule History</span>
+        </a>
+    </div>
+
+    <script src="../public/js/appwriteConfig.js"></script>
+    <script src="../public/js/theme.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        let readMore = false;
+        let subView = 'schedule';
+        let map;
+        let userLocation = null;
+        let companyMarker = null;
+        let userMarker = null;
+        let currentTileLayer = null;
+        let isSatelliteView = false;
+
+        // Current company data (same as home page)
+        const currentCompany = {
+            id: 1,
+            name: 'Voltic Water Company',
+            location: 'Accra, Ghana',
+            coordinates: { lat: 5.6037, lng: -0.1870 },
+            phone: '+233 24 123 4567',
+            workingHours: {
+                monday: { open: '08:00', close: '17:00', isOpen: true },
+                tuesday: { open: '08:00', close: '17:00', isOpen: true },
+                wednesday: { open: '08:00', close: '17:00', isOpen: true },
+                thursday: { open: '08:00', close: '17:00', isOpen: true },
+                friday: { open: '08:00', close: '17:00', isOpen: true },
+                saturday: { open: '09:00', close: '14:00', isOpen: true },
+                sunday: { open: 'Closed', close: 'Closed', isOpen: false }
+            }
+        };
+
+        // Sample products (exact from Products.tsx structure)
+        const products = [
+            { price: 10, name: 'Sachets water', type: 'Description of product', image: '../public/images/main/ProductImage1.png' },
+            { price: 20, name: 'Bottle water', type: 'Description of product', image: '../public/images/main/ProductImage1.png' },
+            { price: 15, name: 'Dispenser', type: 'Description of product', image: '../public/images/main/ProductImage1.png' },
+            { price: 12, name: 'Sachets water', type: 'Description of product', image: '../public/images/main/ProductImage1.png' }
+        ];
+
+        // CompanyDescription toggle (Exact animation logic)
+        function toggleReadMore() {
+            readMore = !readMore;
+            const container = document.getElementById('descriptionContainer');
+            const gradient = document.getElementById('descGradient');
+            const text = document.getElementById('readMoreText');
+
+            if (readMore) {
+                container.style.height = 'auto';
+                gradient.style.display = 'none';
+                text.textContent = 'less -';
+            } else {
+                container.style.height = '45px';
+                gradient.style.display = 'block';
+                text.textContent = 'more +';
+            }
+        }
+
+        // Tab navigation (exact button styling logic)
+        function setSubView(view) {
+            subView = view;
+            const btns = ['schedule', 'products', 'rating'];
+            btns.forEach(btn => {
+                const button = document.getElementById('btn-' + btn);
+                if (btn === view) {
+                    button.style.backgroundColor = 'var(--btn-color)';
+                    button.style.borderColor = 'var(--btn-border)';
+                } else {
+                    button.style.backgroundColor = 'transparent';
+                    button.style.borderColor = 'transparent';
+                }
+            });
+
+            document.getElementById('view-schedule').style.display = view === 'schedule' ? 'block' : 'none';
+            document.getElementById('view-products').style.display = view === 'products' ? 'block' : 'none';
+            document.getElementById('view-rating').style.display = view === 'rating' ? 'block' : 'none';
+
+            if (view === 'products') renderProducts();
+        }
+
+        // Products rendering (exact dimensions from Products.tsx)
+        function renderProducts() {
+            const container = document.getElementById('productsGrid');
+            container.innerHTML = '';
+
+            products.forEach((p, i) => {
+                const card = document.createElement('div');
+                // Exact: height: 220, width: screenWidth / 2 - 35, borderRadius: 10
+                card.className = "relative overflow-hidden rounded-[10px]";
+                card.style.width = "calc(50% - 8px)"; // Approximating screenWidth / 2 - 35
+                card.style.height = "220px";
+                card.style.backgroundColor = "var(--card-bg-dark)";
+
+                card.innerHTML = `
+                    <!-- Top Blur (intensity: 70, height: 40, zIndex: 2) -->
+                    <div class="absolute top-0 left-0 right-0 px-2 flex flex-row justify-between items-center z-10 glass-blur-70" style="height: 40px;">
+                         <span class="text-white font-[700] text-lg">GHS ${p.price}</span>
+                         <div class="w-[15px] h-[15px] bg-white/50 rounded-sm"></div>
+                    </div>
+                    
+                    <img src="${p.image}" class="w-full h-full object-cover">
+                    
+                    <!-- Bottom Blur (intensity: 50, height: 50, zIndex: 2) -->
+                    <div class="absolute bottom-0 left-0 right-0 px-2 py-1 flex flex-row justify-between items-center gap-1 z-10 glass-blur-50" style="height: 50px;">
+                         <div>
+                              <span class="text-white font-[600] block leading-tight truncate" style="width: 110px;">${p.name}</span>
+                              <span class="text-white font-[400] text-sm block leading-tight truncate" style="width: 110px;">${p.type}</span>
+                         </div>
+                         <!-- Button (height: 25, rounded: 5, bg: #40444B, shadow) -->
+                         <button class="bg-[#40444B] rounded-[5px] px-2 flex items-center justify-center transform active:scale-95 transition-transform"
+                                 onclick="openProductModal('${p.name}', ${p.price}, '${p.type}')"
+                                 style="height: 25px; box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25);">
+                              <span class="text-white text-sm font-[500]">less +</span>
+                         </button>
+                    </div>
+                `;
+                container.appendChild(card);
+            });
+        }
+
+        function updateWorkingHours() {
+            const select = document.getElementById('workingDaysSelect');
+            const openingTimeSpan = document.getElementById('openingTime');
+            const closingTimeSpan = document.getElementById('closingTime');
+            
+            // Handle case when no day is selected
+            if (!select || !select.value) {
+                openingTimeSpan.textContent = 'Closed';
+                closingTimeSpan.textContent = 'Closed';
+                openingTimeSpan.style.color = '#F57D7D';
+                closingTimeSpan.style.color = '#F57D7D';
+                return;
+            }
+            
+            const selectedDay = select.value;
+            const dayHours = currentCompany.workingHours[selectedDay];
+            
+            // Handle case when day data is not available
+            if (!dayHours) {
+                openingTimeSpan.textContent = 'Closed';
+                closingTimeSpan.textContent = 'Closed';
+                openingTimeSpan.style.color = '#F57D7D';
+                closingTimeSpan.style.color = '#F57D7D';
+                return;
+            }
+            
+            if (dayHours.isOpen) {
+                openingTimeSpan.textContent = dayHours.open;
+                closingTimeSpan.textContent = dayHours.close;
+                openingTimeSpan.style.color = '#FFFFFF';
+                closingTimeSpan.style.color = '#FFFFFF';
+            } else {
+                openingTimeSpan.textContent = 'Closed';
+                closingTimeSpan.textContent = 'Closed';
+                openingTimeSpan.style.color = '#F57D7D';
+                closingTimeSpan.style.color = '#F57D7D';
+            }
+            
+            // Update select styling to show current day
+            const today = new Date().toLocaleDateString('en-US', { weekday: 'short' }).toLowerCase();
+            const dayMapping = {
+                'mon': 'monday', 'tue': 'tuesday', 'wed': 'wednesday',
+                'thu': 'thursday', 'fri': 'friday', 'sat': 'saturday', 'sun': 'sunday'
+            };
+            
+            const currentDay = dayMapping[today] || 'monday';
+            if (selectedDay === currentDay) {
+                select.style.backgroundColor = '#3B74FF';
+                select.style.color = '#FFFFFF';
+            } else {
+                select.style.backgroundColor = '#202225';
+                select.style.color = '#FFFFFF';
+            }
+        }
+
+        // Set current day as default on page load
+        function setCurrentDay() {
+            const select = document.getElementById('workingDaysSelect');
+            
+            // Handle case when select element doesn't exist
+            if (!select) {
+                console.warn('Working days select element not found');
+                return;
+            }
+            
+            const today = new Date().toLocaleDateString('en-US', { weekday: 'short' }).toLowerCase();
+            
+            // Map JavaScript day names to our select values
+            const dayMapping = {
+                'mon': 'monday',
+                'tue': 'tuesday', 
+                'wed': 'wednesday',
+                'thu': 'thursday',
+                'fri': 'friday',
+                'sat': 'saturday',
+                'sun': 'sunday'
+            };
+            
+            const currentDay = dayMapping[today] || 'monday';
+            
+            // Only set value if the option exists
+            const option = select.querySelector(`option[value="${currentDay}"]`);
+            if (option) {
+                select.value = currentDay;
+                option.textContent = option.textContent.replace(/^(\w+)/, '$1 (Today)');
+            } else {
+                // Fallback to first available day
+                select.value = select.options[0]?.value || 'monday';
+            }
+            
+            updateWorkingHours();
+        }
+
+        // Initialize date picker with minimum date as today (matching React Native ScheduleDatePicker)
+        document.addEventListener('DOMContentLoaded', function () {
+            const datePicker = document.getElementById('scheduleDatePicker');
+            const selectedDateSpan = document.getElementById('selectedDate');
+
+            if (datePicker) {
+                // Set minimum date to today (matching React Native minimumDate={currentDate})
+                const today = new Date().toISOString().split('T')[0];
+                datePicker.min = today;
+
+                // Handle date change
+                datePicker.addEventListener('change', function () {
+                    if (this.value) {
+                        const selectedDate = new Date(this.value);
+                        const options = { day: 'numeric', month: 'long', year: 'numeric' };
+                        const formattedDate = selectedDate.toLocaleDateString('en-US', options);
+                        selectedDateSpan.textContent = formattedDate;
+                    }
+                });
+            }
+        });
+
+        // Product Modal
+        function openProductModal(name, price, description) {
+            const modal = document.getElementById('productModal');
+            const content = document.getElementById('productModalContent');
+            document.getElementById('modalProductName').textContent = name;
+            document.getElementById('modalProductPrice').textContent = "GHS " + price;
+            document.getElementById('modalProductDescription').textContent = description;
+
+            modal.classList.remove('opacity-0', 'pointer-events-none');
+            modal.classList.add('opacity-100');
+            setTimeout(() => content.classList.remove('translate-y-full'), 10);
+        }
+
+        function closeProductModal() {
+            const modal = document.getElementById('productModal');
+            const content = document.getElementById('productModalContent');
+            content.classList.add('translate-y-full');
+            setTimeout(() => {
+                modal.classList.remove('opacity-100');
+                modal.classList.add('opacity-0', 'pointer-events-none');
+            }, 300);
+        }
+
+        // Schedule Flow Bottom Sheet - FIXED FUNCTION WITH CONSOLE LOGS
+        function startScheduleFlow() {
+            console.log('🔵 [DEBUG] Schedule Pickup button clicked - Function startScheduleFlow() called');
+            
+            const sheet = document.getElementById('scheduleFlowSheet');
+            const content = document.getElementById('scheduleFlowContent');
+            
+            console.log('🔵 [DEBUG] Sheet element:', sheet ? 'Found' : 'NOT FOUND');
+            console.log('🔵 [DEBUG] Content element:', content ? 'Found' : 'NOT FOUND');
+            
+            if (!sheet || !content) {
+                console.error('❌ [ERROR] Modal elements not found!');
+                console.error('❌ [ERROR] Sheet:', sheet);
+                console.error('❌ [ERROR] Content:', content);
+                alert('Error: Modal elements not found. Please check console for details.');
+                return;
+            }
+            
+            console.log('🔵 [DEBUG] Removing opacity-0 and pointer-events-none from sheet');
+            sheet.classList.remove('opacity-0', 'pointer-events-none');
+            sheet.classList.add('opacity-100');
+            
+            console.log('🔵 [DEBUG] Setting timeout to remove translate-y-full from content');
+            setTimeout(() => {
+                console.log('🔵 [DEBUG] Removing translate-y-full from content');
+                content.classList.remove('translate-y-full');
+                console.log('✅ [SUCCESS] Schedule flow sheet opened successfully');
+            }, 10);
+            
+            goToStep('terms');
+        }
+
+        function closeScheduleFlow() {
+            console.log('🔵 [DEBUG] Closing schedule flow');
+            const sheet = document.getElementById('scheduleFlowSheet');
+            const content = document.getElementById('scheduleFlowContent');
+            
+            content.classList.add('translate-y-full');
+            setTimeout(() => {
+                sheet.classList.remove('opacity-100');
+                sheet.classList.add('opacity-0', 'pointer-events-none');
+                console.log('✅ [SUCCESS] Schedule flow closed successfully');
+            }, 300);
+        }
+
+        function goToStep(step) {
+            console.log(`🔵 [DEBUG] Navigating to step: ${step}`);
+            // Fixed: Include 'terms' in the steps array
+            const allSteps = ['terms', 'product', 'recipient', 'review', 'payment-terms', 'select-payment', 'payment-details', 'payment-processing', 'payment-success', 'pickup-sent', 'rate-phluowise', 'rating-done'];
+            allSteps.forEach(s => {
+                const element = document.getElementById('step-' + s);
+                if (element) {
+                    element.classList.add('hidden');
+                }
+            });
+            
+            const stepElement = document.getElementById('step-' + step);
+            if (stepElement) {
+                stepElement.classList.remove('hidden');
+                console.log(`✅ [SUCCESS] Step ${step} displayed`);
+            } else {
+                console.error(`❌ [ERROR] Step element not found: step-${step}`);
+                return;
+            }
+            
+            // Initialize step-specific content
+            if (step === 'product') {
+                initializeProducts();
+            } else if (step === 'review') {
+                updateOrderReview();
+            } else if (step === 'payment-processing') {
+                simulatePaymentProcessing();
+            }
+        }
+
+        // Rating system state
+        let currentRating = 0;
+        let selectedTags = new Set();
+        let reviews = [
+            {
+                id: 1,
+                name: 'Anonymous name',
+                rating: 5,
+                comment: 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
+                tags: ['Sachets'],
+                date: new Date('2024-01-15')
+            },
+            {
+                id: 2,
+                name: 'John Doe',
+                rating: 4,
+                comment: 'Great service and fast delivery. Highly recommend!',
+                tags: ['Bottle'],
+                date: new Date('2024-01-10')
+            },
+            {
+                id: 3,
+                name: 'Jane Smith',
+                rating: 3,
+                comment: 'Good quality products, delivery was on time.',
+                tags: ['Dispenser'],
+                date: new Date('2024-01-05')
+            }
+        ];
+
+        // Load reviews from localStorage
+        function loadReviews() {
+            const savedReviews = localStorage.getItem(`reviews_${currentCompany.id}`);
+            if (savedReviews) {
+                const parsed = JSON.parse(savedReviews);
+                // Convert string dates back to Date objects
+                reviews = parsed.map(review => ({
+                    ...review,
+                    date: new Date(review.date)
+                }));
+            }
+        }
+
+        // Save reviews to localStorage
+        function saveReviews() {
+            localStorage.setItem(`reviews_${currentCompany.id}`, JSON.stringify(reviews));
+        }
+
+        // Calculate rating statistics
+        function calculateRatingStats() {
+            if (reviews.length === 0) {
+                return { average: 0, total: 0, distribution: [0, 0, 0, 0, 0] };
+            }
+
+            const total = reviews.reduce((sum, review) => sum + review.rating, 0);
+            const average = (total / reviews.length).toFixed(1);
+            
+            const distribution = [0, 0, 0, 0, 0];
+            reviews.forEach(review => {
+                distribution[review.rating - 1]++;
+            });
+
+            const percentages = distribution.map(count => 
+                reviews.length > 0 ? Math.round((count / reviews.length) * 100) : 0
+            );
+
+            return { average, total: reviews.length, distribution: percentages };
+        }
+
+        // Update rating display
+        function updateRatingDisplay() {
+            const stats = calculateRatingStats();
+            
+            // Update rating summary
+            document.querySelector('.text-white.font-bold.text-xl').textContent = `${stats.average} rating`;
+            document.querySelector('.text-white.font-semibold.text-lg').textContent = `${stats.total} reviews`;
+
+            // Update rating bars
+            const starLabels = [5, 4, 3, 2, 1];
+            starLabels.forEach((star, index) => {
+                const barIndex = 5 - star;
+                const percentage = stats.distribution[barIndex];
+                const barContainer = document.querySelectorAll('.flex.flex-row.items-center.gap-2')[index];
+                if (barContainer) {
+                    const bar = barContainer.querySelector('.bg-white.h-full');
+                    const percentageText = barContainer.querySelector('.text-white.font-medium.text-lg');
+                    if (bar) bar.style.width = `${percentage}%`;
+                    if (percentageText) percentageText.textContent = `${percentage}%`;
+                }
+            });
+        }
+
+        // Render reviews
+        function renderReviews() {
+            const container = document.querySelector('#view-rating .flex.flex-col.gap-4');
+            if (!container) return;
+
+            container.innerHTML = '';
+            
+            reviews.slice().reverse().forEach(review => {
+                const reviewElement = document.createElement('div');
+                reviewElement.className = 'flex flex-col gap-4';
+                
+                const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
+                const dateStr = review.date && typeof review.date.toLocaleDateString === 'function' 
+                    ? review.date.toLocaleDateString('en-US', { 
+                        month: 'short', 
+                        day: 'numeric', 
+                        year: 'numeric' 
+                    })
+                    : 'Unknown date';
+                
+                reviewElement.innerHTML = `
+                    <div class="flex flex-row gap-4">
+                        <div class="rounded-full border"
+                            style="height: 63px; width: 63px; background-color: #292B2F99; border-color: #DADADA;">
+                            <div class="w-full h-full rounded-full flex items-center justify-center text-white text-xl font-bold">
+                                ${review.name.charAt(0).toUpperCase()}
+                            </div>
+                        </div>
+                        <div class="flex flex-col justify-between py-1">
+                            <span class="text-white font-medium text-lg pl-8">${review.name}</span>
+                            <div class="flex flex-row gap-2">
+                                <div class="flex flex-row gap-1">
+                                    <span class="text-white text-base">${stars}</span>
+                                </div>
+                                <span class="text-white font-medium text-lg">${dateStr}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="w-full rounded-[12px] p-2"
+                        style="height: 90px; background-color: #292B2FCC;">
+                        <p class="text-white px-5 py-2 text-lg font-normal">
+                            ${review.comment}
+                        </p>
+                    </div>
+                    ${review.tags && review.tags.length > 0 ? `
+                        <div class="flex flex-row gap-2">
+                            ${review.tags.map(tag => `
+                                <span class="px-3 py-1 rounded-full text-sm font-medium" 
+                                      style="background-color: #40444B; color: white;">
+                                    ${tag}
+                                </span>
+                            `).join('')}
+                        </div>
+                    ` : ''}
+                `;
+                
+                container.appendChild(reviewElement);
+            });
+        }
+
+        // Set star rating
+        function setStarRating(rating) {
+            currentRating = rating;
+            updateStarDisplay();
+        }
+
+        // Update star display
+        function updateStarDisplay() {
+            const stars = document.querySelectorAll('#ratingPopup .star-rating-btn svg path');
+            stars.forEach((star, index) => {
+                if (index < currentRating) {
+                    star.setAttribute('fill', 'gold');
+                } else {
+                    star.setAttribute('fill', '#666');
+                }
+            });
+        }
+
+        // Rating Popup Toggle
+        function toggleRatingPopup() {
+            const popup = document.getElementById('ratingPopup');
+            popup.classList.toggle('hidden');
+        }
+
+        // Social Media Modal Functions
+        function showSocialModal(platform) {
+            const modal = document.getElementById('socialModal');
+            const platformNameSpan = document.getElementById('socialPlatformName');
+            
+            // Update platform name in the message
+            platformNameSpan.textContent = platform;
+            
+            // Show modal with fade-in effect
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.style.opacity = '1';
+            }, 10);
+        }
+
+        function closeSocialModal() {
+            const modal = document.getElementById('socialModal');
+            
+            // Hide modal with fade-out effect
+            modal.style.opacity = '0';
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        // Contact Popup Toggle
+        function toggleContactPopup() {
+            const popup = document.getElementById('contactPopup');
+            popup.classList.toggle('hidden');
+        }
+
+        // Tag Toggle (exact styling logic from Comment.tsx)
+        function toggleTag(btn) {
+            const tagText = btn.textContent.trim();
+            
+            if (selectedTags.has(tagText)) {
+                selectedTags.delete(tagText);
+                btn.style.backgroundColor = '#40444B';
+                btn.style.borderColor = 'transparent';
+            } else {
+                selectedTags.add(tagText);
+                btn.style.backgroundColor = 'var(--btn-color)';
+                btn.style.borderColor = 'var(--btn-border)';
+            }
+        }
+
+        // Submit review
+        function submitReview() {
+            const commentInput = document.querySelector('#view-rating input[type="text"]');
+            const comment = commentInput.value.trim();
+
+            if (currentRating === 0) {
+                alert('Please select a star rating');
+                return;
+            }
+
+            if (!comment) {
+                alert('Please write a review');
+                return;
+            }
+
+            // Create new review
+            const newReview = {
+                id: Date.now(),
+                name: 'You',
+                rating: currentRating,
+                comment: comment,
+                tags: Array.from(selectedTags),
+                date: new Date()
+            };
+
+            // Add to reviews
+            reviews.push(newReview);
+            saveReviews();
+
+            // Update displays
+            updateRatingDisplay();
+            renderReviews();
+
+            // Reset form
+            currentRating = 0;
+            selectedTags.clear();
+            commentInput.value = '';
+            updateStarDisplay();
+            
+            // Reset tag buttons
+            document.querySelectorAll('#ratingPopup button').forEach(btn => {
+                if (btn.textContent.includes('Sachets') || btn.textContent.includes('Bottle') || btn.textContent.includes('Dispenser')) {
+                    btn.style.backgroundColor = '#40444B';
+                    btn.style.borderColor = 'transparent';
+                }
+            });
+
+            // Hide popup
+            toggleRatingPopup();
+
+            // Show success message
+            alert('Thank you for your review!');
+        }
+
+        // Missing schedule flow functions
+        function initializeProducts() {
+            // Initialize product selection for schedule flow
+            console.log('🔵 [DEBUG] Products initialized for schedule flow');
+        }
+
+        function updateOrderReview() {
+            // Update order review display
+            console.log('🔵 [DEBUG] Order review updated');
+        }
+
+        function simulatePaymentProcessing() {
+            console.log('🔵 [DEBUG] Simulating payment processing');
+            // Simulate payment processing
+            setTimeout(() => {
+                goToStep('payment-success');
+                console.log('✅ [SUCCESS] Payment processing simulated successfully');
+            }, 3000);
+        }
+
+        function selectPaymentMethod(method) {
+            console.log(`🔵 [DEBUG] Payment method selected: ${method}`);
+            // Handle payment method selection
+            document.querySelectorAll('.payment-option').forEach(btn => {
+                const radio = btn.querySelector('.payment-radio');
+                if (btn.dataset.payment === method) {
+                    radio.style.backgroundColor = 'white';
+                } else {
+                    radio.style.backgroundColor = 'transparent';
+                }
+            });
+        }
+
+        function goToPaymentDetails() {
+            console.log('🔵 [DEBUG] Going to payment details step');
+            // Go to payment details step
+            goToStep('payment-details');
+        }
+
+        function setRating(rating) {
+            console.log(`🔵 [DEBUG] Setting Phluowise rating to: ${rating}`);
+            // Set rating for Phluowise rating step
+            const stars = document.querySelectorAll('.star-button');
+            stars.forEach((star, index) => {
+                if (index < rating) {
+                    star.classList.remove('text-gray-400');
+                    star.classList.add('text-yellow-400');
+                } else {
+                    star.classList.remove('text-yellow-400');
+                    star.classList.add('text-gray-400');
+                    star.classList.remove('text-yellow-400');
+                }
+            });
+        }
+
+        // Map Functions
+        function initMap() {
+            // Initialize Leaflet map
+            map = L.map('scheduleMap', {
+                zoomControl: false,
+                attributionControl: false
+            }).setView([currentCompany.coordinates.lat, currentCompany.coordinates.lng], 14);
+
+            // Add default dark tile layer
+            currentTileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                attribution: ' OpenStreetMap contributors, CARTO',
+                maxZoom: 19
+            }).addTo(map);
+
+            // Add company marker
+            const companyIcon = L.divIcon({
+                className: 'custom-marker',
+                iconSize: [20, 20],
+                iconAnchor: [10, 10]
+            });
+
+            companyMarker = L.marker([currentCompany.coordinates.lat, currentCompany.coordinates.lng], {
+                icon: companyIcon
+            }).addTo(map);
+
+            // Add popup
+            companyMarker.bindPopup(`
+                <div class="p-2">
+                    <h3 class="font-semibold text-white mb-1">${currentCompany.name}<span class="material-symbols-outlined verified-checkmark" style="font-size: 16px; margin-left: 2px;">verified</span></h3>
+                    <p class="text-gray-300 text-sm mb-2">${currentCompany.location}</p>
+                    <button onclick="callCompany()" class="text-[#3B74FF] text-sm hover:underline">Call Now</button>
+                </div>
+            `);
+
+            function getUserLocation() {
+                if (navigator.geolocation) {
+                    navigator.geolocation.getCurrentPosition(
+                        (position) => {
+                            userLocation = {
+                                lat: position.coords.latitude,
+                                lng: position.coords.longitude
+                            };
+
+                            // Add user location marker
+                            const userIcon = L.divIcon({
+                                className: 'user-location-marker',
+                                iconSize: [16, 16],
+                                iconAnchor: [8, 8]
+                            });
+
+                            userMarker = L.marker([userLocation.lat, userLocation.lng], {
+                                icon: userIcon
+                            }).addTo(map);
+
+                            userMarker.bindPopup(`
+                                <div class="p-2">
+                                    <h3 class="font-semibold text-white mb-1">Your Location</h3>
+                                    <p class="text-gray-300 text-sm">Current position</p>
+                                </div>
+                            `);
+                        },
+                        (error) => {
+                            console.log('Location access denied');
+                        }
+                    );
+                }
+            }
+
+            // Get user location
+            getUserLocation();
+        }
+
+        function zoomInMap() {
+            if (map) map.zoomIn();
+        }
+
+        function zoomOutMap() {
+            if (map) map.zoomOut();
+        }
+
+        function callCompany() {
+            if (currentCompany.phone) {
+                window.location.href = `tel:${currentCompany.phone}`;
+            }
+        }
+
+        function toggleMapType() {
+            if (!map || !currentTileLayer) return;
+            
+            // Remove current tile layer
+            map.removeLayer(currentTileLayer);
+            
+            // Toggle between dark and satellite view
+            isSatelliteView = !isSatelliteView;
+            
+            if (isSatelliteView) {
+                // Add satellite tile layer
+                currentTileLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                    attribution: '© Esri',
+                    maxZoom: 19
+                });
+            } else {
+                // Add dark tile layer
+                currentTileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+                    attribution: '© OpenStreetMap contributors, © CARTO',
+                    maxZoom: 19
+                });
+            }
+            
+            // Add new tile layer to map
+            currentTileLayer.addTo(map);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('🔵 [DEBUG] DOM Content Loaded - Initializing schedule page');
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.body.classList.remove('dark-theme', 'gray-theme', 'light-theme');
+            document.body.classList.add(savedTheme + '-theme');
+
+            setSubView('schedule');
+            
+            // Load reviews and initialize rating display
+            loadReviews();
+            updateRatingDisplay();
+            renderReviews();
+            
+            // Set current working day
+            setCurrentDay();
+            
+            // Initialize map when schedule view is active
+            setTimeout(() => {
+                initMap();
+                console.log('✅ [SUCCESS] Map initialized');
+            }, 100);
+        });
+    </script>
+    <script src="../public/js/notifications.js"></script>
+</body>
+
+</html>
