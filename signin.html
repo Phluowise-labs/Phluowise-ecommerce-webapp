@@ -6,6 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Phluowise - Sign In</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+    </style>
     <script>
         tailwind.config = {
             theme: {
@@ -40,7 +43,7 @@
 
         <!-- Email Box -->
         <div
-            class="border w-full rounded-2xl flex flex-row items-center px-5 gap-4 mt-3 h-[56px] border-[#292B2F] bg-[#000000]">
+            class="border w-full rounded-2xl flex flex-row items-center px-5 gap-4 mt-3 h-[56px] border-[#292B2F] bg-[#000000] focus-within:border-[#007ACC] transition-colors">
             <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
@@ -58,7 +61,7 @@
 
         <!-- Password -->
         <div
-            class="border w-full rounded-2xl flex flex-row items-center px-5 gap-4 mt-3 h-[56px] border-[#292B2F] bg-[#000000]">
+            class="border w-full rounded-2xl flex flex-row items-center px-5 gap-4 mt-3 h-[56px] border-[#292B2F] bg-[#000000] focus-within:border-[#007ACC] transition-colors">
             <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                     d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11.536 16 10.5 17.5 7.5 14.5 9 12l.257.257A6 6 0 1120 8z" />
@@ -85,7 +88,7 @@
         <!-- Sign In Button -->
         <div class="w-full flex flex-col gap-1 mt-3">
             <button
-                class="h-[56px] mb-1 w-full rounded-2xl flex items-center justify-center border border-[#007ACC] bg-[#007ACC]">
+                class="h-[56px] mb-1 w-full rounded-2xl flex items-center justify-center border border-[#007ACC] bg-[#007ACC]/20 backdrop-blur-md">
                 <span class="text-white text-xl font-medium capitalize">Sign In</span>
             </button>
         </div>
@@ -100,7 +103,7 @@
         <!-- Google Sign In -->
         <div class="w-full flex flex-col gap-4 mt-2">
             <button
-                class="border-[0.2px] border-[#292B2F] bg-[#000000] h-[56px] rounded-[10px] w-full flex items-center justify-center p-3">
+                class="border-[0.2px] border-[#292B2F] bg-[#000000]/20 backdrop-blur-md h-[56px] rounded-[10px] w-full flex items-center justify-center p-3">
                 <div class="flex flex-row items-center gap-3">
                     <!-- Google Icon Mock -->
                     <div class="w-5 h-5 bg-white rounded-full flex items-center justify-center">
@@ -118,8 +121,109 @@
             </p>
         </div>
 
+        <!-- Terms -->
+        <div class="mb-2 text-center">
+            <p class="text-xs font-normal text-white">
+                By signing in you agree to our
+                <a href="#" onclick="showTermsModal()" class="text-[#007ACC] underline">Terms of Service</a> and
+                <a href="#" onclick="showPrivacyModal()" class="text-[#007ACC] underline">Privacy Policy</a>
+            </p>
+        </div>
+
     </div>
     </div>
+
+    <!-- Terms Modal -->
+    <div id="termsModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#060606] rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+            <div class="flex flex-col h-[90vh]">
+                <!-- Modal Header -->
+                <div class="flex items-center justify-between p-4 border-b border-[#292B2F]">
+                    <h3 class="text-white text-xl font-semibold">Terms of Service</h3>
+                    <button onclick="closeTermsModal()" class="text-white hover:text-gray-300">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <!-- Modal Content -->
+                <div class="flex-1 overflow-hidden">
+                    <iframe src="https://concrete-aurora-836.notion.site/ebd//1c7c077ea6428075b4c6f68ad38d15c1" 
+                            width="100%" 
+                            height="100%" 
+                            frameborder="0" 
+                            allowfullscreen
+                            class="w-full h-full">
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy Modal -->
+    <div id="privacyModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-[#060606] rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+            <div class="flex flex-col h-[90vh]">
+                <!-- Modal Header -->
+                <div class="flex items-center justify-between p-4 border-b border-[#292B2F]">
+                    <h3 class="text-white text-xl font-semibold">Privacy Policy</h3>
+                    <button onclick="closePrivacyModal()" class="text-white hover:text-gray-300">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+                <!-- Modal Content -->
+                <div class="flex-1 overflow-hidden">
+                    <iframe src="https://concrete-aurora-836.notion.site/ebd//1c7c077ea6428075b4c6f68ad38d15c1" 
+                            width="100%" 
+                            height="100%" 
+                            frameborder="0" 
+                            allowfullscreen
+                            class="w-full h-full">
+                    </iframe>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Modal functions
+        function showTermsModal() {
+            document.getElementById('termsModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeTermsModal() {
+            document.getElementById('termsModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        function showPrivacyModal() {
+            document.getElementById('privacyModal').classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closePrivacyModal() {
+            document.getElementById('privacyModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        }
+
+        // Close modals when clicking outside
+        document.addEventListener('click', function(event) {
+            const termsModal = document.getElementById('termsModal');
+            const privacyModal = document.getElementById('privacyModal');
+            
+            if (event.target === termsModal) {
+                closeTermsModal();
+            }
+            if (event.target === privacyModal) {
+                closePrivacyModal();
+            }
+        });
+    </script>
 
 </body>
 

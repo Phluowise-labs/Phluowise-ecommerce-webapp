@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Phluowise - Welcome</title>
+    <title>Phluowise</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -26,82 +26,416 @@
         body {
             background-color: #060606;
             color: white;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
         }
-    </style>
-    <!-- Basic Swiper CSS Mock -->
-    <style>
+
+        /* Splash Screen Styles */
+        .splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #060606 0%, #101010 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease-out, transform 0.5s ease-out;
+        }
+
+        .splash-screen.fade-out {
+            opacity: 0;
+            transform: scale(0.95);
+            pointer-events: none;
+        }
+
+        .logo-container {
+            animation: pulse 2s infinite ease-in-out;
+        }
+
+        .logo-image {
+            width: 200px;
+            height: auto;
+            max-width: 80vw;
+            object-fit: contain;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.05); opacity: 0.9; }
+        }
+
+        .logo-text {
+            font-size: 3rem;
+            font-weight: 700;
+            background: linear-gradient(45deg, #007ACC, #3B74FF);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+
+        .logo-subtitle {
+            font-size: 1rem;
+            color: #888;
+            font-weight: 400;
+            letter-spacing: 0.05em;
+        }
+
+        .loading-dots {
+            display: flex;
+            gap: 0.25rem;
+            margin-top: 2rem;
+        }
+
+        .loading-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #007ACC;
+            border-radius: 50%;
+            animation: loadingDot 1.5s infinite ease-in-out;
+        }
+
+        .loading-dot:nth-child(2) { animation-delay: 0.2s; }
+        .loading-dot:nth-child(3) { animation-delay: 0.4s; }
+
+        @keyframes loadingDot {
+            0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; }
+            40% { transform: scale(1.2); opacity: 1; }
+        }
+
+        /* Onboarding Styles */
+        .onboarding-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #060606 0%, #101010 100%);
+            display: none;
+            flex-direction: column;
+            z-index: 1000;
+        }
+
+        .onboarding-container.active {
+            display: flex;
+        }
+
         .swiper-container {
             width: 100%;
-            height: 60%;
+            flex: 1;
             overflow: hidden;
             position: relative;
         }
 
         .swiper-slide {
-            display: none;
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
+            display: flex;
+            flex-direction: column;
             align-items: center;
             justify-content: center;
-            flex-direction: column;
+            padding: 2rem;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: opacity 0.5s ease, transform 0.5s ease;
         }
 
         .swiper-slide.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        .swiper-slide.prev {
+            transform: translateX(-100%);
+        }
+
+        .slide-image {
+            width: 85%;
+            max-width: 300px;
+            height: auto;
+            margin-bottom: 2rem;
+            object-fit: contain;
+        }
+
+        .slide-title {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+            text-align: center;
+            background: linear-gradient(45deg, #ffffff, #cccccc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .slide-description {
+            font-size: 1.1rem;
+            color: #888;
+            text-align: center;
+            line-height: 1.6;
+            max-width: 320px;
+        }
+
+        .dots-container {
             display: flex;
+            gap: 0.5rem;
+            padding: 1rem;
+        }
+
+        .dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: #444;
+            transition: all 0.3s ease;
+        }
+
+        .dot.active {
+            background-color: #007ACC;
+            width: 24px;
+            border-radius: 4px;
+        }
+
+        .bottom-section {
+            padding: 2rem;
+            background: rgba(6, 6, 6, 0.8);
+            backdrop-filter: blur(10px);
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-primary {
+            width: 100%;
+            height: 56px;
+            background: linear-gradient(45deg, rgba(0, 122, 204, 0.2), rgba(59, 116, 255, 0.2));
+            backdrop-filter: blur(12px);
+            border: 1px solid #007ACC;
+            border-radius: 16px;
+            color: white;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 1rem;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 122, 204, 0.3);
+        }
+
+        .btn-secondary {
+            background: none;
+            border: none;
+            color: #007ACC;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            color: #3B74FF;
+        }
+
+        .terms-text {
+            font-size: 0.85rem;
+            color: #666;
+            text-align: center;
+            line-height: 1.4;
+            margin-top: 1rem;
+        }
+
+        .terms-text a {
+            color: #007ACC;
+            text-decoration: none;
+        }
+
+        .terms-text a:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
 
-<body class="h-screen flex flex-col items-center justify-center">
+<body>
+    <!-- Splash Screen -->
+    <div id="splashScreen" class="splash-screen">
+        <div class="logo-container">
+            <img src="images/logo.png" alt="Phluowise" class="logo-image">
+        </div>
+    </div>
 
-    <!-- Swiper UI Mock (SwiperUi.tsx) -->
-    <div class="flex-1 w-full flex items-center justify-center">
+    <!-- Onboarding Container -->
+    <div id="onboardingContainer" class="onboarding-container">
         <div class="swiper-container">
             <!-- Slide 1 -->
-            <div class="swiper-slide active">
-                <img src="../public/images/main/ScheduleImage1.png" class="w-[80%] h-auto object-contain">
-                <h2 class="text-2xl font-bold mt-4">Welcome to Phluowise</h2>
-                <p class="text-gray-400 text-center px-6 mt-2">Manage your water delivery with ease.</p>
+            <div class="swiper-slide active" data-slide="0">
+                <img src="images/main/ScheduleImage1.png" alt="Welcome" class="slide-image">
+                <h2 class="slide-title">Welcome to Phluowise</h2>
+                <p class="slide-description">Your smart water delivery companion. Schedule, track, and manage your water orders with ease.</p>
             </div>
+
             <!-- Slide 2 -->
-            <div class="swiper-slide">
-                <img src="../public/images/main/TruckImage.png" class="w-[80%] h-auto object-contain">
-                <h2 class="text-2xl font-bold mt-4">Fast Delivery</h2>
-                <p class="text-gray-400 text-center px-6 mt-2">Get your water delivered in no time.</p>
+            <div class="swiper-slide" data-slide="1">
+                <img src="images/main/TruckImage.png" alt="Fast Delivery" class="slide-image">
+                <h2 class="slide-title">Fast & Reliable</h2>
+                <p class="slide-description">Get clean water delivered to your doorstep in record time. Real-time tracking included.</p>
+            </div>
+
+            <!-- Slide 3 -->
+            <div class="swiper-slide" data-slide="2">
+                <img src="images/main/ScheduleImage1.png" alt="Smart Scheduling" class="slide-image">
+                <h2 class="slide-title">Smart Scheduling</h2>
+                <p class="slide-description">Set up recurring deliveries or schedule on-demand. Never run out of water again.</p>
             </div>
         </div>
-        <!-- Basic Dots -->
-        <div class="flex flex-row gap-2 mt-4">
-            <div class="w-2 h-2 rounded-full bg-[#007ACC]"></div>
-            <div class="w-2 h-2 rounded-full bg-gray-600"></div>
+
+        <!-- Navigation Dots -->
+        <div class="dots-container">
+            <div class="dot active" data-slide="0"></div>
+            <div class="dot" data-slide="1"></div>
+            <div class="dot" data-slide="2"></div>
+        </div>
+
+        <!-- Bottom Section -->
+        <div class="bottom-section">
+            <button id="nextBtn" class="btn-primary" onclick="nextSlide()">
+                Next
+            </button>
+            <button id="getStartedBtn" class="btn-primary" style="display: none;" onclick="getStarted()">
+                Get Started
+            </button>
+            <button class="btn-secondary" onclick="skipOnboarding()">
+                Skip
+            </button>
+            <div class="terms-text">
+                By continuing, you accept our <a href="terms.html">Terms of Service</a> and <a href="privacy.html">Privacy Policy</a>
+            </div>
         </div>
     </div>
 
-    <!-- Bottom Section (Index.tsx) -->
-    <div class="h-[200px] w-full flex flex-col justify-end pb-12">
-        <div class="flex-1 items-center px-6">
-            <!-- Create Account Button -->
-            <button onclick="window.location.href='signup.html'"
-                class="h-[56px] w-full rounded-2xl flex items-center justify-center border border-[#007ACC] bg-[#007ACC]">
-                <span class="text-white text-xl font-medium capitalize">Create An Account</span>
-            </button>
+    <script>
+        let currentSlide = 0;
+        const totalSlides = 3;
 
-            <!-- Sign In Link -->
-            <button onclick="window.location.href='signin.html'"
-                class="h-[40px] items-center justify-center mt-5 w-[114px]">
-                <span class="text-[#007ACC] text-xl font-medium capitalize">Sign in</span>
-            </button>
-        </div>
+        // Initialize app
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check if user has seen onboarding
+            const hasSeenOnboarding = localStorage.getItem('hasSeenOnboarding');
+            
+            // Show splash screen first
+            setTimeout(() => {
+                // Hide splash screen
+                const splashScreen = document.getElementById('splashScreen');
+                splashScreen.classList.add('fade-out');
+                
+                setTimeout(() => {
+                    splashScreen.style.display = 'none';
+                    
+                    // Check if should show onboarding or go directly to app
+                    if (hasSeenOnboarding === 'true') {
+                        // User has seen onboarding, go to home
+                        window.location.href = 'home.html';
+                    } else {
+                        // Show onboarding
+                        const onboardingContainer = document.getElementById('onboardingContainer');
+                        onboardingContainer.classList.add('active');
+                    }
+                }, 500);
+            }, 3000); // 3 seconds splash screen
+        });
 
-        <!-- Terms -->
-        <div class="mb-4">
-            <p class="text-base font-normal text-white text-center leading-4">
-                By Continuing You <a href="#" class="underline text-white">Accept Our Terms</a> Of<br>
-                <a href="#" class="underline text-white">Service & Privacy Policy</a>
-            </p>
-        </div>
-    </div>
+        function nextSlide() {
+            if (currentSlide < totalSlides - 1) {
+                // Move to next slide
+                const currentSlideEl = document.querySelector(`[data-slide="${currentSlide}"]`);
+                const nextSlideEl = document.querySelector(`[data-slide="${currentSlide + 1}"]`);
+                const currentDot = document.querySelector(`.dot[data-slide="${currentSlide}"]`);
+                const nextDot = document.querySelector(`.dot[data-slide="${currentSlide + 1}"]`);
+                
+                currentSlideEl.classList.remove('active');
+                currentSlideEl.classList.add('prev');
+                nextSlideEl.classList.add('active');
+                
+                currentDot.classList.remove('active');
+                nextDot.classList.add('active');
+                
+                currentSlide++;
+                
+                // Update button text
+                if (currentSlide === totalSlides - 1) {
+                    document.getElementById('nextBtn').style.display = 'none';
+                    document.getElementById('getStartedBtn').style.display = 'block';
+                }
+            }
+        }
 
+        function getStarted() {
+            // Mark onboarding as seen
+            localStorage.setItem('hasSeenOnboarding', 'true');
+            
+            // Navigate to signup
+            window.location.href = 'signup.html';
+        }
+
+        function skipOnboarding() {
+            // Mark onboarding as seen
+            localStorage.setItem('hasSeenOnboarding', 'true');
+            
+            // Navigate to signin
+            window.location.href = 'signin.html';
+        }
+
+        // Add swipe support for mobile
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', function(e) {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', function(e) {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            if (touchEndX < touchStartX - 50) {
+                // Swipe left - next slide
+                if (currentSlide < totalSlides - 1) {
+                    nextSlide();
+                }
+            }
+            if (touchEndX > touchStartX + 50) {
+                // Swipe right - previous slide (optional)
+                if (currentSlide > 0) {
+                    // You could implement previous slide functionality here
+                }
+            }
+        }
+
+        // Add keyboard navigation
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'ArrowRight' && currentSlide < totalSlides - 1) {
+                nextSlide();
+            }
+            if (e.key === 'Enter') {
+                if (currentSlide === totalSlides - 1) {
+                    getStarted();
+                } else {
+                    nextSlide();
+                }
+            }
+        });
+    </script>
 </body>
 
 </html>
