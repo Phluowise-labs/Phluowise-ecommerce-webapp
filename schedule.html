@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Phluowise - Shop Details</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=verified,flag_2" />
     <link rel="stylesheet" href="../public/css/notifications.css" />
     <script>
@@ -66,6 +67,16 @@
             font-size: 20px;
             vertical-align: middle;
             margin-left: 4px;
+        }
+
+        /* Schedule Pickup Button Mobile Touch Fix */
+        .schedule-pickup-btn {
+            -webkit-tap-highlight-color: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+        }
+
+        .schedule-pickup-btn:active {
+            transform: scale(0.98);
         }
 
         .hide-scrollbar::-webkit-scrollbar {
@@ -144,6 +155,1140 @@
             border: 3px solid white;
             border-radius: 50%;
             box-shadow: 0 4px 12px rgba(0, 255, 136, 0.4);
+        }
+
+        /* Bottom sheet animation classes */
+        .bottom-sheet-container {
+            background: rgba(29, 29, 31, 0.8);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .bottom-sheet-container.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .bottom-sheet-content {
+            background: rgba(29, 29, 31, 0.95);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 28px 28px 0 0;
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.33, 1, 0.68, 1);
+            box-shadow: 0 -20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .bottom-sheet-content.active {
+            transform: translateY(0);
+        }
+
+        .sheet-drag-handle {
+            width: 40px;
+            height: 4px;
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            margin: 0 auto 16px auto;
+        }
+
+        .section-header {
+            font-size: 24px;
+            font-weight: 700;
+            margin-bottom: 20px;
+            color: var(--text-color);
+        }
+
+        .section-subheader {
+            font-size: 18px;
+            font-weight: 500;
+            color: #9BA1A6;
+            margin-bottom: 20px;
+        }
+
+        .form-container {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 16px;
+            font-weight: 600;
+            color: #9BA1A6;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 12px;
+        }
+
+        .form-input {
+            background-color: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: var(--text-color);
+            padding: 16px 20px;
+            border-radius: 12px;
+            width: 100%;
+            transition: all 0.2s ease;
+            font-size: 18px;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: #3B74FF;
+            box-shadow: 0 0 0 3px rgba(59, 116, 255, 0.15);
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .form-textarea {
+            background-color: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: var(--text-color);
+            padding: 16px 20px;
+            border-radius: 12px;
+            width: 100%;
+            transition: all 0.2s ease;
+            font-size: 18px;
+            resize: vertical;
+            min-height: 120px;
+        }
+
+        .form-textarea:focus {
+            outline: none;
+            border-color: #3B74FF;
+            box-shadow: 0 0 0 3px rgba(59, 116, 255, 0.15);
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .step-content {
+            display: block;
+        }
+
+        .step-content.hidden {
+            display: none;
+        }
+
+        .step-indicator-container {
+            padding: 8px 0 24px 0;
+            margin-bottom: 8px;
+            position: relative;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            display: none;
+        }
+
+        .step-indicator-line {
+            position: absolute;
+            top: 24px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: rgba(255, 255, 255, 0.1);
+            z-index: 0;
+        }
+
+        .step-indicator-wrapper {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .step-indicator-item {
+            width: 36px;
+            height: 36px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            position: relative;
+            border: 2px solid transparent;
+        }
+
+        .step-indicator-item.active {
+            background-color: #3B74FF;
+            color: white;
+            border-color: #3B74FF;
+            box-shadow: 0 4px 12px rgba(59, 116, 255, 0.3);
+        }
+
+        .step-indicator-item.completed {
+            background: rgba(16, 185, 129, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            color: white;
+            border: 2px solid rgba(16, 185, 129, 0.4);
+        }
+
+        .step-indicator-item.default {
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #9BA1A6;
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .step-indicator-name {
+            position: absolute;
+            top: 40px;
+            left: 50%;
+            transform: translateX(-50%);
+            white-space: nowrap;
+            font-size: 10px;
+            color: #9BA1A6;
+            font-weight: 500;
+        }
+
+        .step-indicator-item.active .step-indicator-name {
+            color: #3B74FF;
+            font-weight: 600;
+        }
+
+        .step-indicator-item.completed .step-indicator-name {
+            color: #10B981;
+        }
+
+        .terms-radio-container {
+            margin-bottom: 24px;
+        }
+
+        .terms-radio-item {
+            margin-bottom: 16px;
+            padding: 16px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .terms-radio-item:hover {
+            background-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .terms-radio-item.selected {
+            border-color: #3B74FF;
+            background-color: rgba(59, 116, 255, 0.1);
+        }
+
+        .terms-radio-label {
+            display: flex;
+            align-items: center;
+            font-size: 18px;
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        .terms-radio-circle {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            margin-right: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+
+        .terms-radio-item.selected .terms-radio-circle {
+            border-color: #3B74FF;
+            background-color: #3B74FF;
+        }
+
+        .terms-radio-item.selected .terms-radio-circle::after {
+            content: '';
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background-color: white;
+        }
+
+        .terms-details {
+            margin-top: 8px;
+            padding-left: 36px;
+            font-size: 16px;
+            color: #9BA1A6;
+        }
+
+        .terms-container {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            max-height: 300px;
+            overflow-y: auto;
+            margin-bottom: 20px;
+        }
+
+        .recipient-type-container {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .recipient-type-btn {
+            flex: 1;
+            padding: 20px 12px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            color: var(--text-color);
+            font-weight: 600;
+            font-size: 16px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .recipient-type-btn:hover {
+            background-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .recipient-type-btn.active {
+            background-color: rgba(59, 116, 255, 0.15);
+            border-color: #3B74FF;
+            color: #3B74FF;
+        }
+
+        .toggle-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            margin-bottom: 20px;
+        }
+
+        .toggle-label {
+            font-size: 18px;
+            color: var(--text-color);
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+        }
+
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .toggle-slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: rgba(255, 255, 255, 0.1);
+            transition: .4s;
+            border-radius: 34px;
+        }
+
+        .toggle-slider:before {
+            position: absolute;
+            content: "";
+            height: 22px;
+            width: 22px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .toggle-slider {
+            background-color: #3B74FF;
+        }
+
+        input:checked + .toggle-slider:before {
+            transform: translateX(30px);
+        }
+
+        .business-type-container {
+            margin-top: 16px;
+        }
+
+        .business-name-container {
+            margin-top: 16px;
+        }
+
+        .business-type-select {
+            background-color: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            color: var(--text-color);
+            padding: 16px 20px;
+            border-radius: 12px;
+            width: 100%;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        .business-type-select:focus {
+            outline: none;
+            border-color: #3B74FF;
+            box-shadow: 0 0 0 3px rgba(59, 116, 255, 0.15);
+        }
+
+        .saved-recipients-container {
+            margin-top: 20px;
+        }
+
+        .saved-recipient-item {
+            padding: 16px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            position: relative;
+        }
+
+        .saved-recipient-item:hover {
+            background-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .saved-recipient-item.selected {
+            border-color: #3B74FF;
+            background-color: rgba(59, 116, 255, 0.1);
+        }
+
+        .saved-recipient-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 4px;
+        }
+
+        .saved-recipient-info {
+            font-size: 16px;
+            color: #9BA1A6;
+        }
+
+        .delete-recipient-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(239, 68, 68, 0.2);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: #EF4444;
+            border-radius: 6px;
+            padding: 4px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .delete-recipient-btn:hover {
+            background: rgba(239, 68, 68, 0.3);
+            border-color: rgba(239, 68, 68, 0.5);
+        }
+
+        .recipient-content {
+            cursor: pointer;
+            padding-right: 40px;
+        }
+
+        .you-recipient-info {
+            background-color: rgba(59, 116, 255, 0.1);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(59, 116, 255, 0.2);
+        }
+
+        .you-recipient-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .you-recipient-item:last-child {
+            border-bottom: none;
+        }
+
+        .you-recipient-label {
+            font-size: 16px;
+            color: #9BA1A6;
+        }
+
+        .you-recipient-value {
+            font-size: 16px;
+            color: var(--text-color);
+            font-weight: 500;
+        }
+
+        /* Date and Time Selection */
+        .datetime-container {
+            margin-top: 20px;
+        }
+
+        .datetime-row {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .datetime-input {
+            flex: 1;
+        }
+
+        .time-slots-container {
+            margin-top: 20px;
+        }
+
+        .time-slots-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .time-slot-btn {
+            padding: 16px 8px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            color: var(--text-color);
+            font-size: 16px;
+            font-weight: 600;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .time-slot-btn:hover {
+            background-color: rgba(255, 255, 255, 0.08);
+        }
+
+        .time-slot-btn.selected {
+            background-color: rgba(59, 116, 255, 0.15);
+            border-color: #3B74FF;
+            color: #3B74FF;
+        }
+
+        .time-slot-btn.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .info-card {
+            background: linear-gradient(135deg, rgba(59, 116, 255, 0.1) 0%, rgba(59, 116, 255, 0.05) 100%);
+            border-radius: 16px;
+            padding: 20px;
+            border: 1px solid rgba(59, 116, 255, 0.2);
+            margin-bottom: 20px;
+        }
+
+        .info-title {
+            font-size: 20px;
+            font-weight: 600;
+            color: #3B74FF;
+            margin-bottom: 8px;
+        }
+
+        .info-text {
+            font-size: 16px;
+            color: #9BA1A6;
+            line-height: 1.5;
+        }
+
+        /* Product Selection */
+        .service-products-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+
+        .add-more-btn {
+            background-color: rgba(59, 116, 255, 0.1);
+            border: 1px solid #3B74FF;
+            color: #3B74FF;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .add-more-btn:hover {
+            background-color: rgba(59, 116, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .selected-products-container {
+            margin-top: 24px;
+        }
+
+        .selected-product-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px;
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+
+        .selected-product-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .selected-product-details {
+            flex: 1;
+        }
+
+        .selected-product-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 4px;
+        }
+
+        .selected-product-price {
+            font-size: 16px;
+            color: #9BA1A6;
+        }
+
+        .selected-product-quantity {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .quantity-btn-small {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: var(--text-color);
+            font-size: 20px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .quantity-display-small {
+            font-size: 18px;
+            font-weight: 600;
+            min-width: 30px;
+            text-align: center;
+        }
+
+        .delivery-instructions {
+            margin-top: 20px;
+        }
+
+        .instructions-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #9BA1A6;
+            margin-bottom: 12px;
+        }
+
+        .instructions-example {
+            font-size: 14px;
+            color: #9BA1A6;
+            font-style: italic;
+            margin-bottom: 12px;
+        }
+
+        .delivery-info-note {
+            background-color: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 20px;
+            color: #F59E0B;
+            font-size: 16px;
+            line-height: 1.5;
+        }
+
+        .no-products-selected {
+            text-align: center;
+            padding: 40px 20px;
+            color: #9BA1A6;
+            font-size: 18px;
+        }
+
+        /* Price Display */
+        .price-display {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .price-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+        }
+
+        .price-row.total {
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            padding-top: 16px;
+            margin-top: 8px;
+        }
+
+        .price-label {
+            font-size: 18px;
+            color: #9BA1A6;
+        }
+
+        .price-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .price-value.total {
+            font-size: 24px;
+            font-weight: 700;
+            color: #3B74FF;
+        }
+
+        /* Review Section */
+        .review-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .review-section {
+            margin-bottom: 20px;
+        }
+
+        .review-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .review-section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #9BA1A6;
+            margin-bottom: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .review-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .review-item:last-child {
+            border-bottom: none;
+        }
+
+        .review-label {
+            font-size: 18px;
+            color: #9BA1A6;
+        }
+
+        .review-value {
+            font-size: 18px;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .review-product-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .review-product-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            object-fit: cover;
+        }
+
+        .review-product-details {
+            flex: 1;
+        }
+
+        .review-product-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-color);
+        }
+
+        .review-product-price {
+            font-size: 16px;
+            color: #3B74FF;
+            font-weight: 600;
+        }
+
+        /* Payment Methods */
+        .payment-method-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 20px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+        }
+
+        .payment-method-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(59, 116, 255, 0.5);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+        }
+
+        .payment-method-card.selected {
+            border-color: #3B74FF;
+            background-color: rgba(59, 116, 255, 0.1);
+        }
+
+        .payment-method-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 16px;
+        }
+
+        .payment-method-icon.mobile {
+            background-color: rgba(34, 197, 94, 0.15);
+            color: #10B981;
+        }
+
+        .payment-check {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 24px;
+            height: 24px;
+            border-radius: 12px;
+            background: rgba(59, 116, 255, 0.2);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 2px solid rgba(59, 116, 255, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .payment-method-card.selected .payment-check {
+            opacity: 1;
+        }
+
+        .mobile-payment-note {
+            background-color: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            border-radius: 12px;
+            padding: 16px;
+            margin-top: 16px;
+            color: #10B981;
+            font-size: 16px;
+        }
+
+        /* Processing and Success States */
+        .processing-spinner {
+            width: 80px;
+            height: 80px;
+            border: 4px solid rgba(255, 255, 255, 0.1);
+            border-top-color: #3B74FF;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 24px;
+        }
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        .success-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 40px;
+            background: rgba(16, 185, 129, 0.2);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 2px solid rgba(16, 185, 129, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .progress-bar-container {
+            width: 100%;
+            height: 8px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 24px 0;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #3B74FF 0%, #2563EB 100%);
+            border-radius: 4px;
+            transition: width 0.5s ease;
+        }
+
+        /* Rating Stars */
+        .rating-stars-container {
+            display: flex;
+            gap: 8px;
+            margin: 24px 0;
+        }
+
+        .rating-star-large {
+            font-size: 36px;
+            color: rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .rating-star-large.selected {
+            color: #FCD34D;
+            transform: scale(1.1);
+        }
+
+        .rating-star-large:hover {
+            color: #FCD34D;
+            transform: scale(1.2);
+        }
+
+        /* Navigation Buttons */
+        .step-navigation {
+            display: flex;
+            gap: 12px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .nav-btn {
+            flex: 1;
+            padding: 20px 24px;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 18px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .nav-btn.prev {
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text-color);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .nav-btn.prev:hover {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+        }
+
+        .nav-btn.next {
+            background: rgba(59, 116, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(59, 116, 255, 0.4);
+        }
+
+        .nav-btn.next:hover {
+            background: rgba(59, 116, 255, 0.3);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 116, 255, 0.3);
+        }
+
+        .nav-btn.pay {
+            background: rgba(16, 185, 129, 0.2);
+            color: white;
+            border: 1px solid rgba(16, 185, 129, 0.4);
+        }
+
+        .nav-btn.pay:hover {
+            background: rgba(16, 185, 129, 0.3);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .nav-btn.done {
+            background: rgba(59, 116, 255, 0.2);
+            color: white;
+            border: 1px solid rgba(59, 116, 255, 0.4);
+        }
+
+        .nav-btn.done:hover {
+            background: rgba(59, 116, 255, 0.3);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 116, 255, 0.3);
+        }
+
+        /* Error and Success Messages */
+        .error-message {
+            background-color: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-top: 12px;
+            color: #EF4444;
+            font-size: 16px;
+            display: none;
+        }
+
+        .error-message.active {
+            display: block;
+        }
+
+        .success-message {
+            background-color: rgba(34, 197, 94, 0.1);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            border-radius: 12px;
+            padding: 16px 20px;
+            margin-top: 12px;
+            color: #10B981;
+            font-size: 16px;
+            display: none;
+        }
+
+        .success-message.active {
+            display: block;
+        }
+
+        /* New Product Selection Step Styles */
+        .products-grid-container {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .product-select-card {
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 12px;
+            padding: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+        }
+
+        .product-select-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .product-select-card.selected {
+            border-color: #3B74FF;
+            background-color: rgba(59, 116, 255, 0.1);
+        }
+
+        .product-select-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 8px;
+            object-fit: cover;
+            margin-bottom: 8px;
+        }
+
+        .product-select-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-color);
+            margin-bottom: 4px;
+        }
+
+        .product-select-price {
+            font-size: 16px;
+            font-weight: 700;
+            color: #3B74FF;
+        }
+
+        .product-select-quantity {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 8px;
+        }
+
+        .quantity-btn-product {
+            width: 30px;
+            height: 30px;
+            border-radius: 6px;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            color: var(--text-color);
+            font-size: 16px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+        }
+
+        .quantity-display-product {
+            font-size: 16px;
+            font-weight: 600;
+            min-width: 30px;
+            text-align: center;
         }
     </style>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -287,7 +1432,7 @@
                         <!-- Discord -->
                         <div onclick="showSocialModal('Discord')" class="flex flex-row justify-center items-center p-1 cursor-pointer hover:opacity-80 transition-opacity" style="background-color: #333333; height: 28px; width: 28px;">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
-                                <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
+                                <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03a.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/>
                             </svg>
                         </div>
                     </div>
@@ -384,9 +1529,9 @@
 
                     <!-- Schedule Pickup Button (height: 46, rounded: 30, paddingVertical: 15) -->
                     <div class="px-4 relative py-[15px] flex justify-center">
-                        <button onclick="startScheduleFlow()"
-                            class="rounded-[30px] flex items-center justify-center border"
-                            style="background-color: var(--btn-color); border-color: var(--btn-border); height: 46px; width: 242px;">
+                        <button id="schedulePickupBtn"
+                            class="rounded-[30px] flex items-center justify-center border schedule-pickup-btn"
+                            style="background-color: var(--btn-color); border-color: var(--btn-border); height: 46px; width: 242px; touch-action: manipulation;">
                             <span class="text-white text-xl font-[500] capitalize leading-5">Schedule Pickup</span>
                         </button>
                     </div>
@@ -619,7 +1764,7 @@
     <div id="socialModal" class="fixed inset-0 z-50 flex items-center justify-center p-9 hidden"
         style="background-color: rgba(0,0,0,0.5); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
         <div class="rounded-[30px] w-full max-w-[350px] h-[200px] px-10 py-7 flex flex-col items-center justify-center border-[0.2px]"
-            style="background-color: var(--modal-bg); border-color: var(--modal-border);">
+            style="background-color: #1D1D1D; border-color: rgba(255,255,255,0.1);">
 
             <div class="flex-1 w-full items-center flex-col justify-center relative">
                 <!-- Icon Section -->
@@ -659,440 +1804,603 @@
         </div>
     </div>
 
-    <!-- Schedule Flow Bottom Sheet (Exact from schedule.tsx) -->
-    <div id="scheduleFlowSheet"
-        class="fixed inset-0 z-50 flex items-end justify-center pointer-events-none opacity-0 transition-opacity duration-300"
-        style="background-color: rgba(0,0,0,0.5);">
+    <!-- Terms of Service Modal -->
+    <div id="termsModal" class="fixed inset-0 z-[70] flex items-center justify-center p-4 hidden"
+        style="background-color: rgba(0,0,0,0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
+        <div class="rounded-[20px] w-full max-w-[400px] h-[80vh] bg-[#1D1D1D] border border-[rgba(255,255,255,0.1)] flex flex-col">
+            <!-- Header -->
+            <div class="flex items-center justify-between p-4 border-b border-[rgba(255,255,255,0.1)] flex-shrink-0">
+                <h3 class="text-white text-xl font-semibold">Terms of Service</h3>
+                <button onclick="closeTermsModal()" class="w-8 h-8 flex items-center justify-center rounded-full bg-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.2)] transition-colors">
+                    <span class="text-white text-lg">×</span>
+                </button>
+            </div>
+            
+            <!-- Content with Notion iframe -->
+            <div class="flex-1 overflow-hidden">
+                <iframe src="https://concrete-aurora-836.notion.site/ebd//1c7c077ea6428075b4c6f68ad38d15c1" 
+                        width="100%" 
+                        height="100%" 
+                        frameborder="0" 
+                        allowfullscreen
+                        class="rounded-b-[20px]">
+                </iframe>
+            </div>
+        </div>
+    </div>
 
-        <!-- Content (rounded-t: 30, bg: #1D1D1D, h: 85vh) -->
-        <div id="scheduleFlowContent"
-            class="pointer-events-auto bg-[#1D1D1D] w-full max-w-[400px] rounded-t-[30px] p-4 transform translate-y-full transition-transform duration-300 flex flex-col relative"
+    <!-- Schedule Flow Bottom Sheet (NEW VERSION - Integrated from second file) -->
+    <div id="scheduleFlowSheet"
+        class="bottom-sheet-container fixed inset-0 z-[60] flex items-end justify-center pointer-events-none">
+
+        <!-- Content -->
+        <div id="scheduleFlowContent" class="bottom-sheet-content w-full max-w-[400px] flex flex-col relative"
             style="height: 85vh;">
+
+            <!-- Drag Handle -->
+            <div class="sheet-drag-handle"></div>
+
+            <!-- Step Indicators (Hidden as requested) -->
+            <div class="step-indicator-container" style="display: none;">
+                <div class="step-indicator-line"></div>
+                <div class="step-indicator-wrapper px-6">
+                    <div id="stepTermsIndicator" class="step-indicator-item default">
+                        <span class="step-indicator-name">Terms</span>
+                    </div>
+                    <div id="stepRecipientIndicator" class="step-indicator-item default">
+                        <span class="step-indicator-name">Recipient</span>
+                    </div>
+                    <div id="stepQuantityIndicator" class="step-indicator-item default">
+                        <span class="step-indicator-name">Quantity</span>
+                    </div>
+                    <div id="stepReviewIndicator" class="step-indicator-item default">
+                        <span class="step-indicator-name">Review</span>
+                    </div>
+                    <div id="stepPaymentIndicator" class="step-indicator-item default">
+                        <span class="step-indicator-name">Payment</span>
+                    </div>
+                </div>
+            </div>
 
             <!-- Close Button -->
             <button onclick="closeScheduleFlow()"
-                class="absolute top-[-5px] right-[10px] z-10 w-10 h-10 flex items-center justify-center">
+                class="absolute top-4 right-4 z-10 w-10 h-10 flex items-center justify-center rounded-full bg-[rgba(255,255,255,0.1)] hover:bg-[rgba(255,255,255,0.2)] transition-colors">
                 <span class="text-white text-2xl">×</span>
             </button>
 
-            <!-- Steps Container -->
-            <div id="flowSteps" class="flex-1 overflow-y-auto hide-scrollbar pt-5">
+            <!-- Error Message Container -->
+            <div id="errorMessage" class="error-message mx-6"></div>
 
-                <!-- Step 1: Terms of Service -->
-                <div id="step-terms" class="hidden">
-                    <div class="flex flex-col h-full">
-                        <h2 class="text-white text-2xl font-bold text-center mb-4">Terms of Service</h2>
-                        <div class="flex-1 bg-[#292B2F] rounded-lg p-4 mb-4 overflow-y-auto" style="height: 300px;">
-                            <div class="text-white space-y-3 text-sm">
-                                <h3 class="text-lg font-semibold mb-3">Phluowise Terms of Service</h3>
-                                <p>• By using Phluowise, you agree to these terms and conditions.</p>
-                                <p>• All orders are subject to product availability and confirmation by the service provider.</p>
-                                <p>• Delivery times are estimates and may vary based on location and demand.</p>
-                                <p>• Payment is required at the time of delivery unless otherwise specified.</p>
-                                <p>• Cancellations must be made at least 2 hours before scheduled delivery time.</p>
-                                <p>• Phluowise is not responsible for the quality or condition of products delivered by third-party providers.</p>
-                                <p>• Users must provide accurate contact and delivery information.</p>
-                                <p>• Misuse of the platform may result in account termination.</p>
-                                <p>• Prices are subject to change without prior notice.</p>
-                                <p>• By proceeding with an order, you confirm you have read and agree to these terms.</p>
+            <!-- Success Message Container -->
+            <div id="successMessage" class="success-message mx-6"></div>
+
+            <!-- Step Content Container -->
+            <div class="flex-1 overflow-y-auto hide-scrollbar px-6 pt-4">
+
+                <!-- Step 1: Terms of Service (Radio Button Style) -->
+                <div id="termsStep" class="step-content">
+                    <h3 class="section-header">Terms of Service</h3>
+                    <p class="section-subheader">Please select your order type:</p>
+
+                    <div class="terms-radio-container">
+                        <div onclick="selectTermsOption('schedule')" class="terms-radio-item selected"
+                            id="termsSchedule">
+                            <div class="terms-radio-label">
+                                <div class="terms-radio-circle"></div>
+                                Schedule Order
+                            </div>
+                            <div class="terms-details">
+                                Place an order for future delivery. Orders must be scheduled at least 2 hours in
+                                advance.
                             </div>
                         </div>
-                        <div class="flex items-center gap-3 mb-6">
-                            <input type="checkbox" id="termsCheckbox" class="w-5 h-5 rounded">
-                            <label for="termsCheckbox" class="text-white text-lg">I agree to the terms of service</label>
+
+                        <div onclick="selectTermsOption('immediate')" class="terms-radio-item" id="termsImmediate">
+                            <div class="terms-radio-label">
+                                <div class="terms-radio-circle"></div>
+                                Immediate Order
+                            </div>
+                            <div class="terms-details">
+                                Order for immediate delivery. Subject to availability and current delivery conditions.
+                            </div>
                         </div>
-                        <div class="flex justify-center">
-                            <button onclick="goToStep('product')" 
-                                    class="rounded-[30px] border flex items-center justify-center shadow-lg"
-                                    style="background-color: var(--btn-color); border-color: var(--btn-border); width: 242px; height: 50px;">
-                                <span class="text-white text-xl font-semibold">Continue</span>
-                            </button>
-                        </div>
+                    </div>
+
+                    <div class="terms-container">
+                        <p class="info-text">
+                            By continuing you agree to our <a href="#" onclick="openTermsOfService()"
+                                class="text-blue-400 hover:text-blue-300 underline">terms of service</a>
+                        </p>
                     </div>
                 </div>
 
-                <!-- Step 2: Product Purchase -->
-                <div id="step-product" class="hidden">
-                    <div class="flex flex-col h-full">
-                        <h2 class="text-white text-2xl font-bold text-center mb-4">Select Products</h2>
-                        
-                        <!-- Total Price Header -->
-                        <div class="mx-auto rounded-[10px] mb-4 flex flex-col justify-center items-center"
-                             style="height: 80px; width: 260px; background-color: var(--input-bg);">
-                            <span class="text-[#808080] text-xl font-semibold">Total Price:</span>
-                            <span id="totalPrice" class="text-[#F5F5F5] text-2xl font-bold">GH₵ 0.00</span>
-                        </div>
+                <!-- Step 2: Product Selection -->
+                <div id="productSelectionStep" class="step-content hidden">
+                    <h3 class="section-header">Select Products</h3>
+                    <p class="section-subheader">Choose the products you want to order</p>
 
-                        <!-- Product Cards -->
-                        <div class="flex-1 overflow-y-auto hide-scrollbar mb-4">
-                            <div class="flex flex-col gap-4" id="productCards">
-                                <!-- Products will be rendered here -->
-                            </div>
-                        </div>
+                    <div class="products-grid-container" id="productsSelectionGrid">
+                        <!-- Products will be dynamically added here -->
+                    </div>
 
-                        <div class="flex justify-center">
-                            <button onclick="goToStep('recipient')" 
-                                    class="rounded-[30px] border flex items-center justify-center shadow-lg"
-                                    style="background-color: var(--btn-color); border-color: var(--btn-border); width: 242px; height: 50px;">
-                                <span class="text-white text-xl font-semibold">Continue</span>
-                            </button>
+                    <div class="info-card mt-4">
+                        <div class="info-title">Important Note</div>
+                        <div class="info-text">
+                            You can adjust quantities after selecting products. Minimum order is 1 item per product.
                         </div>
                     </div>
                 </div>
 
                 <!-- Step 3: Order Recipient -->
-                <div id="step-recipient" class="hidden">
-                    <div class="flex flex-col h-full">
-                        <h2 class="text-white text-2xl font-bold text-center mb-6">Delivery Information</h2>
-                        
-                        <div class="flex-1 overflow-y-auto hide-scrollbar">
-                            <div class="flex flex-col gap-4">
-                                <div class="border w-full rounded-2xl flex flex-col px-6 py-3"
-                                     style="background-color: #292B2F; border-color: #40444B;">
-                                    <label class="text-[#FFFFFF80] text-xl font-medium mb-2">Full Name</label>
-                                    <input type="text" id="recipientName" placeholder="Enter your full name"
-                                           class="bg-transparent text-white text-xl w-full outline-none placeholder-[#FFFFFF99]">
-                                </div>
+                <div id="orderRecipientStep" class="step-content hidden">
+                    <h3 class="section-header">Order Recipient</h3>
+                    <p class="section-subheader">Who is this order for?</p>
 
-                                <div class="border w-full rounded-2xl flex flex-col px-6 py-3"
-                                     style="background-color: #292B2F; border-color: #40444B;">
-                                    <label class="text-[#FFFFFF80] text-xl font-medium mb-2">Phone Number</label>
-                                    <input type="tel" id="recipientPhone" placeholder="Enter your phone number"
-                                           class="bg-transparent text-white text-xl w-full outline-none placeholder-[#FFFFFF99]">
-                                </div>
+                    <div class="recipient-type-container">
+                        <button onclick="selectRecipientType('you')" class="recipient-type-btn active"
+                            id="recipientYou">You</button>
+                        <button onclick="selectRecipientType('individual')" class="recipient-type-btn"
+                            id="recipientIndividual">Individual</button>
+                        <button onclick="selectRecipientType('business')" class="recipient-type-btn"
+                            id="recipientBusiness">Business</button>
+                    </div>
 
-                                <div class="border w-full rounded-2xl flex flex-col px-6 py-3"
-                                     style="background-color: #292B2F; border-color: #40444B;">
-                                    <label class="text-[#FFFFFF80] text-xl font-medium mb-2">Delivery Address</label>
-                                    <textarea id="recipientAddress" placeholder="Enter your delivery address"
-                                              class="bg-transparent text-white text-xl w-full outline-none placeholder-[#FFFFFF99] resize-none"
-                                              style="height: 80px;"></textarea>
-                                </div>
+                    <!-- Saved Recipients Toggle -->
+                    <div class="toggle-container">
+                        <span class="toggle-label">Save this for future orders</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="saveRecipientToggle">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
 
-                                <div class="border w-full rounded-2xl flex flex-col px-6 py-3"
-                                     style="background-color: #292B2F; border-color: #40444B;">
-                                    <label class="text-[#FFFFFF80] text-xl font-medium mb-2">Special Instructions</label>
-                                    <textarea id="specialInstructions" placeholder="Any special delivery instructions"
-                                              class="bg-transparent text-white text-xl w-full outline-none placeholder-[#FFFFFF99] resize-none"
-                                              style="height: 60px;"></textarea>
-                                </div>
+                    <!-- Saved Recipients (if any) -->
+                    <div id="savedRecipientsContainer" class="saved-recipients-container hidden">
+                        <p class="section-subheader">Select saved recipient:</p>
+                        <div id="savedRecipientsList">
+                            <!-- Saved recipients will be dynamically added here -->
+                        </div>
+                    </div>
+
+                    <div class="form-container space-y-6">
+                        <!-- You recipient info display -->
+                        <div id="youRecipientInfo" class="you-recipient-info">
+                            <div class="you-recipient-item">
+                                <span class="you-recipient-label">Name:</span>
+                                <span id="youNameDisplay" class="you-recipient-value">Loading...</span>
+                            </div>
+                            <div class="you-recipient-item">
+                                <span class="you-recipient-label">Phone:</span>
+                                <span id="youPhoneDisplay" class="you-recipient-value">Loading...</span>
+                            </div>
+                            <div class="you-recipient-item">
+                                <span class="you-recipient-label">Email:</span>
+                                <span id="youEmailDisplay" class="you-recipient-value">Loading...</span>
+                            </div>
+                            <div class="you-recipient-item">
+                                <span class="you-recipient-label">Delivery Address:</span>
+                                <span id="youAddressDisplay" class="you-recipient-value">Loading...</span>
                             </div>
                         </div>
 
-                        <div class="flex justify-center mt-6">
-                            <button onclick="goToStep('review')" 
-                                    class="rounded-[30px] border flex items-center justify-center shadow-lg"
-                                    style="background-color: var(--btn-color); border-color: var(--btn-border); width: 242px; height: 50px;">
-                                <span class="text-white text-xl font-semibold">Continue</span>
-                            </button>
+                        <!-- Business Type Selector (hidden by default) -->
+                        <div id="businessTypeContainer" class="business-type-container hidden">
+                            <label class="form-label">Business Type</label>
+                            <select id="businessType" class="business-type-select">
+                                <option value="">Select Business Type</option>
+                                <option value="school">School/Educational Institution</option>
+                                <option value="hospital">Hospital/Clinic</option>
+                                <option value="hotel">Hotel/Restaurant</option>
+                                <option value="office">Office/Corporate</option>
+                                <option value="church">Church/Religious Institution</option>
+                                <option value="ngo">NGO/Non-Profit</option>
+                                <option value="government">Government Agency</option>
+                                <option value="factory">Factory/Manufacturing</option>
+                                <option value="construction">Construction Site</option>
+                                <option value="other">Other Business</option>
+                            </select>
+                        </div>
+
+                        <!-- Name field (hidden for "You" type) -->
+                        <div id="recipientNameContainer" class="hidden">
+                            <label class="form-label">Full Name</label>
+                            <input type="text" id="recipientName" class="form-input" placeholder="Enter recipient name">
+                        </div>
+
+                        <!-- Business Name Field (hidden by default, shown only for business type) -->
+                        <div id="businessNameContainer" class="business-name-container hidden">
+                            <label class="form-label">Business Name</label>
+                            <input type="text" id="businessName" class="form-input" placeholder="Enter business name">
+                        </div>
+
+                        <!-- Phone field (hidden for "You" type) -->
+                        <div id="recipientPhoneContainer" class="hidden">
+                            <label class="form-label">Phone Number</label>
+                            <input type="tel" id="recipientPhone" class="form-input" placeholder="Enter phone number">
+                        </div>
+
+                        <!-- Email field (hidden for "You" type) -->
+                        <div id="recipientEmailContainer" class="hidden">
+                            <label class="form-label">Email Address</label>
+                            <input type="email" id="recipientEmail" class="form-input"
+                                placeholder="Enter email address">
+                        </div>
+
+                        <!-- Delivery Address (always shown) -->
+                        <div>
+                            <label class="form-label">Delivery Address *</label>
+                            <textarea id="recipientAddress" rows="3" class="form-textarea"
+                                placeholder="Full address or detailed location (e.g: 5th Floor, Block B, Ring Road)"></textarea>
                         </div>
                     </div>
                 </div>
 
-                <!-- Step 4: Order Review -->
-                <div id="step-review" class="hidden">
-                    <div class="flex flex-col h-full">
-                        <h2 class="text-white text-2xl font-bold text-center mb-4">Order Review</h2>
-                        
-                        <div class="flex-1 overflow-y-auto hide-scrollbar">
-                            <div class="bg-[#292B2F] rounded-lg p-4 mb-4">
-                                <h3 class="text-white text-lg font-semibold mb-3">Order Summary</h3>
-                                <div id="orderSummary" class="flex flex-col gap-2">
-                                    <!-- Order items will be displayed here -->
-                                </div>
-                                <div class="border-t border-[#808080] mt-3 pt-3">
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-white text-lg font-semibold">Total:</span>
-                                        <span id="reviewTotal" class="text-white text-xl font-bold">GH₵ 0.00</span>
-                                    </div>
-                                </div>
-                            </div>
+                <!-- Step 4: Date and Time Selection -->
+                <div id="datetimeStep" class="step-content hidden">
+                    <h3 class="section-header">Select Date & Time</h3>
+                    <p class="section-subheader">Choose when you want your order delivered</p>
 
-                            <div class="bg-[#292B2F] rounded-lg p-4 mb-4">
-                                <h3 class="text-white text-lg font-semibold mb-3">Delivery Information</h3>
-                                <div id="deliveryInfo" class="flex flex-col gap-2 text-white">
-                                    <!-- Delivery info will be displayed here -->
-                                </div>
+                    <div class="form-container space-y-6">
+                        <div class="datetime-row">
+                            <div class="datetime-input">
+                                <label class="form-label">Delivery Date</label>
+                                <input type="date" id="deliveryDate" class="form-input" min="">
+                            </div>
+                            <div class="datetime-input">
+                                <label class="form-label">Delivery Time</label>
+                                <select id="deliveryTime" class="form-input">
+                                    <option value="">Select Time</option>
+                                    <option value="08:00">8:00 AM</option>
+                                    <option value="09:00">9:00 AM</option>
+                                    <option value="10:00">10:00 AM</option>
+                                    <option value="11:00">11:00 AM</option>
+                                    <option value="12:00">12:00 PM</option>
+                                    <option value="13:00">1:00 PM</option>
+                                    <option value="14:00">2:00 PM</option>
+                                    <option value="15:00">3:00 PM</option>
+                                    <option value="16:00">4:00 PM</option>
+                                    <option value="17:00">5:00 PM</option>
+                                    <option value="18:00">6:00 PM</option>
+                                </select>
                             </div>
                         </div>
 
-                        <div class="flex justify-center">
-                            <button onclick="goToStep('payment-terms')" 
-                                    class="rounded-[30px] border flex items-center justify-center shadow-lg"
-                                    style="background-color: var(--btn-color); border-color: var(--btn-border); width: 242px; height: 50px;">
-                                <span class="text-white text-xl font-semibold">Proceed to Payment</span>
-                            </button>
+                        <div class="time-slots-container">
+                            <label class="form-label">Popular Time Slots</label>
+                            <div class="time-slots-grid" id="timeSlotsGrid">
+                                <!-- Time slots will be dynamically generated -->
+                            </div>
+                        </div>
+
+                        <div class="info-card">
+                            <div class="info-title">Important Note</div>
+                            <div class="info-text">
+                                Orders must be scheduled at least 2 hours in advance. Same-day delivery is subject to
+                                availability.
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Step 5: Payment Terms of Service -->
-                <div id="step-payment-terms" class="hidden">
-                    <div class="flex flex-col h-full">
-                        <h2 class="text-white text-2xl font-bold text-center mb-4">Payment Terms</h2>
-                        <div class="flex-1 bg-[#292B2F] rounded-lg p-4 mb-4 overflow-y-auto">
-                            <div class="text-white space-y-3">
-                                <p>• Payment is processed securely through our payment partners</p>
-                                <p>• Your payment information is encrypted and protected</p>
-                                <p>• Refunds are processed according to our refund policy</p>
-                                <p>• By proceeding, you agree to our payment terms and conditions</p>
-                                <p>• All transactions are subject to verification</p>
+                <!-- Step 5: Product Quantity Selection (Multiple Products) -->
+                <div id="quantityStep" class="step-content hidden">
+                    <div class="service-products-header">
+                        <h3 class="section-header">Adjust Quantities</h3>
+                        <button onclick="goToProductSelection()" class="add-more-btn">
+                            + Add More Products
+                        </button>
+                    </div>
+                    <p class="section-subheader">Adjust quantities for your selected products</p>
+
+                    <!-- Selected Products Container -->
+                    <div class="selected-products-container" id="selectedProductsContainer">
+                        <!-- Selected products from service cards will appear here -->
+                        <div class="no-products-selected">No products selected. Please go back and select products.</div>
+                    </div>
+
+                    <!-- Delivery Instructions -->
+                    <div class="delivery-instructions">
+                        <div class="instructions-title">Add additional Information</div>
+                        <div class="instructions-example">Example: "Please Call Me On 024XXXXXXXX When You Arrive At The
+                            Main Gate. The Security Guard Will Direct You."</div>
+                        <textarea id="deliveryInstructions" rows="3" class="form-textarea"
+                            placeholder="Enter delivery instructions..."></textarea>
+                    </div>
+
+                    <!-- Delivery Fee Information -->
+                    <div class="delivery-info-note">
+                        <strong>Please Note:</strong> Delivery Fees Are Charged By The Water Company, Not Phluowise.
+                        Payment Must Be Made Upon Delivery To Confirm Receipt.
+                    </div>
+
+                    <!-- Price Summary -->
+                    <div class="price-display mt-6">
+                        <div class="price-row">
+                            <span class="price-label">Subtotal</span>
+                            <span id="quantitySubtotal" class="price-value">GHS 0.00</span>
+                        </div>
+                        <div class="price-row">
+                            <span class="price-label">Service Fee (GHS 0.10 per item)</span>
+                            <span id="serviceFeeDisplay" class="price-value">GHS 0.00</span>
+                        </div>
+                        <div class="price-row total">
+                            <span class="price-label">Total Amount</span>
+                            <span id="quantityTotal" class="price-value total">GHS 0.00</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 6: Order Review -->
+                <div id="orderReviewStep" class="step-content hidden">
+                    <h3 class="section-header">Review Your Order</h3>
+
+                    <!-- Order Summary -->
+                    <div class="review-card">
+                        <div class="review-section">
+                            <h4 class="review-section-title">Order Summary</h4>
+                            <div id="reviewProductsList">
+                                <!-- Products will be dynamically added here -->
                             </div>
                         </div>
-                        <div class="flex items-center gap-3 mb-6">
-                            <input type="checkbox" id="paymentTermsCheckbox" class="w-5 h-5 rounded">
-                            <label for="paymentTermsCheckbox" class="text-white text-lg">I agree to the payment terms</label>
-                        </div>
-                        <div class="flex justify-center">
-                            <button onclick="goToStep('select-payment')" 
-                                    class="rounded-[30px] border flex items-center justify-center shadow-lg"
-                                    style="background-color: var(--btn-color); border-color: var(--btn-border); width: 242px; height: 50px;">
-                                <span class="text-white text-xl font-semibold">Continue</span>
-                            </button>
-                        </div>
                     </div>
-                </div>
 
-                <!-- Step 6: Select Payment -->
-                <div id="step-select-payment" class="hidden">
-                    <div class="flex flex-col h-full">
-                        <h2 class="text-white text-2xl font-bold text-center mb-6">Select Payment Method</h2>
-                        
-                        <div class="flex-1 overflow-y-auto hide-scrollbar">
-                            <div class="flex flex-col gap-4">
-                                <button onclick="selectPaymentMethod('cash')" 
-                                        class="border w-full rounded-2xl p-4 flex flex-row items-center justify-between payment-option"
-                                        style="background-color: #292B2F; border-color: #40444B; height: 65px;"
-                                        data-payment="cash">
-                                    <span class="text-white text-xl font-medium">Pay with Cash</span>
-                                    <div class="w-5 h-5 rounded-full border-2 border-white payment-radio"></div>
-                                </button>
-
-                                <button onclick="selectPaymentMethod('mtn')" 
-                                        class="border w-full rounded-2xl p-4 flex flex-row items-center justify-between payment-option"
-                                        style="background-color: #292B2F; border-color: #40444B; height: 65px;"
-                                        data-payment="mtn">
-                                    <span class="text-white text-xl font-medium">MTN Mobile Money</span>
-                                    <div class="w-5 h-5 rounded-full border-2 border-white payment-radio"></div>
-                                </button>
-
-                                <button onclick="selectPaymentMethod('vodafone')" 
-                                        class="border w-full rounded-2xl p-4 flex flex-row items-center justify-between payment-option"
-                                        style="background-color: #292B2F; border-color: #40444B; height: 65px;"
-                                        data-payment="vodafone">
-                                    <span class="text-white text-xl font-medium">Vodafone Cash</span>
-                                    <div class="w-5 h-5 rounded-full border-2 border-white payment-radio"></div>
-                                </button>
-
-                                <button onclick="selectPaymentMethod('airtel')" 
-                                        class="border w-full rounded-2xl p-4 flex flex-row items-center justify-between payment-option"
-                                        style="background-color: #292B2F; border-color: #40444B; height: 65px;"
-                                        data-payment="airtel">
-                                    <span class="text-white text-xl font-medium">AirtelTigo Money</span>
-                                    <div class="w-5 h-5 rounded-full border-2 border-white payment-radio"></div>
-                                </button>
+                    <!-- Delivery Information -->
+                    <div class="review-card">
+                        <div class="review-section">
+                            <h4 class="review-section-title">Delivery Information</h4>
+                            <div class="review-item">
+                                <span class="review-label">Date:</span>
+                                <span id="reviewDeliveryDate" class="review-value"></span>
+                            </div>
+                            <div class="review-item">
+                                <span class="review-label">Time:</span>
+                                <span id="reviewDeliveryTime" class="review-value"></span>
+                            </div>
+                            <div class="review-item">
+                                <span class="review-label">Address:</span>
+                                <span id="reviewDeliveryAddress" class="review-value"></span>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="flex justify-center mt-6">
-                            <button onclick="goToPaymentDetails()" 
-                                    class="rounded-[30px] border flex items-center justify-center shadow-lg"
-                                    style="background-color: var(--btn-color); border-color: var(--btn-border); width: 242px; height: 50px;">
-                                <span class="text-white text-xl font-semibold">Continue</span>
-                            </button>
+                    <!-- Delivery Instructions -->
+                    <div class="review-card">
+                        <div class="review-section">
+                            <h4 class="review-section-title">Delivery Instructions</h4>
+                            <div class="review-value" id="reviewDeliveryInstructions">None provided</div>
                         </div>
                     </div>
-                </div>
 
-                <!-- Step 7: Input Payment Details -->
-                <div id="step-payment-details" class="hidden">
-                    <div class="flex flex-col h-full">
-                        <h2 class="text-white text-2xl font-bold text-center mb-4">Payment Details</h2>
-                        
-                        <div class="flex-1 overflow-y-auto hide-scrollbar">
-                            <div class="flex flex-col gap-4">
-                                <div id="cashPaymentInfo" class="bg-[#292B2F] rounded-lg p-4">
-                                    <p class="text-white text-lg">Please have the exact amount ready for delivery.</p>
-                                    <p class="text-white text-lg mt-2">Total amount: <span id="cashTotal" class="font-bold">GH₵ 0.00</span></p>
-                                </div>
-
-                                <div id="mobileMoneyInfo" class="hidden">
-                                    <div class="border w-full rounded-2xl flex flex-col px-6 py-3"
-                                         style="background-color: #292B2F; border-color: #40444B;">
-                                        <label class="text-[#FFFFFF80] text-xl font-medium mb-2">Mobile Money Number</label>
-                                        <input type="tel" id="mobileNumber" placeholder="Enter your mobile money number"
-                                               class="bg-transparent text-white text-xl w-full outline-none placeholder-[#FFFFFF99]">
-                                    </div>
-
-                                    <div class="border w-full rounded-2xl flex flex-col px-6 py-3"
-                                         style="background-color: #292B2F; border-color: #40444B;">
-                                        <label class="text-[#FFFFFF80] text-xl font-medium mb-2">PIN Code</label>
-                                        <input type="password" id="mobilePin" placeholder="Enter your PIN"
-                                               class="bg-transparent text-white text-xl w-full outline-none placeholder-[#FFFFFF99]">
-                                    </div>
-
-                                    <div class="bg-[#292B2F] rounded-lg p-4">
-                                        <p class="text-white text-lg">Amount to be charged: <span id="mobileTotal" class="font-bold">GH₵ 0.00</span></p>
-                                    </div>
-                                </div>
+                    <!-- Price Summary -->
+                    <div class="review-card">
+                        <div class="review-section">
+                            <h4 class="review-section-title">Payment Summary</h4>
+                            <div class="review-item">
+                                <span class="review-label">Subtotal</span>
+                                <span id="reviewSubtotal" class="review-value">GHS 0.00</span>
+                            </div>
+                            <div class="review-item">
+                                <span class="review-label">Service Fee (GHS 0.10 per item)</span>
+                                <span id="reviewServiceFee" class="review-value">GHS 0.00</span>
+                            </div>
+                            <div class="review-item"
+                                style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 12px;">
+                                <span class="review-label">Total Amount</span>
+                                <span id="reviewTotal" class="review-value"
+                                    style="color: #3B74FF; font-weight: 600;">GHS 0.00</span>
                             </div>
                         </div>
+                    </div>
 
-                        <div class="flex justify-center mt-6">
-                            <button onclick="goToStep('payment-processing')" 
-                                    class="rounded-[30px] border flex items-center justify-center shadow-lg"
-                                    style="background-color: var(--btn-color); border-color: var(--btn-border); width: 242px; height: 50px;">
-                                <span class="text-white text-xl font-semibold">Process Payment</span>
-                            </button>
-                        </div>
+                    <!-- Delivery Fee Note -->
+                    <div class="delivery-info-note">
+                        <strong>Please Note:</strong> Delivery Fees Are Charged By The Water Company, Not Phluowise.
+                        Payment Must Be Made Upon Delivery To Confirm Receipt.
                     </div>
                 </div>
 
-                <!-- Step 8: Payment Processing -->
-                <div id="step-payment-processing" class="hidden">
-                    <div class="flex flex-col h-full items-center justify-center">
-                        <div class="w-16 h-16 border-4 border-[#3B74FF] border-t-transparent rounded-full animate-spin mb-6"></div>
-                        <h2 class="text-white text-2xl font-bold text-center mb-4">Processing Payment</h2>
-                        <p class="text-white text-lg text-center">Please wait while we process your payment...</p>
-                    </div>
-                </div>
+                <!-- Step 7: Payment -->
+                <div id="selectPaymentStep" class="step-content hidden">
+                    <h3 class="section-header">Payment Method</h3>
+                    <p class="section-subheader">Select your preferred payment method</p>
 
-                <!-- Step 9: Payment Success -->
-                <div id="step-payment-success" class="hidden">
-                    <div class="flex flex-col h-full items-center justify-center">
-                        <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mb-6">
-                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                    <!-- Mobile Money Only -->
+                    <div onclick="selectPaymentMethod('mobile')" class="payment-method-card">
+                        <div class="payment-method-icon mobile">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
                             </svg>
                         </div>
-                        <h2 class="text-white text-2xl font-bold text-center mb-4">Payment Successful!</h2>
-                        <p class="text-white text-lg text-center mb-6">Your payment has been processed successfully</p>
-                        <div class="flex justify-center">
-                            <button onclick="goToStep('pickup-sent')" 
-                                    class="rounded-[30px] border flex items-center justify-center shadow-lg"
-                                    style="background-color: var(--btn-color); border-color: var(--btn-border); width: 242px; height: 50px;">
-                                <span class="text-white text-xl font-semibold">Continue</span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Step 10: Schedule Pickup Sent -->
-                <div id="step-pickup-sent" class="hidden">
-                    <div class="flex flex-col h-full items-center justify-center">
-                        <div class="w-16 h-16 bg-blue-500 rounded-full flex items-center justify-center mb-6">
-                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                        <div class="payment-method-name">Mobile Money</div>
+                        <div class="payment-method-desc">MTN, Vodafone, AirtelTigo</div>
+                        <div class="payment-check">
+                            <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                                    d="M5 13l4 4L19 7" />
                             </svg>
                         </div>
-                        <h2 class="text-white text-2xl font-bold text-center mb-4">Schedule Pickup Sent!</h2>
-                        <p class="text-white text-lg text-center mb-6">Your pickup schedule has been sent to the company</p>
-                        <p class="text-white text-base text-center mb-6">You will receive a confirmation once they accept your order</p>
-                        <div class="flex justify-center">
-                            <button onclick="goToStep('rate-phluowise')" 
-                                    class="rounded-[30px] border flex items-center justify-center shadow-lg"
-                                    style="background-color: var(--btn-color); border-color: var(--btn-border); width: 242px; height: 50px;">
-                                <span class="text-white text-xl font-semibold">Continue</span>
-                            </button>
+                    </div>
+
+                    <div class="mobile-payment-note">
+                        You will receive a prompt on your mobile phone to complete the payment.
+                    </div>
+                </div>
+
+                <!-- Step 8: Input Payment Details (Mobile Money Only) -->
+                <div id="paymentDetailsStep" class="step-content hidden">
+                    <h3 class="section-header">Mobile Money Details</h3>
+
+                    <div class="form-container space-y-4">
+                        <div>
+                            <label class="form-label">Mobile Network</label>
+                            <select id="mobileNetwork" class="form-input">
+                                <option value="">Select Network</option>
+                                <option value="mtn">MTN Mobile Money</option>
+                                <option value="vodafone">Vodafone Cash</option>
+                                <option value="airteltigo">AirtelTigo Money</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="form-label">Phone Number</label>
+                            <input type="tel" id="mobileNumber" class="form-input" placeholder="0201234567">
                         </div>
                     </div>
                 </div>
 
-                <!-- Step 11: Rate Phluowise -->
-                <div id="step-rate-phluowise" class="hidden">
-                    <div class="flex flex-col h-full">
-                        <h2 class="text-white text-2xl font-bold text-center mb-4">Rate Phluowise</h2>
-                        <p class="text-white text-lg text-center mb-6">How would you rate your experience?</p>
-                        
-                        <div class="flex-1 flex flex-col items-center justify-center">
-                            <div class="flex gap-4 mb-8">
-                                <button onclick="setRating(1)" class="star-button text-4xl text-gray-400 hover:text-yellow-400 transition-colors">★</button>
-                                <button onclick="setRating(2)" class="star-button text-4xl text-gray-400 hover:text-yellow-400 transition-colors">★</button>
-                                <button onclick="setRating(3)" class="star-button text-4xl text-gray-400 hover:text-yellow-400 transition-colors">★</button>
-                                <button onclick="setRating(4)" class="star-button text-4xl text-gray-400 hover:text-yellow-400 transition-colors">★</button>
-                                <button onclick="setRating(5)" class="star-button text-4xl text-gray-400 hover:text-yellow-400 transition-colors">★</button>
-                            </div>
-
-                            <textarea placeholder="Tell us about your experience (optional)"
-                                      class="w-full rounded-2xl p-4 border text-white bg-transparent placeholder-[#FFFFFF99] resize-none mb-6"
-                                      style="background-color: #292B2F; border-color: #40444B; height: 100px;"
-                                      id="ratingComment"></textarea>
-
-                            <div class="flex justify-center">
-                                <button onclick="goToStep('rating-done')" 
-                                        class="rounded-[30px] border flex items-center justify-center shadow-lg"
-                                        style="background-color: var(--btn-color); border-color: var(--btn-border); width: 242px; height: 50px;">
-                                    <span class="text-white text-xl font-semibold">Submit Rating</span>
-                                </button>
-                            </div>
+                <!-- Step 9: Payment Confirmation Processing -->
+                <div id="paymentProcessingStep" class="step-content hidden">
+                    <div class="flex flex-col items-center justify-center h-full text-center">
+                        <div class="processing-spinner"></div>
+                        <h3 class="section-header mb-2">Processing Payment</h3>
+                        <p class="section-subheader">Please wait while we process your payment securely...</p>
+                        <div class="progress-bar-container">
+                            <div id="paymentProgressBar" class="progress-bar" style="width: 0%"></div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Step 12: Rating Done -->
-                <div id="step-rating-done" class="hidden">
-                    <div class="flex flex-col h-full items-center justify-center">
-                        <div class="w-16 h-16 bg-green-500 rounded-full flex items-center justify-center mb-6">
+                <!-- Step 10: Payment Success -->
+                <div id="paymentSuccessStep" class="step-content hidden">
+                    <div class="flex flex-col items-center justify-center h-full text-center">
+                        <div class="success-icon">
                             <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7" />
                             </svg>
                         </div>
-                        <h2 class="text-white text-2xl font-bold text-center mb-4">Thank You!</h2>
-                        <p class="text-white text-lg text-center mb-6">Your rating has been submitted successfully</p>
-                        <p class="text-white text-base text-center mb-6">We appreciate your feedback and will use it to improve our service</p>
-                        <div class="flex justify-center">
-                            <button onclick="closeScheduleFlow()" 
-                                    class="rounded-[30px] border flex items-center justify-center shadow-lg"
-                                    style="background-color: var(--btn-color); border-color: var(--btn-border); width: 242px; height: 50px;">
-                                <span class="text-white text-xl font-semibold">Done</span>
-                            </button>
+                        <h3 class="section-header mb-2">Payment Successful!</h3>
+                        <p class="section-subheader mb-6">Your payment has been processed successfully</p>
+                        <div class="review-card w-full mb-6">
+                            <div class="review-item">
+                                <span class="review-label">Transaction ID:</span>
+                                <span id="transactionIdDisplay" class="review-value"></span>
+                            </div>
+                            <div class="review-item">
+                                <span class="review-label">Amount Paid:</span>
+                                <span id="amountPaidDisplay" class="review-value" style="color: #10B981;"></span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Step 2: Date & Time (Exact from schedule.tsx) -->
-                <div id="step-date" class="hidden">
-                    <div class="w-full gap-4 pt-[10px]">
-                        <!-- Date Picker (matching ScheduleDatePicker.tsx) -->
-                        <div class="border w-full rounded-2xl flex flex-row items-center gap-4 my-2 px-6 justify-between"
-                            style="background-color: #292B2F; border-color: #40444B; height: 65px;">
-                            <div>
-                                <span class="text-[#FFFFFF80] text-xl font-medium">Date</span>
-                                <span id="selectedDate" class="text-[#FFFFFF80] text-lg font-normal block">Select
-                                    Date</span>
+                <!-- Step 11: Schedule Pickup Sent & Rate Phluowise -->
+                <div id="scheduleSentStep" class="step-content hidden">
+                    <div class="flex flex-col items-center h-full text-center">
+                        <div class="success-icon"
+                            style="background: rgba(59, 116, 255, 0.2); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px); border: 2px solid rgba(59, 116, 255, 0.4); margin-bottom: 24px;">
+                            <svg class="w-8 h-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <h3 class="section-header mb-2">Schedule Pickup Sent!</h3>
+                        <p class="section-subheader mb-6">Your order has been successfully scheduled and confirmed</p>
+
+                        <div class="review-card w-full mb-6">
+                            <h4 class="review-section-title mb-4">Order Summary</h4>
+                            <div class="review-item">
+                                <span class="review-label">Order ID:</span>
+                                <span id="orderIdDisplay" class="review-value"></span>
                             </div>
-                            <input type="date" id="scheduleDatePicker"
-                                class="bg-transparent text-white border-none outline-none cursor-pointer"
-                                style="min-width: 120px;" min="">
-                        </div>
-
-                        <!-- Time Input -->
-                        <div class="border w-full rounded-2xl flex flex-row items-center gap-4 my-2 px-6 justify-between"
-                            style="background-color: #292B2F; border-color: #40444B; height: 65px;">
-                            <div>
-                                <span class="text-[#FFFFFF80] text-xl font-medium">Time</span>
-                                <span class="text-[#FFFFFF80] text-lg font-normal">15:46</span>
+                            <div class="review-item">
+                                <span class="review-label">Delivery Date:</span>
+                                <span id="orderDateDisplay" class="review-value"></span>
                             </div>
-                            <button class="text-white">›</button>
+                            <div class="review-item">
+                                <span class="review-label">Delivery Time:</span>
+                                <span id="orderTimeDisplay" class="review-value"></span>
+                            </div>
+                            <div class="review-item">
+                                <span class="review-label">Total Items:</span>
+                                <span id="orderItemsDisplay" class="review-value"></span>
+                            </div>
+                            <div class="review-item">
+                                <span class="review-label">Status:</span>
+                                <span class="review-value" style="color: #10B981;">Confirmed</span>
+                            </div>
                         </div>
 
-                        <!-- Additional Info Textarea (from schedule.tsx) -->
-                        <div class="mt-4">
-                            <textarea placeholder="Add additional information"
-                                class="w-full rounded-2xl p-4 border text-white bg-transparent placeholder-[#FFFFFF80] resize-none"
-                                style="background-color: #292B2F; border-color: #40444B; height: 100px;"></textarea>
-                        </div>
-
-                        <div class="flex justify-center mt-8">
-                            <button onclick="goToStep('payment')"
-                                class="rounded-[30px] border flex items-center justify-center shadow-lg"
-                                style="background-color: var(--btn-color); border-color: var(--btn-border); width: 242px; height: 50px;">
-                                <span class="text-white text-xl font-semibold">Confirm</span>
+                        <!-- Download PDF Button -->
+                        <div class="w-full mb-6">
+                            <button onclick="downloadOrderPDF()" class="w-full py-4 rounded-lg backdrop-blur-xl bg-[#007ACC]/20 border border-[#007ACC]/40 text-white font-medium hover:bg-[#007ACC]/30 transition-all duration-300 shadow-lg flex items-center justify-center gap-2">
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                </svg>
+                                Download Order PDF
                             </button>
+                        </div>
+
+                        <!-- Rating Section -->
+                        <div class="w-full">
+                            <h4 class="review-section-title mb-4">Rate Phluowise</h4>
+                            <p class="section-subheader mb-6">How was your experience with our service?</p>
+
+                            <div class="rating-stars-container">
+                                <div onclick="setRating(1)" class="rating-star-large">☆</div>
+                                <div onclick="setRating(2)" class="rating-star-large">☆</div>
+                                <div onclick="setRating(3)" class="rating-star-large">☆</div>
+                                <div onclick="setRating(4)" class="rating-star-large">☆</div>
+                                <div onclick="setRating(5)" class="rating-star-large">☆</div>
+                            </div>
+
+                            <textarea id="ratingComment" rows="3" class="form-textarea mt-4"
+                                placeholder="Share your experience (optional)..."></textarea>
                         </div>
                     </div>
                 </div>
 
+                <!-- Step 12: Rating Success -->
+                <div id="ratingSuccessStep" class="step-content hidden">
+                    <div class="flex flex-col items-center justify-center h-full text-center">
+                        <div class="success-icon" style="width: 80px; height: 80px;">
+                            <svg class="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M5 13l4 4L19 7" />
+                            </svg>
+                        </div>
+                        <h3 class="section-header mb-4">Thank You!</h3>
+                        <p class="text-lg text-gray-300 mb-2">Your rating has been submitted</p>
+                        <p class="section-subheader mb-6">We appreciate your feedback</p>
+
+                        <div class="review-card w-full mb-6">
+                            <div class="review-item">
+                                <span class="review-label">Order ID:</span>
+                                <span id="finalOrderId" class="review-value"></span>
+                            </div>
+                            <div class="review-item">
+                                <span class="review-label">Delivery Date:</span>
+                                <span id="finalDeliveryDate" class="review-value"></span>
+                            </div>
+                            <div class="review-item">
+                                <span class="review-label">Rating:</span>
+                                <span id="finalRatingStars" class="review-value"
+                                    style="color: #FCD34D; font-size: 18px;"></span>
+                            </div>
+                            <div class="review-item">
+                                <span class="review-label">Total Paid:</span>
+                                <span id="finalTotalPaid" class="review-value" style="color: #3B74FF;"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Navigation Buttons (Improved) -->
+            <div class="step-navigation px-6 pb-6">
+                <button id="prevBtn" onclick="previousStep()" class="nav-btn prev hidden">
+                    Back
+                </button>
+                <button id="nextBtn" onclick="nextStep()" class="nav-btn next">
+                    Continue
+                </button>
+                <button id="payBtn" onclick="processPayment()" class="nav-btn pay hidden">
+                    Pay Now
+                </button>
+                <button id="doneBtn" onclick="finishFlow()" class="nav-btn done hidden">
+                    Done
+                </button>
             </div>
         </div>
     </div>
@@ -1139,6 +2447,80 @@
     <script src="../public/js/theme.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
+        // Global variables for the schedule flow
+        let currentStep = 1;
+        const totalSteps = 12; // Increased to 12 steps
+        let selectedPaymentMethod = null;
+        let orderData = {
+            recipient: {},
+            products: [],
+            subtotal: 0,
+            serviceFee: 0,
+            total: 0
+        };
+        let userRating = 0;
+        let selectedCompany = '';
+        let recipientType = 'you';
+        const SERVICE_FEE_PER_ITEM = 0.10;
+        let savedRecipients = [];
+        let selectedSavedRecipient = null;
+        let selectedDate = '';
+        let selectedTime = '';
+        let selectedProducts = [];
+
+        // Sample products data for the company
+        const companyProducts = [
+            {
+                id: 1,
+                name: 'Sachets Water (500ml bag)',
+                price: 20.00,
+                image: '../public/images/main/ProductImage1.png',
+                quantity: 1,
+                description: 'Pack of 20 sachets, 500ml each'
+            },
+            {
+                id: 2,
+                name: 'Bottle Water (750ml pack)',
+                price: 15.00,
+                image: '../public/images/main/ProductImage1.png',
+                quantity: 1,
+                description: 'Pack of 12 bottles, 750ml each'
+            },
+            {
+                id: 3,
+                name: 'Dispenser (5 gallons)',
+                price: 25.00,
+                image: '../public/images/main/ProductImage1.png',
+                quantity: 1,
+                description: '5-gallon water dispenser'
+            },
+            {
+                id: 4,
+                name: 'Sachets Water (1L bag)',
+                price: 30.00,
+                image: '../public/images/main/ProductImage1.png',
+                quantity: 1,
+                description: 'Pack of 15 sachets, 1L each'
+            },
+            {
+                id: 5,
+                name: 'Premium Bottle (1.5L)',
+                price: 18.00,
+                image: '../public/images/main/ProductImage1.png',
+                quantity: 1,
+                description: 'Pack of 8 bottles, 1.5L each'
+            },
+            {
+                id: 6,
+                name: 'Dispenser (10 gallons)',
+                price: 40.00,
+                image: '../public/images/main/ProductImage1.png',
+                quantity: 1,
+                description: '10-gallon water dispenser'
+            }
+        ];
+
+        // Variables from original schedule.html
         let readMore = false;
         let subView = 'schedule';
         let map;
@@ -1148,7 +2530,7 @@
         let currentTileLayer = null;
         let isSatelliteView = false;
 
-        // Current company data (same as home page)
+        // Current company data
         const currentCompany = {
             id: 1,
             name: 'Voltic Water Company',
@@ -1174,7 +2556,37 @@
             { price: 12, name: 'Sachets water', type: 'Description of product', image: '../public/images/main/ProductImage1.png' }
         ];
 
-        // CompanyDescription toggle (Exact animation logic)
+        // Rating system state
+        let currentRating = 0;
+        let selectedTags = new Set();
+        let reviews = [
+            {
+                id: 1,
+                name: 'Anonymous name',
+                rating: 5,
+                comment: 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
+                tags: ['Sachets'],
+                date: new Date('2024-01-15')
+            },
+            {
+                id: 2,
+                name: 'John Doe',
+                rating: 4,
+                comment: 'Great service and fast delivery. Highly recommend!',
+                tags: ['Bottle'],
+                date: new Date('2024-01-10')
+            },
+            {
+                id: 3,
+                name: 'Jane Smith',
+                rating: 3,
+                comment: 'Good quality products, delivery was on time.',
+                tags: ['Dispenser'],
+                date: new Date('2024-01-05')
+            }
+        ];
+
+        // Functions from original schedule.html
         function toggleReadMore() {
             readMore = !readMore;
             const container = document.getElementById('descriptionContainer');
@@ -1192,7 +2604,6 @@
             }
         }
 
-        // Tab navigation (exact button styling logic)
         function setSubView(view) {
             subView = view;
             const btns = ['schedule', 'products', 'rating'];
@@ -1214,16 +2625,14 @@
             if (view === 'products') renderProducts();
         }
 
-        // Products rendering (exact dimensions from Products.tsx)
         function renderProducts() {
             const container = document.getElementById('productsGrid');
             container.innerHTML = '';
 
             products.forEach((p, i) => {
                 const card = document.createElement('div');
-                // Exact: height: 220, width: screenWidth / 2 - 35, borderRadius: 10
                 card.className = "relative overflow-hidden rounded-[10px]";
-                card.style.width = "calc(50% - 8px)"; // Approximating screenWidth / 2 - 35
+                card.style.width = "calc(50% - 8px)";
                 card.style.height = "220px";
                 card.style.backgroundColor = "var(--card-bg-dark)";
 
@@ -1259,7 +2668,6 @@
             const openingTimeSpan = document.getElementById('openingTime');
             const closingTimeSpan = document.getElementById('closingTime');
             
-            // Handle case when no day is selected
             if (!select || !select.value) {
                 openingTimeSpan.textContent = 'Closed';
                 closingTimeSpan.textContent = 'Closed';
@@ -1271,7 +2679,6 @@
             const selectedDay = select.value;
             const dayHours = currentCompany.workingHours[selectedDay];
             
-            // Handle case when day data is not available
             if (!dayHours) {
                 openingTimeSpan.textContent = 'Closed';
                 closingTimeSpan.textContent = 'Closed';
@@ -1292,7 +2699,6 @@
                 closingTimeSpan.style.color = '#F57D7D';
             }
             
-            // Update select styling to show current day
             const today = new Date().toLocaleDateString('en-US', { weekday: 'short' }).toLowerCase();
             const dayMapping = {
                 'mon': 'monday', 'tue': 'tuesday', 'wed': 'wednesday',
@@ -1309,19 +2715,15 @@
             }
         }
 
-        // Set current day as default on page load
         function setCurrentDay() {
             const select = document.getElementById('workingDaysSelect');
             
-            // Handle case when select element doesn't exist
             if (!select) {
-                // console.warn('Working days select element not found');
                 return;
             }
             
             const today = new Date().toLocaleDateString('en-US', { weekday: 'short' }).toLowerCase();
             
-            // Map JavaScript day names to our select values
             const dayMapping = {
                 'mon': 'monday',
                 'tue': 'tuesday', 
@@ -1334,42 +2736,17 @@
             
             const currentDay = dayMapping[today] || 'monday';
             
-            // Only set value if the option exists
             const option = select.querySelector(`option[value="${currentDay}"]`);
             if (option) {
                 select.value = currentDay;
                 option.textContent = option.textContent.replace(/^(\w+)/, '$1 (Today)');
             } else {
-                // Fallback to first available day
                 select.value = select.options[0]?.value || 'monday';
             }
             
             updateWorkingHours();
         }
 
-        // Initialize date picker with minimum date as today (matching React Native ScheduleDatePicker)
-        document.addEventListener('DOMContentLoaded', function () {
-            const datePicker = document.getElementById('scheduleDatePicker');
-            const selectedDateSpan = document.getElementById('selectedDate');
-
-            if (datePicker) {
-                // Set minimum date to today (matching React Native minimumDate={currentDate})
-                const today = new Date().toISOString().split('T')[0];
-                datePicker.min = today;
-
-                // Handle date change
-                datePicker.addEventListener('change', function () {
-                    if (this.value) {
-                        const selectedDate = new Date(this.value);
-                        const options = { day: 'numeric', month: 'long', year: 'numeric' };
-                        const formattedDate = selectedDate.toLocaleDateString('en-US', options);
-                        selectedDateSpan.textContent = formattedDate;
-                    }
-                });
-            }
-        });
-
-        // Product Modal
         function openProductModal(name, price, description) {
             const modal = document.getElementById('productModal');
             const content = document.getElementById('productModalContent');
@@ -1392,117 +2769,1410 @@
             }, 300);
         }
 
-        // Schedule Flow Bottom Sheet - FIXED FUNCTION WITH CONSOLE LOGS
-        function startScheduleFlow() {
-            // console.log('🔵 [DEBUG] Schedule Pickup button clicked - Function startScheduleFlow() called');
+        // Schedule Flow Bottom Sheet Functions
+        function openScheduleBottomSheet() {
+            console.log('Opening schedule bottom sheet...');
+            
+            // Reset to first step
+            currentStep = 1;
             
             const sheet = document.getElementById('scheduleFlowSheet');
             const content = document.getElementById('scheduleFlowContent');
             
-            // console.log('🔵 [DEBUG] Sheet element:', sheet ? 'Found' : 'NOT FOUND');
-            // console.log('🔵 [DEBUG] Content element:', content ? 'Found' : 'NOT FOUND');
+            console.log('Sheet element:', sheet);
+            console.log('Content element:', content);
             
-            if (!sheet || !content) {
-                // console.error('❌ [ERROR] Modal elements not found!');
-                // console.error('❌ [ERROR] Sheet:', sheet);
-                // console.error('❌ [ERROR] Content:', content);
-                alert('Error: Modal elements not found. Please check console for details.');
+            if (!sheet) {
+                console.error('Schedule flow sheet not found!');
                 return;
             }
             
-            // console.log('🔵 [DEBUG] Removing opacity-0 and pointer-events-none from sheet');
-            sheet.classList.remove('opacity-0', 'pointer-events-none');
-            sheet.classList.add('opacity-100');
+            if (!content) {
+                console.error('Schedule flow content not found!');
+                return;
+            }
             
-            // console.log('🔵 [DEBUG] Setting timeout to remove translate-y-full from content');
-            setTimeout(() => {
-                // console.log('🔵 [DEBUG] Removing translate-y-full from content');
-                content.classList.remove('translate-y-full');
-                // console.log('✅ [SUCCESS] Schedule flow sheet opened successfully');
-            }, 10);
+            console.log('Adding active classes...');
+            sheet.classList.add('active');
+            content.classList.add('active');
+            sheet.classList.remove('pointer-events-none');
             
+            console.log('Classes added. Sheet classes:', sheet.className);
+            console.log('Content classes:', content.className);
+            
+            // Load saved recipients
+            loadSavedRecipients();
+            
+            // Initialize date input with minimum date (today + 2 hours)
+            initializeDateInput();
+            
+            // Load user profile data
+            loadUserProfileData();
+            
+            // Reset selected products
+            selectedProducts = [];
+            orderData.products = [];
+            
+            console.log('About to call goToStep...');
             goToStep('terms');
+            console.log('goToStep completed');
         }
 
         function closeScheduleFlow() {
-            // console.log('🔵 [DEBUG] Closing schedule flow');
             const sheet = document.getElementById('scheduleFlowSheet');
             const content = document.getElementById('scheduleFlowContent');
-            
-            content.classList.add('translate-y-full');
+            content.classList.remove('active');
             setTimeout(() => {
-                sheet.classList.remove('opacity-100');
-                sheet.classList.add('opacity-0', 'pointer-events-none');
-                // console.log('✅ [SUCCESS] Schedule flow closed successfully');
+                sheet.classList.remove('active');
+                sheet.classList.add('pointer-events-none');
             }, 300);
+            
+            // Reset step
+            currentStep = 1;
+            updateStepIndicators();
+            
+            // Reset data
+            orderData = {
+                recipient: {}
+            };
+            selectedPaymentMethod = null;
+            userRating = 0;
+            selectedProducts = [];
+            hideError();
         }
 
         function goToStep(step) {
-            // console.log(`🔵 [DEBUG] Navigating to step: ${step}`);
-            // Fixed: Include 'terms' in the steps array
-            const allSteps = ['terms', 'product', 'recipient', 'review', 'payment-terms', 'select-payment', 'payment-details', 'payment-processing', 'payment-success', 'pickup-sent', 'rate-phluowise', 'rating-done'];
-            allSteps.forEach(s => {
-                const element = document.getElementById('step-' + s);
-                if (element) {
-                    element.classList.add('hidden');
-                }
-            });
+            console.log('goToStep called with:', step);
             
-            const stepElement = document.getElementById('step-' + step);
+            // Hide all steps
+            document.querySelectorAll('.step-content').forEach(el => {
+                el.classList.add('hidden');
+            });
+
+            // Show current step
+            const stepMap = {
+                'terms': 'termsStep',
+                'productSelection': 'productSelectionStep',
+                'recipient': 'orderRecipientStep',
+                'datetime': 'datetimeStep',
+                'quantity': 'quantityStep',
+                'review': 'orderReviewStep',
+                'selectPayment': 'selectPaymentStep',
+                'paymentDetails': 'paymentDetailsStep',
+                'paymentProcessing': 'paymentProcessingStep',
+                'paymentSuccess': 'paymentSuccessStep',
+                'scheduleSent': 'scheduleSentStep',
+                'ratingSuccess': 'ratingSuccessStep'
+            };
+
+            console.log('Step map:', stepMap);
+            console.log('Looking for element ID:', stepMap[step]);
+
+            const stepElement = document.getElementById(stepMap[step]);
+            console.log('Found step element:', stepElement);
+            
             if (stepElement) {
                 stepElement.classList.remove('hidden');
-                // console.log(`✅ [SUCCESS] Step ${step} displayed`);
+                console.log('Removed hidden class from step element');
+
+                // Special handling for specific steps
+                if (step === 'productSelection') {
+                    updateProductSelectionStep();
+                } else if (step === 'recipient') {
+                    updateRecipientStep();
+                } else if (step === 'datetime') {
+                    updateDateTimeStep();
+                } else if (step === 'quantity') {
+                    updateQuantityStep();
+                } else if (step === 'review') {
+                    updateOrderReview();
+                } else if (step === 'paymentProcessing') {
+                    startPaymentProcessing();
+                } else if (step === 'paymentSuccess') {
+                    showPaymentSuccess();
+                } else if (step === 'scheduleSent') {
+                    showScheduleSent();
+                } else if (step === 'ratingSuccess') {
+                    showRatingSuccess();
+                }
             } else {
-                // console.error(`❌ [ERROR] Step element not found: step-${step}`);
-                return;
+                console.error('Step element not found for:', step, 'ID:', stepMap[step]);
             }
-            
-            // Initialize step-specific content
-            if (step === 'product') {
-                initializeProducts();
-            } else if (step === 'review') {
-                updateOrderReview();
-            } else if (step === 'payment-processing') {
-                simulatePaymentProcessing();
+
+            updateStepIndicators();
+            updateNavigationButtons();
+            hideError();
+            console.log('goToStep completed');
+        }
+
+        function updateStepIndicators() {
+            // Step indicators are hidden as requested
+        }
+
+        function updateNavigationButtons() {
+            const prevBtn = document.getElementById('prevBtn');
+            const nextBtn = document.getElementById('nextBtn');
+            const payBtn = document.getElementById('payBtn');
+            const doneBtn = document.getElementById('doneBtn');
+
+            // Show/hide previous button
+            if (currentStep === 1) {
+                prevBtn.classList.add('hidden');
+            } else {
+                prevBtn.classList.remove('hidden');
+            }
+
+            // Show/hide buttons based on current step
+            nextBtn.classList.add('hidden');
+            payBtn.classList.add('hidden');
+            doneBtn.classList.add('hidden');
+
+            if (currentStep === totalSteps) {
+                doneBtn.classList.remove('hidden');
+            } else if (currentStep === 8) { // Payment details step
+                payBtn.classList.remove('hidden');
+            } else if (currentStep < totalSteps) {
+                nextBtn.classList.remove('hidden');
+
+                // Update button text based on step
+                if (currentStep === 6) { // Review step
+                    nextBtn.textContent = 'Confirm Order';
+                } else if (currentStep === 7) { // Select payment step
+                    nextBtn.textContent = 'Proceed to Payment';
+                } else if (currentStep === 2) { // Product selection step
+                    nextBtn.textContent = selectedProducts.length > 0 ? 'Continue' : 'Skip for now';
+                } else {
+                    nextBtn.textContent = 'Continue';
+                }
             }
         }
 
-        // Rating system state
-        let currentRating = 0;
-        let selectedTags = new Set();
-        let reviews = [
-            {
-                id: 1,
-                name: 'Anonymous name',
-                rating: 5,
-                comment: 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
-                tags: ['Sachets'],
-                date: new Date('2024-01-15')
-            },
-            {
-                id: 2,
-                name: 'John Doe',
-                rating: 4,
-                comment: 'Great service and fast delivery. Highly recommend!',
-                tags: ['Bottle'],
-                date: new Date('2024-01-10')
-            },
-            {
-                id: 3,
-                name: 'Jane Smith',
-                rating: 3,
-                comment: 'Good quality products, delivery was on time.',
-                tags: ['Dispenser'],
-                date: new Date('2024-01-05')
-            }
-        ];
+        function nextStep() {
+            if (currentStep < totalSteps) {
+                // Validate current step
+                if (!validateCurrentStep()) {
+                    return;
+                }
 
-        // Load reviews from localStorage
+                currentStep++;
+                const steps = ['terms', 'productSelection', 'recipient', 'datetime', 'quantity', 'review', 'selectPayment', 'paymentDetails', 'paymentProcessing', 'paymentSuccess', 'scheduleSent', 'ratingSuccess'];
+                if (currentStep <= steps.length && currentStep <= totalSteps) {
+                    goToStep(steps[currentStep - 1]);
+                }
+            }
+        }
+
+        function previousStep() {
+            if (currentStep > 1) {
+                currentStep--;
+                const steps = ['terms', 'productSelection', 'recipient', 'datetime', 'quantity', 'review', 'selectPayment', 'paymentDetails', 'paymentProcessing', 'paymentSuccess', 'scheduleSent', 'ratingSuccess'];
+                goToStep(steps[currentStep - 1]);
+            }
+        }
+
+        function validateCurrentStep() {
+            hideError();
+
+            switch (currentStep) {
+                case 1: // Terms - no validation needed
+                    break;
+                case 2: // Product Selection
+                    // Allow user to continue even if no products selected
+                    break;
+                case 3: // Recipient
+                    const address = document.getElementById('recipientAddress').value;
+
+                    if (recipientType === 'business') {
+                        const businessType = document.getElementById('businessType').value;
+                        const businessName = document.getElementById('businessName').value;
+                        if (!businessType) {
+                            showError('Please select a business type');
+                            return false;
+                        }
+                        if (!businessName) {
+                            showError('Please enter a business name');
+                            return false;
+                        }
+
+                        orderData.recipient.businessName = businessName;
+                        orderData.recipient.businessType = businessType;
+                    }
+
+                    if (recipientType !== 'you') {
+                        const name = document.getElementById('recipientName').value;
+                        const phone = document.getElementById('recipientPhone').value;
+                        const email = document.getElementById('recipientEmail').value;
+
+                        if (!name || !phone || !email) {
+                            showError('Please fill in all recipient information');
+                            return false;
+                        }
+
+                        if (!/^0\d{9}$/.test(phone)) {
+                            showError('Please enter a valid Ghanaian phone number (e.g., 0201234567)');
+                            return false;
+                        }
+
+                        if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                            showError('Please enter a valid email address');
+                            return false;
+                        }
+
+                        orderData.recipient.name = name;
+                        orderData.recipient.phone = phone;
+                        orderData.recipient.email = email;
+                    } else {
+                        orderData.recipient.name = document.getElementById('youNameDisplay').textContent;
+                        orderData.recipient.phone = document.getElementById('youPhoneDisplay').textContent;
+                        orderData.recipient.email = document.getElementById('youEmailDisplay').textContent;
+                    }
+
+                    if (!address) {
+                        showError('Please enter a delivery address');
+                        return false;
+                    }
+
+                    orderData.recipient.address = address;
+                    orderData.recipient.type = recipientType;
+
+                    const saveToggle = document.getElementById('saveRecipientToggle').checked;
+                    if (saveToggle && recipientType !== 'you') {
+                        saveRecipient();
+                    }
+                    break;
+                case 4: // Date and Time
+                    selectedDate = document.getElementById('deliveryDate').value;
+                    selectedTime = document.getElementById('deliveryTime').value;
+
+                    if (!selectedDate || !selectedTime) {
+                        showError('Please select both date and time for delivery');
+                        return false;
+                    }
+
+                    const selectedDateTime = new Date(`${selectedDate} ${selectedTime}`);
+                    const now = new Date();
+
+                    if (selectedDateTime <= now) {
+                        showError('Please select a future date and time for delivery');
+                        return false;
+                    }
+
+                    orderData.deliveryDate = selectedDate;
+                    orderData.deliveryTime = selectedTime;
+                    break;
+                case 5: // Quantity
+                    if (selectedProducts.length === 0) {
+                        showError('Please select at least one product');
+                        return false;
+                    }
+
+                    const invalidProduct = selectedProducts.find(p => p.quantity < 1);
+                    if (invalidProduct) {
+                        showError('Product quantity must be at least 1');
+                        return false;
+                    }
+
+                    orderData.products = selectedProducts;
+                    orderData.deliveryInstructions = document.getElementById('deliveryInstructions').value;
+                    break;
+                case 7: // Select Payment
+                    if (!selectedPaymentMethod) {
+                        showError('Please select a payment method');
+                        return false;
+                    }
+                    break;
+                case 8: // Payment Details
+                    if (!validatePaymentDetails()) {
+                        return false;
+                    }
+                    break;
+            }
+            return true;
+        }
+
+        function validatePaymentDetails() {
+            const mobileNetwork = document.getElementById('mobileNetwork').value;
+            const mobileNumber = document.getElementById('mobileNumber').value;
+
+            if (!mobileNetwork) {
+                showError('Please select a mobile network');
+                return false;
+            }
+
+            if (!mobileNumber) {
+                showError('Please enter your mobile number');
+                return false;
+            }
+
+            if (!/^0\d{9}$/.test(mobileNumber)) {
+                showError('Please enter a valid Ghanaian phone number (e.g., 0201234567)');
+                return false;
+            }
+
+            orderData.payment = {
+                method: 'mobile',
+                network: mobileNetwork,
+                phoneNumber: mobileNumber
+            };
+
+            return true;
+        }
+
+        function initializeDateInput() {
+            const dateInput = document.getElementById('deliveryDate');
+            const now = new Date();
+            const minDate = new Date(now.getTime() + 2 * 60 * 60 * 1000); // 2 hours from now
+
+            const minDateString = minDate.toISOString().split('T')[0];
+            dateInput.min = minDateString;
+
+            const tomorrow = new Date(now);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const tomorrowString = tomorrow.toISOString().split('T')[0];
+            dateInput.value = tomorrowString;
+            selectedDate = tomorrowString;
+        }
+
+        function generateTimeSlots() {
+            const timeSlotsGrid = document.getElementById('timeSlotsGrid');
+            timeSlotsGrid.innerHTML = '';
+
+            const timeSlots = [
+                { time: '08:00', label: '8:00 AM', available: true },
+                { time: '09:00', label: '9:00 AM', available: true },
+                { time: '10:00', label: '10:00 AM', available: true },
+                { time: '11:00', label: '11:00 AM', available: true },
+                { time: '12:00', label: '12:00 PM', available: true },
+                { time: '13:00', label: '1:00 PM', available: true },
+                { time: '14:00', label: '2:00 PM', available: true },
+                { time: '15:00', label: '3:00 PM', available: true },
+                { time: '16:00', label: '4:00 PM', available: true },
+                { time: '17:00', label: '5:00 PM', available: true },
+                { time: '18:00', label: '6:00 PM', available: true }
+            ];
+
+            timeSlots.forEach(slot => {
+                const timeSlotBtn = document.createElement('button');
+                timeSlotBtn.type = 'button';
+                timeSlotBtn.className = `time-slot-btn ${slot.available ? '' : 'disabled'}`;
+                timeSlotBtn.textContent = slot.label;
+                timeSlotBtn.disabled = !slot.available;
+
+                if (slot.available) {
+                    timeSlotBtn.onclick = () => selectTimeSlot(slot.time, slot.label, timeSlotBtn);
+                }
+
+                timeSlotsGrid.appendChild(timeSlotBtn);
+            });
+        }
+
+        function selectTimeSlot(time, label, button) {
+            document.querySelectorAll('.time-slot-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+
+            button.classList.add('selected');
+            document.getElementById('deliveryTime').value = time;
+            selectedTime = time;
+        }
+
+        function selectTermsOption(type) {
+            document.querySelectorAll('.terms-radio-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+
+            document.getElementById(`terms${type.charAt(0).toUpperCase() + type.slice(1)}`).classList.add('selected');
+            orderData.orderType = type;
+        }
+
+        function updateProductSelectionStep() {
+            const productsGrid = document.getElementById('productsSelectionGrid');
+            productsGrid.innerHTML = '';
+
+            companyProducts.forEach(product => {
+                const isSelected = selectedProducts.find(p => p.id === product.id);
+                const productCard = document.createElement('div');
+                productCard.className = `product-select-card ${isSelected ? 'selected' : ''}`;
+                productCard.onclick = () => toggleProductSelection(product);
+
+                productCard.innerHTML = `
+                    <img src="${product.image}" alt="${product.name}" class="product-select-image">
+                    <div class="product-select-name">${product.name}</div>
+                    <div class="product-select-price">GHS ${product.price.toFixed(2)}</div>
+                    ${isSelected ? `
+                        <div class="product-select-quantity">
+                            <button onclick="event.stopPropagation(); changeProductQuantityInSelection(${product.id}, -1)" class="quantity-btn-product">-</button>
+                            <span class="quantity-display-product">${isSelected.quantity}</span>
+                            <button onclick="event.stopPropagation(); changeProductQuantityInSelection(${product.id}, 1)" class="quantity-btn-product">+</button>
+                        </div>
+                    ` : ''}
+                `;
+
+                productsGrid.appendChild(productCard);
+            });
+        }
+
+        function toggleProductSelection(product) {
+            const existingIndex = selectedProducts.findIndex(p => p.id === product.id);
+            
+            if (existingIndex > -1) {
+                // Remove product if already selected
+                selectedProducts.splice(existingIndex, 1);
+            } else {
+                // Add product with default quantity of 1
+                selectedProducts.push({
+                    ...product,
+                    quantity: 1
+                });
+            }
+            
+            updateProductSelectionStep();
+        }
+
+        function changeProductQuantityInSelection(productId, amount) {
+            const productIndex = selectedProducts.findIndex(p => p.id === productId);
+            
+            if (productIndex > -1) {
+                const product = selectedProducts[productIndex];
+                const newQuantity = product.quantity + amount;
+                
+                if (newQuantity < 1) {
+                    // Remove product if quantity becomes 0
+                    selectedProducts.splice(productIndex, 1);
+                } else if (newQuantity > 100) {
+                    showError(`Maximum quantity per product is 100 items`);
+                    return;
+                } else {
+                    selectedProducts[productIndex].quantity = newQuantity;
+                }
+                
+                updateProductSelectionStep();
+            }
+        }
+
+        function goToProductSelection() {
+            currentStep = 2;
+            goToStep('productSelection');
+        }
+
+        function selectRecipientType(type) {
+            recipientType = type;
+
+            document.querySelectorAll('.recipient-type-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+
+            document.getElementById(`recipient${type.charAt(0).toUpperCase() + type.slice(1)}`).classList.add('active');
+
+            const nameContainer = document.getElementById('recipientNameContainer');
+            const phoneContainer = document.getElementById('recipientPhoneContainer');
+            const emailContainer = document.getElementById('recipientEmailContainer');
+            const businessTypeContainer = document.getElementById('businessTypeContainer');
+            const businessNameContainer = document.getElementById('businessNameContainer');
+            const youInfo = document.getElementById('youRecipientInfo');
+            const savedContainer = document.getElementById('savedRecipientsContainer');
+
+            if (type === 'you') {
+                nameContainer.classList.add('hidden');
+                phoneContainer.classList.add('hidden');
+                emailContainer.classList.add('hidden');
+                businessTypeContainer.classList.add('hidden');
+                businessNameContainer.classList.add('hidden');
+                youInfo.classList.remove('hidden');
+                savedContainer.classList.add('hidden');
+            } else {
+                nameContainer.classList.remove('hidden');
+                phoneContainer.classList.remove('hidden');
+                emailContainer.classList.remove('hidden');
+                youInfo.classList.add('hidden');
+
+                if (type === 'business') {
+                    businessTypeContainer.classList.remove('hidden');
+                    businessNameContainer.classList.remove('hidden');
+                } else {
+                    businessTypeContainer.classList.add('hidden');
+                    businessNameContainer.classList.add('hidden');
+                }
+
+                if (savedRecipients.length > 0) {
+                    savedContainer.classList.remove('hidden');
+                }
+            }
+        }
+
+        function loadUserProfileData() {
+            const userProfile = JSON.parse(localStorage.getItem('userProfile')) || {
+                name: 'John Doe',
+                phone1: '0241234567',
+                email: 'john@example.com',
+                address: '123 Main Street, Accra'
+            };
+
+            document.getElementById('youNameDisplay').textContent = userProfile.name || 'John Doe';
+            document.getElementById('youPhoneDisplay').textContent = userProfile.phone1 || '0241234567';
+            document.getElementById('youEmailDisplay').textContent = userProfile.email || 'john@example.com';
+            document.getElementById('youAddressDisplay').textContent = userProfile.address || '123 Main Street, Accra';
+
+            const addressField = document.getElementById('recipientAddress');
+            if (addressField && userProfile.address) {
+                addressField.value = userProfile.address;
+            }
+        }
+
+        function saveUserAddress() {
+            const address = document.getElementById('recipientAddress').value;
+            if (address && recipientType === 'you') {
+                const userProfile = JSON.parse(localStorage.getItem('userProfile')) || {};
+                userProfile.address = address;
+                localStorage.setItem('userProfile', JSON.stringify(userProfile));
+                document.getElementById('youAddressDisplay').textContent = address;
+            }
+        }
+
+        function loadSavedRecipients() {
+            const savedRecipientsData = localStorage.getItem('savedRecipients');
+            if (savedRecipientsData) {
+                savedRecipients = JSON.parse(savedRecipientsData);
+            } else {
+                savedRecipients = [
+                    {
+                        id: 1,
+                        name: 'Jane Smith',
+                        phone: '0241234567',
+                        email: 'jane@example.com',
+                        address: '123 Main St, Accra',
+                        type: 'individual'
+                    },
+                    {
+                        id: 2,
+                        name: 'ABC Corporation',
+                        phone: '0209876543',
+                        email: 'info@abccorp.com',
+                        address: '456 Business Ave, Tema',
+                        type: 'business',
+                        businessName: 'ABC Corporation',
+                        businessType: 'office'
+                    }
+                ];
+                localStorage.setItem('savedRecipients', JSON.stringify(savedRecipients));
+            }
+
+            updateSavedRecipientsList();
+        }
+
+        function updateSavedRecipientsList() {
+            const savedList = document.getElementById('savedRecipientsList');
+            savedList.innerHTML = '';
+
+            if (savedRecipients.length === 0) {
+                savedList.innerHTML = '<p class="text-gray-400 text-center py-4">No saved recipients yet</p>';
+                return;
+            }
+
+            savedRecipients.forEach(recipient => {
+                const recipientItem = document.createElement('div');
+                recipientItem.className = 'saved-recipient-item';
+                recipientItem.style.position = 'relative';
+
+                recipientItem.innerHTML = `
+                    <button onclick="deleteSavedRecipient(${recipient.id})" class="delete-recipient-btn" title="Delete recipient">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M3 6h18"/>
+                            <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2 2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+                            <path d="M10 11v6"/>
+                            <path d="M14 11v6"/>
+                        </svg>
+                    </button>
+                    <div onclick="selectSavedRecipient(${recipient.id})" class="recipient-content">
+                        <div class="saved-recipient-name">${recipient.name}</div>
+                        <div class="saved-recipient-info">${recipient.phone} • ${recipient.address}</div>
+                    </div>
+                `;
+
+                savedList.appendChild(recipientItem);
+            });
+        }
+
+        function selectSavedRecipient(recipientId) {
+            const recipient = savedRecipients.find(r => r.id === recipientId);
+            if (!recipient) return;
+
+            selectedSavedRecipient = recipient;
+            event.currentTarget.closest('.saved-recipient-item').classList.add('selected');
+
+            document.getElementById('recipientName').value = recipient.name;
+            document.getElementById('recipientPhone').value = recipient.phone;
+            document.getElementById('recipientEmail').value = recipient.email;
+            document.getElementById('recipientAddress').value = recipient.address;
+
+            if (recipient.type === 'business') {
+                document.getElementById('businessType').value = recipient.businessType;
+                document.getElementById('businessName').value = recipient.businessName;
+            }
+
+            selectRecipientType(recipient.type);
+        }
+
+        function deleteSavedRecipient(recipientId) {
+            if (confirm('Are you sure you want to delete this saved recipient?')) {
+                savedRecipients = savedRecipients.filter(r => r.id !== recipientId);
+                localStorage.setItem('savedRecipients', JSON.stringify(savedRecipients));
+                updateSavedRecipientsList();
+                showSuccess('Recipient deleted successfully');
+
+                if (selectedSavedRecipient && selectedSavedRecipient.id === recipientId) {
+                    selectedSavedRecipient = null;
+                }
+            }
+            event.stopPropagation();
+        }
+
+        function saveRecipient() {
+            const name = document.getElementById('recipientName').value;
+            const phone = document.getElementById('recipientPhone').value;
+            const email = document.getElementById('recipientEmail').value;
+            const address = document.getElementById('recipientAddress').value;
+
+            const newRecipient = {
+                id: Date.now(),
+                name,
+                phone,
+                email,
+                address,
+                type: recipientType
+            };
+
+            if (recipientType === 'business') {
+                newRecipient.businessName = document.getElementById('businessName').value;
+                newRecipient.businessType = document.getElementById('businessType').value;
+            }
+
+            const existingIndex = savedRecipients.findIndex(r =>
+                r.name === name && r.phone === phone && r.email === email
+            );
+
+            if (existingIndex === -1) {
+                savedRecipients.push(newRecipient);
+                localStorage.setItem('savedRecipients', JSON.stringify(savedRecipients));
+                updateSavedRecipientsList();
+                showSuccess('Recipient saved successfully');
+            }
+        }
+
+        function updateDateTimeStep() {
+            generateTimeSlots();
+
+            if (orderData.deliveryDate) {
+                document.getElementById('deliveryDate').value = orderData.deliveryDate;
+            }
+
+            if (orderData.deliveryTime) {
+                document.getElementById('deliveryTime').value = orderData.deliveryTime;
+
+                const timeSlots = document.querySelectorAll('.time-slot-btn');
+                timeSlots.forEach(btn => {
+                    btn.classList.remove('selected');
+                    if (btn.textContent.includes(orderData.deliveryTime.replace(':00', ''))) {
+                        btn.classList.add('selected');
+                    }
+                });
+            }
+        }
+
+        function updateRecipientStep() {
+            if (orderData.recipient) {
+                if (recipientType !== 'you') {
+                    document.getElementById('recipientName').value = orderData.recipient.name || '';
+                    document.getElementById('businessName').value = orderData.recipient.businessName || '';
+                    document.getElementById('recipientPhone').value = orderData.recipient.phone || '';
+                    document.getElementById('recipientEmail').value = orderData.recipient.email || '';
+                    document.getElementById('recipientAddress').value = orderData.recipient.address || '';
+
+                    if (orderData.recipient.type === 'business' && orderData.recipient.businessType) {
+                        document.getElementById('businessType').value = orderData.recipient.businessType;
+                    }
+                } else {
+                    document.getElementById('recipientAddress').value = orderData.recipient.address || '';
+                }
+            }
+        }
+
+        function updateQuantityStep() {
+            const selectedContainer = document.getElementById('selectedProductsContainer');
+            selectedContainer.innerHTML = '';
+
+            if (selectedProducts.length > 0) {
+                selectedProducts.forEach((product, index) => {
+                    const selectedItem = document.createElement('div');
+                    selectedItem.className = 'selected-product-item';
+                    selectedItem.innerHTML = `
+                        <img src="${product.image}" alt="${product.name}" class="selected-product-image">
+                        <div class="selected-product-details">
+                            <div class="selected-product-name">${product.name}</div>
+                            <div class="selected-product-price">GHS ${product.price.toFixed(2)} each</div>
+                        </div>
+                        <div class="selected-product-quantity">
+                            <button onclick="changeProductQuantity(${index}, -1)" class="quantity-btn-small">-</button>
+                            <span class="quantity-display-small">${product.quantity}</span>
+                            <button onclick="changeProductQuantity(${index}, 1)" class="quantity-btn-small">+</button>
+                        </div>
+                    `;
+                    selectedContainer.appendChild(selectedItem);
+                });
+            } else {
+                const noProducts = document.createElement('div');
+                noProducts.className = 'no-products-selected';
+                noProducts.textContent = 'No products selected. Please go back and select products.';
+                selectedContainer.appendChild(noProducts);
+            }
+
+            updateQuantityCalculations();
+        }
+
+        function changeProductQuantity(productIndex, amount) {
+            if (selectedProducts[productIndex]) {
+                const product = selectedProducts[productIndex];
+                const newQuantity = product.quantity + amount;
+
+                if (newQuantity < 1) {
+                    showError(`Minimum quantity is 1 item`);
+                    return;
+                }
+
+                if (newQuantity > 100) {
+                    showError(`Maximum quantity per product is 100 items`);
+                    return;
+                }
+
+                selectedProducts[productIndex].quantity = newQuantity;
+                updateQuantityStep();
+            }
+        }
+
+        function updateQuantityCalculations() {
+            calculateTotals();
+            
+            document.getElementById('quantitySubtotal').textContent = `GHS ${orderData.subtotal.toFixed(2)}`;
+            document.getElementById('serviceFeeDisplay').textContent = `GHS ${orderData.serviceFee.toFixed(2)}`;
+            document.getElementById('quantityTotal').textContent = `GHS ${orderData.total.toFixed(2)}`;
+        }
+
+        function calculateTotals() {
+            orderData.subtotal = selectedProducts.reduce((sum, product) => 
+                sum + (product.price * product.quantity), 0);
+            const totalItems = selectedProducts.reduce((sum, product) => sum + product.quantity, 0);
+            orderData.serviceFee = totalItems * SERVICE_FEE_PER_ITEM;
+            orderData.total = orderData.subtotal + orderData.serviceFee;
+        }
+
+        function updateOrderReview() {
+            if (selectedProducts.length === 0) return;
+
+            calculateTotals();
+
+            const productsList = document.getElementById('reviewProductsList');
+            productsList.innerHTML = '';
+
+            selectedProducts.forEach(product => {
+                const productItem = document.createElement('div');
+                productItem.className = 'review-product-item';
+                productItem.innerHTML = `
+                    <img src="${product.image}" alt="${product.name}" class="review-product-image">
+                    <div class="review-product-details">
+                        <div class="review-product-name">${product.quantity}x ${product.name}</div>
+                        <div class="review-product-price">GHS ${(product.price * product.quantity).toFixed(2)}</div>
+                    </div>
+                `;
+                productsList.appendChild(productItem);
+            });
+
+            document.getElementById('reviewDeliveryDate').textContent = formatDate(selectedDate);
+            document.getElementById('reviewDeliveryTime').textContent = formatTime(selectedTime);
+            document.getElementById('reviewDeliveryAddress').textContent = orderData.recipient.address || '';
+
+            const instructions = document.getElementById('deliveryInstructions').value || 'None provided';
+            document.getElementById('reviewDeliveryInstructions').textContent = instructions;
+
+            document.getElementById('reviewSubtotal').textContent = `GHS ${orderData.subtotal.toFixed(2)}`;
+            document.getElementById('reviewServiceFee').textContent = `GHS ${orderData.serviceFee.toFixed(2)}`;
+            document.getElementById('reviewTotal').textContent = `GHS ${orderData.total.toFixed(2)}`;
+
+            orderData.products = selectedProducts;
+            orderData.deliveryInstructions = instructions;
+        }
+
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-US', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
+            });
+        }
+
+        function formatTime(timeString) {
+            const [hours, minutes] = timeString.split(':');
+            const hour = parseInt(hours);
+            const ampm = hour >= 12 ? 'PM' : 'AM';
+            const displayHour = hour % 12 || 12;
+            return `${displayHour}:${minutes} ${ampm}`;
+        }
+
+        function selectPaymentMethod(method) {
+            selectedPaymentMethod = method;
+
+            document.querySelectorAll('.payment-method-card').forEach(card => {
+                card.classList.remove('selected');
+            });
+
+            event.currentTarget.classList.add('selected');
+        }
+
+        function processPayment() {
+            if (!validateCurrentStep()) {
+                return;
+            }
+            nextStep();
+        }
+
+        function startPaymentProcessing() {
+            let progress = 0;
+            const progressBar = document.getElementById('paymentProgressBar');
+
+            const interval = setInterval(() => {
+                progress += 10;
+                progressBar.style.width = progress + '%';
+
+                if (progress >= 100) {
+                    clearInterval(interval);
+                    setTimeout(() => {
+                        nextStep();
+                    }, 1000);
+                }
+            }, 300);
+        }
+
+        function showPaymentSuccess() {
+            const transactionId = 'TXN' + Date.now().toString().slice(-8);
+            document.getElementById('transactionIdDisplay').textContent = transactionId;
+            document.getElementById('amountPaidDisplay').textContent = `GHS ${orderData.total.toFixed(2)}`;
+
+            orderData.transactionId = transactionId;
+            orderData.timestamp = new Date().toISOString();
+        }
+
+        function showScheduleSent() {
+            const orderId = 'ORD' + Date.now().toString().slice(-8);
+            document.getElementById('orderIdDisplay').textContent = orderId;
+            document.getElementById('orderDateDisplay').textContent = formatDate(selectedDate);
+            document.getElementById('orderTimeDisplay').textContent = formatTime(selectedTime);
+
+            const totalItems = selectedProducts.reduce((sum, product) => sum + product.quantity, 0);
+            document.getElementById('orderItemsDisplay').textContent = `${totalItems} items`;
+
+            orderData.orderId = orderId;
+            orderData.orderDate = formatDate(selectedDate);
+            orderData.orderTime = formatTime(selectedTime);
+        }
+
+        function setRating(rating) {
+            userRating = rating;
+
+            document.querySelectorAll('.rating-star-large').forEach((star, index) => {
+                star.textContent = '☆';
+                star.classList.remove('selected');
+
+                if (index < rating) {
+                    star.textContent = '★';
+                    star.classList.add('selected');
+                }
+            });
+        }
+
+        function submitRating() {
+            const comment = document.getElementById('ratingComment').value;
+
+            if (userRating === 0) {
+                showError('Please select a rating');
+                return;
+            }
+
+            orderData.rating = userRating;
+            orderData.comment = comment;
+
+            currentStep = 12;
+            goToStep('ratingSuccess');
+        }
+
+        function showRatingSuccess() {
+            document.getElementById('finalOrderId').textContent = orderData.orderId;
+            document.getElementById('finalDeliveryDate').textContent = `${formatDate(selectedDate)} at ${formatTime(selectedTime)}`;
+            document.getElementById('finalTotalPaid').textContent = `GHS ${orderData.total.toFixed(2)}`;
+
+            let stars = '';
+            for (let i = 0; i < 5; i++) {
+                if (i < userRating) {
+                    stars += '★';
+                } else {
+                    stars += '☆';
+                }
+            }
+            document.getElementById('finalRatingStars').textContent = stars;
+        }
+
+        function finishFlow() {
+            completeOrderFlow();
+        }
+
+        function completeOrderFlow() {
+            saveOrderToHistory();
+            
+            showSuccess(`Thank you for your order! Order ID: ${orderData.orderId}. Your order has been confirmed and will be processed.`);
+
+            setTimeout(() => {
+                closeScheduleFlow();
+            }, 3000);
+        }
+
+        function saveOrderToHistory() {
+            try {
+                let existingOrders = localStorage.getItem('phluowiseOrders');
+                let orders = existingOrders ? JSON.parse(existingOrders) : [];
+
+                const formattedDate = formatDate(selectedDate);
+                const formattedTime = formatTime(selectedTime);
+
+                const newOrder = {
+                    orderId: orderData.orderId,
+                    company: currentCompany.name,
+                    location: orderData.recipient ? orderData.recipient.address : 'Accra, Ghana',
+                    payment: 'Mobile Money',
+                    time: formattedTime,
+                    date: formattedDate,
+                    price: `GH₵${orderData.total.toFixed(2)}`,
+                    status: 'pending',
+                    statusText: 'Pending',
+                    statusColor: '#F2A78C',
+                    products: orderData.products,
+                    subtotal: orderData.subtotal,
+                    serviceFee: orderData.serviceFee,
+                    total: orderData.total,
+                    recipient: orderData.recipient,
+                    paymentDetails: orderData.payment,
+                    timestamp: new Date().toISOString(),
+                    rating: orderData.rating,
+                    comment: orderData.comment,
+                    transactionId: orderData.transactionId,
+                    deliveryInstructions: orderData.deliveryInstructions,
+                    deliveryDate: selectedDate,
+                    deliveryTime: selectedTime
+                };
+
+                orders.unshift(newOrder);
+                localStorage.setItem('phluowiseOrders', JSON.stringify(orders));
+
+            } catch (error) {
+                console.error('Error saving order to history:', error);
+                showError('Error saving order. Please try again.');
+            }
+        }
+
+        function downloadOrderPDF() {
+            try {
+                const orderId = document.getElementById('orderIdDisplay')?.textContent || 'N/A';
+                const orderDate = document.getElementById('orderDateDisplay')?.textContent || 'N/A';
+                const orderTime = document.getElementById('orderTimeDisplay')?.textContent || 'N/A';
+                const orderItems = document.getElementById('orderItemsDisplay')?.textContent || 'N/A';
+                
+                const recipientName = orderData.recipient?.name || 'N/A';
+                const recipientPhone = orderData.recipient?.phone || 'N/A';
+                const recipientAddress = orderData.recipient?.address || 'N/A';
+                const deliveryInstructions = orderData.recipient?.instructions || 'None';
+                
+                let subtotal = 0;
+                let totalItems = 0;
+                let productsList = [];
+                
+                if (selectedProducts && selectedProducts.length > 0) {
+                    selectedProducts.forEach(product => {
+                        const productPrice = parseFloat(product.price) || 0;
+                        const productQuantity = parseInt(product.quantity) || 0;
+                        const productTotal = productPrice * productQuantity;
+                        
+                        subtotal += productTotal;
+                        totalItems += productQuantity;
+                        productsList.push({
+                            name: product.name || 'Unknown Product',
+                            quantity: productQuantity,
+                            price: productPrice,
+                            total: productTotal
+                        });
+                    });
+                }
+                
+                const serviceFee = totalItems * SERVICE_FEE_PER_ITEM;
+                const totalAmount = subtotal + serviceFee;
+
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+                
+                const pageWidth = doc.internal.pageSize.getWidth();
+                const pageHeight = doc.internal.pageSize.getHeight();
+                const margin = 15;
+                const contentWidth = pageWidth - (margin * 2);
+                let yPosition = 15;
+                
+                function checkPageBreak(requiredHeight) {
+                    if (yPosition + requiredHeight > pageHeight - 20) {
+                        doc.addPage();
+                        yPosition = 15;
+                        return true;
+                    }
+                    return false;
+                }
+                
+                doc.setFillColor(59, 116, 255);
+                doc.rect(0, 0, pageWidth, 50, 'F');
+                
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(20);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Phluowise', margin, 25);
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'normal');
+                doc.text('Order Confirmation', margin, 35);
+                
+                doc.setFontSize(10);
+                doc.text(`#${orderId}`, pageWidth - margin, 25, { align: 'right' });
+                
+                doc.setTextColor(0, 0, 0);
+                yPosition = 60;
+                
+                doc.setFontSize(9);
+                doc.setTextColor(100, 100, 100);
+                doc.text(`Generated: ${new Date().toLocaleDateString()} ${new Date().toLocaleTimeString()}`, margin, yPosition);
+                yPosition += 15;
+                
+                checkPageBreak(40);
+                
+                doc.setTextColor(59, 116, 255);
+                doc.setFontSize(14);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Delivery Information', margin, yPosition);
+                yPosition += 8;
+                
+                doc.setDrawColor(59, 116, 255);
+                doc.setLineWidth(0.5);
+                doc.line(margin, yPosition, margin + 60, yPosition);
+                yPosition += 12;
+                
+                doc.setTextColor(0, 0, 0);
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
+                
+                doc.text('Date:', margin, yPosition);
+                doc.setFont('helvetica', 'bold');
+                doc.text(orderDate, margin + 25, yPosition);
+                
+                doc.setFont('helvetica', 'normal');
+                doc.text('Time:', margin + 80, yPosition);
+                doc.setFont('helvetica', 'bold');
+                doc.text(orderTime, margin + 100, yPosition);
+                yPosition += 10;
+                
+                doc.setFont('helvetica', 'normal');
+                doc.text('Items:', margin, yPosition);
+                doc.setFont('helvetica', 'bold');
+                doc.text(orderItems, margin + 25, yPosition);
+                
+                doc.setFont('helvetica', 'normal');
+                doc.text('Status:', margin + 80, yPosition);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(16, 185, 129);
+                doc.text('Confirmed', margin + 100, yPosition);
+                doc.setTextColor(0, 0, 0);
+                yPosition += 20;
+                
+                checkPageBreak(60);
+                
+                doc.setTextColor(59, 116, 255);
+                doc.setFontSize(14);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Customer Information', margin, yPosition);
+                yPosition += 8;
+                
+                doc.setDrawColor(59, 116, 255);
+                doc.line(margin, yPosition, margin + 80, yPosition);
+                yPosition += 12;
+                
+                doc.setTextColor(0, 0, 0);
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
+                
+                doc.text('Name:', margin, yPosition);
+                doc.setFont('helvetica', 'bold');
+                doc.text(recipientName.substring(0, 40), margin + 25, yPosition);
+                yPosition += 10;
+                
+                doc.setFont('helvetica', 'normal');
+                doc.text('Phone:', margin, yPosition);
+                doc.setFont('helvetica', 'bold');
+                doc.text(recipientPhone, margin + 25, yPosition);
+                yPosition += 10;
+                
+                doc.setFont('helvetica', 'normal');
+                doc.text('Address:', margin, yPosition);
+                
+                const addressLines = doc.splitTextToSize(recipientAddress, contentWidth - 25);
+                doc.setFont('helvetica', 'bold');
+                addressLines.forEach((line, index) => {
+                    if (index === 0) {
+                        doc.text(line, margin + 25, yPosition);
+                    } else {
+                        doc.text(line, margin, yPosition + (index * 7));
+                    }
+                });
+                yPosition += (addressLines.length * 7) + 5;
+                
+                if (deliveryInstructions && deliveryInstructions !== 'None') {
+                    doc.setFont('helvetica', 'normal');
+                    doc.text('Instructions:', margin, yPosition);
+                    
+                    const instructionLines = doc.splitTextToSize(deliveryInstructions, contentWidth - 25);
+                    doc.setFont('helvetica', 'bold');
+                    instructionLines.forEach((line, index) => {
+                        if (index === 0) {
+                            doc.text(line, margin + 25, yPosition);
+                        } else {
+                            doc.text(line, margin, yPosition + (index * 7));
+                        }
+                    });
+                    yPosition += (instructionLines.length * 7) + 5;
+                }
+                
+                checkPageBreak(80);
+                
+                doc.setTextColor(59, 116, 255);
+                doc.setFontSize(14);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Order Details', margin, yPosition);
+                yPosition += 8;
+                
+                doc.setDrawColor(59, 116, 255);
+                doc.line(margin, yPosition, margin + 60, yPosition);
+                yPosition += 12;
+                
+                doc.setFillColor(240, 240, 240);
+                doc.rect(margin, yPosition - 7, contentWidth, 12, 'F');
+                
+                doc.setTextColor(0, 0, 0);
+                doc.setFontSize(9);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Product', margin + 3, yPosition);
+                doc.text('Qty', margin + 80, yPosition);
+                doc.text('Price', margin + 100, yPosition);
+                doc.text('Total', margin + 140, yPosition);
+                yPosition += 15;
+                
+                doc.setFont('helvetica', 'normal');
+                productsList.forEach((product, index) => {
+                    checkPageBreak(12);
+                    
+                    if (index % 2 === 0) {
+                        doc.setFillColor(248, 248, 248);
+                        doc.rect(margin, yPosition - 7, contentWidth, 10, 'F');
+                    }
+                    
+                    const productName = product.name.substring(0, 25);
+                    const quantity = product.quantity.toString();
+                    const unitPrice = `GHS ${product.price.toFixed(2)}`;
+                    const totalPrice = `GHS ${product.total.toFixed(2)}`;
+                    
+                    doc.text(productName, margin + 3, yPosition);
+                    doc.text(quantity, margin + 80, yPosition);
+                    doc.text(unitPrice, margin + 100, yPosition);
+                    doc.text(totalPrice, margin + 140, yPosition);
+                    yPosition += 10;
+                });
+                
+                yPosition += 10;
+                
+                checkPageBreak(50);
+                
+                doc.setFillColor(240, 248, 255);
+                doc.rect(margin, yPosition - 5, contentWidth, 45, 'F');
+                doc.setDrawColor(59, 116, 255);
+                doc.rect(margin, yPosition - 5, contentWidth, 45);
+                
+                doc.setTextColor(59, 116, 255);
+                doc.setFontSize(12);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Price Summary', margin + 3, yPosition + 5);
+                yPosition += 15;
+                
+                doc.setTextColor(0, 0, 0);
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
+                doc.text('Subtotal:', margin + 3, yPosition);
+                doc.setFont('helvetica', 'bold');
+                doc.text(`GHS ${subtotal.toFixed(2)}`, margin + 120, yPosition);
+                yPosition += 8;
+                
+                doc.setFont('helvetica', 'normal');
+                doc.text(`Service Fee (${totalItems} items):`, margin + 3, yPosition);
+                doc.setFont('helvetica', 'bold');
+                doc.text(`GHS ${serviceFee.toFixed(2)}`, margin + 120, yPosition);
+                yPosition += 10;
+                
+                doc.setDrawColor(59, 116, 255);
+                doc.line(margin + 3, yPosition, margin + contentWidth - 3, yPosition);
+                yPosition += 8;
+                
+                doc.setFontSize(11);
+                doc.setFont('helvetica', 'bold');
+                doc.text('Total Amount:', margin + 3, yPosition);
+                doc.setTextColor(59, 116, 255);
+                doc.text(`GHS ${totalAmount.toFixed(2)}`, margin + 120, yPosition);
+                
+                yPosition = pageHeight - 25;
+                doc.setTextColor(100, 100, 100);
+                doc.setFontSize(8);
+                doc.setFont('helvetica', 'normal');
+                doc.text('Thank you for choosing Phluowise!', margin, yPosition);
+                doc.text('This is an automatically generated order confirmation.', margin, yPosition + 6);
+                doc.text('For inquiries, contact our customer support.', margin, yPosition + 12);
+                
+                const totalPages = doc.internal.getNumberOfPages();
+                for (let i = 1; i <= totalPages; i++) {
+                    doc.setPage(i);
+                    doc.text(`Page ${i} of ${totalPages}`, pageWidth - margin, yPosition + 12, { align: 'right' });
+                }
+                
+                doc.save(`order_${orderId}_${Date.now()}.pdf`);
+                
+            } catch (error) {
+                console.error('Error generating PDF:', error);
+                alert('Failed to generate PDF. Please try again.');
+            }
+        }
+
+        // Message display functions
+        function showError(message) {
+            const errorDiv = document.getElementById('errorMessage');
+            errorDiv.textContent = message;
+            errorDiv.classList.add('active');
+
+            setTimeout(() => {
+                errorDiv.classList.remove('active');
+            }, 5000);
+        }
+
+        function showSuccess(message) {
+            const successDiv = document.getElementById('successMessage');
+            successDiv.textContent = message;
+            successDiv.classList.add('active');
+
+            setTimeout(() => {
+                successDiv.classList.remove('active');
+            }, 5000);
+        }
+
+        function hideError() {
+            document.getElementById('errorMessage').classList.remove('active');
+        }
+
+        // Original functions from schedule.html
+        function showSocialModal(platform) {
+            const modal = document.getElementById('socialModal');
+            const platformNameSpan = document.getElementById('socialPlatformName');
+            
+            platformNameSpan.textContent = platform;
+            
+            modal.classList.remove('hidden');
+            setTimeout(() => {
+                modal.style.opacity = '1';
+            }, 10);
+        }
+
+        function closeSocialModal() {
+            const modal = document.getElementById('socialModal');
+            
+            modal.style.opacity = '0';
+            setTimeout(() => {
+                modal.classList.add('hidden');
+            }, 300);
+        }
+
+        function toggleContactPopup() {
+            const popup = document.getElementById('contactPopup');
+            popup.classList.toggle('hidden');
+        }
+
+        function toggleTag(btn) {
+            const tagText = btn.textContent.trim();
+            
+            if (selectedTags.has(tagText)) {
+                selectedTags.delete(tagText);
+                btn.style.backgroundColor = '#40444B';
+                btn.style.borderColor = 'transparent';
+            } else {
+                selectedTags.add(tagText);
+                btn.style.backgroundColor = 'var(--btn-color)';
+                btn.style.borderColor = 'var(--btn-border)';
+            }
+        }
+
+        function submitReview() {
+            const commentInput = document.querySelector('#view-rating input[type="text"]');
+            const comment = commentInput.value.trim();
+
+            if (currentRating === 0) {
+                alert('Please select a star rating');
+                return;
+            }
+
+            if (!comment) {
+                alert('Please write a review');
+                return;
+            }
+
+            const newReview = {
+                id: Date.now(),
+                name: 'You',
+                rating: currentRating,
+                comment: comment,
+                tags: Array.from(selectedTags),
+                date: new Date()
+            };
+
+            reviews.push(newReview);
+            saveReviews();
+
+            updateRatingDisplay();
+            renderReviews();
+
+            currentRating = 0;
+            selectedTags.clear();
+            commentInput.value = '';
+            updateStarDisplay();
+            
+            document.querySelectorAll('#ratingPopup button').forEach(btn => {
+                if (btn.textContent.includes('Sachets') || btn.textContent.includes('Bottle') || btn.textContent.includes('Dispenser')) {
+                    btn.style.backgroundColor = '#40444B';
+                    btn.style.borderColor = 'transparent';
+                }
+            });
+
+            toggleRatingPopup();
+
+            alert('Thank you for your review!');
+        }
+
         function loadReviews() {
             const savedReviews = localStorage.getItem(`reviews_${currentCompany.id}`);
             if (savedReviews) {
                 const parsed = JSON.parse(savedReviews);
-                // Convert string dates back to Date objects
                 reviews = parsed.map(review => ({
                     ...review,
                     date: new Date(review.date)
@@ -1510,12 +4180,10 @@
             }
         }
 
-        // Save reviews to localStorage
         function saveReviews() {
             localStorage.setItem(`reviews_${currentCompany.id}`, JSON.stringify(reviews));
         }
 
-        // Calculate rating statistics
         function calculateRatingStats() {
             if (reviews.length === 0) {
                 return { average: 0, total: 0, distribution: [0, 0, 0, 0, 0] };
@@ -1536,15 +4204,12 @@
             return { average, total: reviews.length, distribution: percentages };
         }
 
-        // Update rating display
         function updateRatingDisplay() {
             const stats = calculateRatingStats();
             
-            // Update rating summary
             document.querySelector('.text-white.font-bold.text-xl').textContent = `${stats.average} rating`;
             document.querySelector('.text-white.font-semibold.text-lg').textContent = `${stats.total} reviews`;
 
-            // Update rating bars
             const starLabels = [5, 4, 3, 2, 1];
             starLabels.forEach((star, index) => {
                 const barIndex = 5 - star;
@@ -1559,7 +4224,6 @@
             });
         }
 
-        // Render reviews
         function renderReviews() {
             const container = document.querySelector('#view-rating .flex.flex-col.gap-4');
             if (!container) return;
@@ -1619,13 +4283,11 @@
             });
         }
 
-        // Set star rating
         function setStarRating(rating) {
             currentRating = rating;
             updateStarDisplay();
         }
 
-        // Update star display
         function updateStarDisplay() {
             const stars = document.querySelectorAll('#ratingPopup .star-rating-btn svg path');
             stars.forEach((star, index) => {
@@ -1637,182 +4299,23 @@
             });
         }
 
-        // Rating Popup Toggle
         function toggleRatingPopup() {
             const popup = document.getElementById('ratingPopup');
             popup.classList.toggle('hidden');
         }
 
-        // Social Media Modal Functions
-        function showSocialModal(platform) {
-            const modal = document.getElementById('socialModal');
-            const platformNameSpan = document.getElementById('socialPlatformName');
-            
-            // Update platform name in the message
-            platformNameSpan.textContent = platform;
-            
-            // Show modal with fade-in effect
-            modal.classList.remove('hidden');
-            setTimeout(() => {
-                modal.style.opacity = '1';
-            }, 10);
-        }
-
-        function closeSocialModal() {
-            const modal = document.getElementById('socialModal');
-            
-            // Hide modal with fade-out effect
-            modal.style.opacity = '0';
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 300);
-        }
-
-        // Contact Popup Toggle
-        function toggleContactPopup() {
-            const popup = document.getElementById('contactPopup');
-            popup.classList.toggle('hidden');
-        }
-
-        // Tag Toggle (exact styling logic from Comment.tsx)
-        function toggleTag(btn) {
-            const tagText = btn.textContent.trim();
-            
-            if (selectedTags.has(tagText)) {
-                selectedTags.delete(tagText);
-                btn.style.backgroundColor = '#40444B';
-                btn.style.borderColor = 'transparent';
-            } else {
-                selectedTags.add(tagText);
-                btn.style.backgroundColor = 'var(--btn-color)';
-                btn.style.borderColor = 'var(--btn-border)';
-            }
-        }
-
-        // Submit review
-        function submitReview() {
-            const commentInput = document.querySelector('#view-rating input[type="text"]');
-            const comment = commentInput.value.trim();
-
-            if (currentRating === 0) {
-                alert('Please select a star rating');
-                return;
-            }
-
-            if (!comment) {
-                alert('Please write a review');
-                return;
-            }
-
-            // Create new review
-            const newReview = {
-                id: Date.now(),
-                name: 'You',
-                rating: currentRating,
-                comment: comment,
-                tags: Array.from(selectedTags),
-                date: new Date()
-            };
-
-            // Add to reviews
-            reviews.push(newReview);
-            saveReviews();
-
-            // Update displays
-            updateRatingDisplay();
-            renderReviews();
-
-            // Reset form
-            currentRating = 0;
-            selectedTags.clear();
-            commentInput.value = '';
-            updateStarDisplay();
-            
-            // Reset tag buttons
-            document.querySelectorAll('#ratingPopup button').forEach(btn => {
-                if (btn.textContent.includes('Sachets') || btn.textContent.includes('Bottle') || btn.textContent.includes('Dispenser')) {
-                    btn.style.backgroundColor = '#40444B';
-                    btn.style.borderColor = 'transparent';
-                }
-            });
-
-            // Hide popup
-            toggleRatingPopup();
-
-            // Show success message
-            alert('Thank you for your review!');
-        }
-
-        // Missing schedule flow functions
-        function initializeProducts() {
-            // Initialize product selection for schedule flow
-            // console.log('🔵 [DEBUG] Products initialized for schedule flow');
-        }
-
-        function updateOrderReview() {
-            // Update order review display
-            // console.log('🔵 [DEBUG] Order review updated');
-        }
-
-        function simulatePaymentProcessing() {
-            // console.log('🔵 [DEBUG] Simulating payment processing');
-            // Simulate payment processing
-            setTimeout(() => {
-                goToStep('payment-success');
-                // console.log('✅ [SUCCESS] Payment processing simulated successfully');
-            }, 3000);
-        }
-
-        function selectPaymentMethod(method) {
-            // console.log(`🔵 [DEBUG] Payment method selected: ${method}`);
-            // Handle payment method selection
-            document.querySelectorAll('.payment-option').forEach(btn => {
-                const radio = btn.querySelector('.payment-radio');
-                if (btn.dataset.payment === method) {
-                    radio.style.backgroundColor = 'white';
-                } else {
-                    radio.style.backgroundColor = 'transparent';
-                }
-            });
-        }
-
-        function goToPaymentDetails() {
-            // console.log('🔵 [DEBUG] Going to payment details step');
-            // Go to payment details step
-            goToStep('payment-details');
-        }
-
-        function setRating(rating) {
-            // console.log(`🔵 [DEBUG] Setting Phluowise rating to: ${rating}`);
-            // Set rating for Phluowise rating step
-            const stars = document.querySelectorAll('.star-button');
-            stars.forEach((star, index) => {
-                if (index < rating) {
-                    star.classList.remove('text-gray-400');
-                    star.classList.add('text-yellow-400');
-                } else {
-                    star.classList.remove('text-yellow-400');
-                    star.classList.add('text-gray-400');
-                    star.classList.remove('text-yellow-400');
-                }
-            });
-        }
-
         // Map Functions
         function initMap() {
-            // Initialize Leaflet map
             map = L.map('scheduleMap', {
                 zoomControl: false,
                 attributionControl: false
             }).setView([currentCompany.coordinates.lat, currentCompany.coordinates.lng], 14);
 
-            // Add default dark tile layer
             currentTileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
                 attribution: ' OpenStreetMap contributors, CARTO',
                 maxZoom: 19
             }).addTo(map);
 
-            // Add company marker
             const companyIcon = L.divIcon({
                 className: 'custom-marker',
                 iconSize: [20, 20],
@@ -1823,7 +4326,6 @@
                 icon: companyIcon
             }).addTo(map);
 
-            // Add popup
             companyMarker.bindPopup(`
                 <div class="p-2">
                     <h3 class="font-semibold text-white mb-1">${currentCompany.name}<span class="material-symbols-outlined verified-checkmark" style="font-size: 16px; margin-left: 2px;">verified</span></h3>
@@ -1841,7 +4343,6 @@
                                 lng: position.coords.longitude
                             };
 
-                            // Add user location marker
                             const userIcon = L.divIcon({
                                 className: 'user-location-marker',
                                 iconSize: [16, 16],
@@ -1866,7 +4367,6 @@
                 }
             }
 
-            // Get user location
             getUserLocation();
         }
 
@@ -1887,52 +4387,74 @@
         function toggleMapType() {
             if (!map || !currentTileLayer) return;
             
-            // Remove current tile layer
             map.removeLayer(currentTileLayer);
             
-            // Toggle between dark and satellite view
             isSatelliteView = !isSatelliteView;
             
             if (isSatelliteView) {
-                // Add satellite tile layer
                 currentTileLayer = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
                     attribution: '© Esri',
                     maxZoom: 19
                 });
             } else {
-                // Add dark tile layer
                 currentTileLayer = L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
                     attribution: '© OpenStreetMap contributors, © CARTO',
                     maxZoom: 19
                 });
             }
             
-            // Add new tile layer to map
             currentTileLayer.addTo(map);
+        }
+
+        function openTermsOfService() {
+            document.getElementById('termsModal').classList.remove('hidden');
+        }
+
+        function closeTermsModal() {
+            document.getElementById('termsModal').classList.add('hidden');
         }
 
         // Initialize
         document.addEventListener('DOMContentLoaded', () => {
-            // console.log('🔵 [DEBUG] DOM Content Loaded - Initializing schedule page');
             const savedTheme = localStorage.getItem('theme') || 'dark';
             document.body.classList.remove('dark-theme', 'gray-theme', 'light-theme');
             document.body.classList.add(savedTheme + '-theme');
 
             setSubView('schedule');
             
-            // Load reviews and initialize rating display
             loadReviews();
             updateRatingDisplay();
             renderReviews();
             
-            // Set current working day
             setCurrentDay();
             
-            // Initialize map when schedule view is active
             setTimeout(() => {
                 initMap();
-                // console.log('✅ [SUCCESS] Map initialized');
             }, 100);
+
+            selectRecipientType('you');
+            
+            selectTermsOption('schedule');
+            
+            const addressField = document.getElementById('recipientAddress');
+            if (addressField) {
+                addressField.addEventListener('input', saveUserAddress);
+            }
+            
+            loadUserProfileData();
+            
+            // Add mobile touch support for Schedule Pickup button
+            const schedulePickupBtn = document.getElementById('schedulePickupBtn');
+            if (schedulePickupBtn) {
+                // Handle both click and touch events
+                schedulePickupBtn.addEventListener('click', openScheduleBottomSheet);
+                schedulePickupBtn.addEventListener('touchstart', function(e) {
+                    e.preventDefault(); // Prevent default touch behavior
+                    openScheduleBottomSheet();
+                }, { passive: false });
+                
+                console.log('Schedule Pickup button event listeners added');
+            }
         });
     </script>
     <script src="../public/js/notifications.js"></script>
