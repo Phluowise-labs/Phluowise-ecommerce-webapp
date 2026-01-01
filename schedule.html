@@ -4091,26 +4091,79 @@
         
         // APK detection (Android app environment)
         function isAPKEnvironment() {
-            return window.cordova || window.PhoneGap || window.phonegap || 
-                   navigator.userAgent.includes('wv') || // WebView
-                   navigator.userAgent.includes('Android') && !navigator.userAgent.includes('Mobile Safari');
+            // More aggressive APK detection
+            const isAndroidApp = navigator.userAgent.includes('Android') && 
+                               !navigator.userAgent.includes('Mobile Safari') &&
+                               !navigator.userAgent.includes('Chrome');
+            
+            const hasCordova = window.cordova || window.PhoneGap || window.phonegap;
+            const isWebView = navigator.userAgent.includes('wv');
+            
+            return isAndroidApp || hasCordova || isWebView;
         }
         
         // APK-specific PDF download methods
         async function tryAPKPDFDownload(doc, filename) {
             return new Promise((resolve, reject) => {
                 try {
-                    // Method 1: Try Cordova File Plugin if available
-                    if (window.cordova && window.cordova.file) {
-                        tryCordovaFileSave(doc, filename).then(resolve).catch(() => {
-                            // Fallback to WebView methods
+                    // Method 1: Try direct Android file system access
+                    tryDirectAndroidSave(doc, filename).then(resolve).catch(() => {
+                        // Method 2: Try Cordova File Plugin if available
+                        if (window.cordova && window.cordova.file) {
+                            tryCordovaFileSave(doc, filename).then(resolve).catch(() => {
+                                // Method 3: WebView download with share intent
+                                tryWebViewDownload(doc, filename).then(resolve).catch(reject);
+                            });
+                        } else {
+                            // Method 3: WebView download with share intent
                             tryWebViewDownload(doc, filename).then(resolve).catch(reject);
-                        });
-                    } else {
-                        // Method 2: WebView download with share intent
-                        tryWebViewDownload(doc, filename).then(resolve).catch(reject);
-                    }
+                        }
+                    });
                 } catch (error) {
+                    reject(error);
+                }
+            });
+        }
+        
+        // Direct Android file save method (no Cordova)
+        async function tryDirectAndroidSave(doc, filename) {
+            return new Promise((resolve, reject) => {
+                try {
+                    // Method 1: Try to trigger Android download manager
+                    const pdfBlob = doc.output('blob');
+                    const url = URL.createObjectURL(pdfBlob);
+                    
+                    // Create a download link that triggers Android download manager
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = url;
+                    downloadLink.download = filename;
+                    downloadLink.style.display = 'none';
+                    
+                    // Force Android download behavior
+                    downloadLink.setAttribute('download', filename);
+                    downloadLink.setAttribute('target', '_self');
+                    
+                    document.body.appendChild(downloadLink);
+                    
+                    // Simulate click event to trigger download
+                    const clickEvent = new MouseEvent('click', {
+                        view: window,
+                        bubbles: true,
+                        cancelable: true
+                    });
+                    downloadLink.dispatchEvent(clickEvent);
+                    
+                    // Remove link after a short delay
+                    setTimeout(() => {
+                        document.body.removeChild(downloadLink);
+                        URL.revokeObjectURL(url);
+                        
+                        showMobileNotification('PDF download started! Check Android Downloads folder.', 'success');
+                        resolve();
+                    }, 2000);
+                    
+                } catch (error) {
+                    console.log('Direct Android save failed:', error);
                     reject(error);
                 }
             });
