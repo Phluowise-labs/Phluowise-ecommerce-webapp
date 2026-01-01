@@ -271,6 +271,20 @@
             border: 1px solid rgba(255, 255, 255, 0.3);
         }
 
+        .glass-button-blue {
+            background: rgba(59, 116, 255, 0.25);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(59, 116, 255, 0.3);
+            box-shadow: none;
+        }
+
+        .glass-button-blue:hover {
+            background: rgba(59, 116, 255, 0.35);
+            border: 1px solid rgba(59, 116, 255, 0.4);
+            box-shadow: none;
+        }
+
         .glass-tag {
             background: rgba(255, 255, 255, 0.08);
             backdrop-filter: blur(8px);
@@ -1448,7 +1462,7 @@
             if (bottle.status === 'pending') {
                 actionButton = `
                     <button onclick="handleBottleReturn('${bottle.id}')" 
-                        class="w-full glass-button text-white font-medium rounded-lg py-3.5 transition-all duration-200 flex items-center justify-center gap-2 text-base">
+                        class="w-full glass-button-blue text-white font-medium rounded-lg py-3.5 transition-all duration-200 flex items-center justify-center gap-2 text-base">
                         <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2">
                             <path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
                         </svg>
