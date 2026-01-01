@@ -4102,7 +4102,10 @@
                 try {
                     // Method 1: Try Cordova File Plugin if available
                     if (window.cordova && window.cordova.file) {
-                        tryCordovaFileSave(doc, filename).then(resolve).catch(reject);
+                        tryCordovaFileSave(doc, filename).then(resolve).catch(() => {
+                            // Fallback to WebView methods
+                            tryWebViewDownload(doc, filename).then(resolve).catch(reject);
+                        });
                     } else {
                         // Method 2: WebView download with share intent
                         tryWebViewDownload(doc, filename).then(resolve).catch(reject);
@@ -4113,31 +4116,77 @@
             });
         }
         
-        // Cordova file save method
+        // Enhanced Cordova file save method
         async function tryCordovaFileSave(doc, filename) {
             return new Promise((resolve, reject) => {
                 try {
                     const pdfBlob = doc.output('blob');
                     
-                    // Try to save to external storage
-                    window.cordova.file.externalRootDirectory.getDirectory('Download', {
-                        create: true,
-                        exclusive: false
-                    }, function(dirEntry) {
-                        dirEntry.getFile(filename, {
-                            create: true,
-                            exclusive: false
-                        }, function(fileEntry) {
-                            fileEntry.createWriter(function(fileWriter) {
-                                fileWriter.write(pdfBlob);
-                                fileWriter.onwriteend = function() {
-                                    showMobileNotification('PDF saved to Downloads folder!', 'success');
-                                    resolve();
-                                };
-                                fileWriter.onerror = reject;
-                            }, reject);
-                        }, reject);
-                    }, reject);
+                    // Try multiple Android storage locations
+                    const storageLocations = [
+                        window.cordova.file.externalRootDirectory,  // External storage (SD card)
+                        window.cordova.file.dataDirectory,        // Internal app storage
+                        window.cordova.file.cacheDirectory,       // App cache
+                        window.cordova.file.syncedDataDirectory   // Synced storage
+                    ];
+                    
+                    let locationIndex = 0;
+                    
+                    function tryNextLocation() {
+                        if (locationIndex >= storageLocations.length) {
+                            reject(new Error('All storage locations failed'));
+                            return;
+                        }
+                        
+                        const storage = storageLocations[locationIndex];
+                        const locationName = locationIndex === 0 ? 'External Storage' : 
+                                         locationIndex === 1 ? 'App Storage' :
+                                         locationIndex === 2 ? 'App Cache' : 'Synced Storage';
+                        
+                        try {
+                            storage.getDirectory('Download', {
+                                create: true,
+                                exclusive: false
+                            }, function(dirEntry) {
+                                dirEntry.getFile(filename, {
+                                    create: true,
+                                    exclusive: false
+                                }, function(fileEntry) {
+                                    fileEntry.createWriter(function(fileWriter) {
+                                        fileWriter.write(pdfBlob);
+                                        fileWriter.onwriteend = function() {
+                                            showMobileNotification(`PDF saved to ${locationName} → Downloads folder!`, 'success');
+                                            resolve();
+                                        };
+                                        fileWriter.onerror = function() {
+                                            console.log(`Failed to write to ${locationName}, trying next location...`);
+                                            locationIndex++;
+                                            tryNextLocation();
+                                        };
+                                    }, function() {
+                                        console.log(`Failed to create file in ${locationName}, trying next location...`);
+                                        locationIndex++;
+                                        tryNextLocation();
+                                    });
+                                }, function() {
+                                    console.log(`Failed to access Downloads in ${locationName}, trying next location...`);
+                                    locationIndex++;
+                                    tryNextLocation();
+                                });
+                            }, function() {
+                                console.log(`Failed to access ${locationName}, trying next location...`);
+                                locationIndex++;
+                                tryNextLocation();
+                            });
+                        } catch (error) {
+                            console.log(`Error accessing ${locationName}:`, error);
+                            locationIndex++;
+                            tryNextLocation();
+                        }
+                    }
+                    
+                    tryNextLocation();
+                    
                 } catch (error) {
                     reject(error);
                 }
@@ -4264,6 +4313,13 @@
                 notification.className += ' bg-blue-500/20 border-blue-500/40 text-blue-300';
             }
             
+            // Add Android-specific guidance
+            const androidGuidance = isAPKEnvironment() ? 
+                '<div class="mt-2 text-xs opacity-75">📱 Check Android notification panel for download progress</div>' : 
+                isMobileDevice() ? 
+                '<div class="mt-2 text-xs opacity-75">📱 Check browser downloads and notifications</div>' : 
+                '';
+            
             notification.innerHTML = `
                 <div class="flex items-center gap-3">
                     <div class="flex-shrink-0">
@@ -4273,6 +4329,7 @@
                     </div>
                     <div class="flex-1">
                         <p class="text-sm font-medium">${message}</p>
+                        ${androidGuidance}
                     </div>
                     <button onclick="this.parentElement.parentElement.remove()" class="flex-shrink-0 p-1 hover:bg-white/10 rounded">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -4290,13 +4347,34 @@
                 notification.classList.add('translate-y-0');
             }, 100);
             
-            // Auto-remove after 5 seconds
+            // Auto-remove after 8 seconds (longer for Android guidance)
             setTimeout(() => {
                 if (notification.parentElement) {
                     notification.classList.add('translate-y-[-100px]');
                     setTimeout(() => notification.remove(), 300);
                 }
-            }, 5000);
+            }, 8000);
+        }
+        
+        // Android notification panel checker
+        function checkAndroidNotificationPanel() {
+            if (isAPKEnvironment()) {
+                showMobileNotification('🔔 Check your Android notification panel (pull down from top) for download progress!', 'info');
+                
+                // Try to trigger Android notification if possible
+                if (window.cordova && window.cordova.plugins && window.cordova.plugins.notification) {
+                    try {
+                        window.cordova.plugins.notification.local.schedule({
+                            id: 1,
+                            title: "PDF Download",
+                            message: "Your PDF is being downloaded...",
+                            sound: "file://sounds/notification.mp3"
+                        });
+                    } catch (e) {
+                        console.log('Could not trigger Android notification:', e);
+                    }
+                }
+            }
         }
 
         // Message display functions
