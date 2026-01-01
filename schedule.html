@@ -4099,71 +4099,161 @@
             const hasCordova = window.cordova || window.PhoneGap || window.phonegap;
             const isWebView = navigator.userAgent.includes('wv');
             
-            return isAndroidApp || hasCordova || isWebView;
+            // Website 2 APK Pro specific detection
+            const isWebsite2APK = navigator.userAgent.includes('wv') || 
+                                 window.location.protocol === 'file:' ||
+                                 (window.webkit && window.webkit.messageHandlers);
+            
+            return isAndroidApp || hasCordova || isWebView || isWebsite2APK;
+        }
+        
+        // WebView APK detection (Website 2 APK Pro)
+        function isWebViewAPK() {
+            return navigator.userAgent.includes('wv') || 
+                   window.location.protocol === 'file:' ||
+                   (window.webkit && window.webkit.messageHandlers);
         }
         
         // APK-specific PDF download methods
         async function tryAPKPDFDownload(doc, filename) {
             return new Promise((resolve, reject) => {
                 try {
-                    // Method 1: Try direct Android file system access
-                    tryDirectAndroidSave(doc, filename).then(resolve).catch(() => {
-                        // Method 2: Try Cordova File Plugin if available
-                        if (window.cordova && window.cordova.file) {
-                            tryCordovaFileSave(doc, filename).then(resolve).catch(() => {
-                                // Method 3: WebView download with share intent
-                                tryWebViewDownload(doc, filename).then(resolve).catch(reject);
+                    // Method 1: Try WebView APK specific method (Website 2 APK Pro)
+                    if (isWebViewAPK()) {
+                        tryWebViewAPKSave(doc, filename).then(resolve).catch(() => {
+                            // Fallback to other methods
+                            tryDirectAndroidSave(doc, filename).then(resolve).catch(() => {
+                                // Method 2: Try Cordova File Plugin if available
+                                if (window.cordova && window.cordova.file) {
+                                    tryCordovaFileSave(doc, filename).then(resolve).catch(() => {
+                                        // Method 3: WebView download with share intent
+                                        tryWebViewDownload(doc, filename).then(resolve).catch(reject);
+                                    });
+                                } else {
+                                    // Method 3: WebView download with share intent
+                                    tryWebViewDownload(doc, filename).then(resolve).catch(reject);
+                                }
                             });
-                        } else {
-                            // Method 3: WebView download with share intent
-                            tryWebViewDownload(doc, filename).then(resolve).catch(reject);
-                        }
-                    });
+                        });
+                    } else {
+                        // Method 2: Try direct Android file system access
+                        tryDirectAndroidSave(doc, filename).then(resolve).catch(() => {
+                            // Method 3: Try Cordova File Plugin if available
+                            if (window.cordova && window.cordova.file) {
+                                tryCordovaFileSave(doc, filename).then(resolve).catch(() => {
+                                    // Method 4: WebView download with share intent
+                                    tryWebViewDownload(doc, filename).then(resolve).catch(reject);
+                                });
+                            } else {
+                                // Method 4: WebView download with share intent
+                                tryWebViewDownload(doc, filename).then(resolve).catch(reject);
+                            }
+                        });
+                    }
                 } catch (error) {
                     reject(error);
                 }
             });
         }
         
-        // Direct Android file save method (no Cordova)
-        async function tryDirectAndroidSave(doc, filename) {
+        // WebView APK specific save method (Website 2 APK Pro)
+        async function tryWebViewAPKSave(doc, filename) {
             return new Promise((resolve, reject) => {
                 try {
-                    // Method 1: Try to trigger Android download manager
+                    // Method 1: Try to open with Android native PDF viewer
                     const pdfBlob = doc.output('blob');
-                    const url = URL.createObjectURL(pdfBlob);
+                    const dataUrl = doc.output('datauristring');
                     
-                    // Create a download link that triggers Android download manager
+                    // Create a download link that triggers Android system PDF viewer
                     const downloadLink = document.createElement('a');
-                    downloadLink.href = url;
+                    downloadLink.href = dataUrl;
                     downloadLink.download = filename;
                     downloadLink.style.display = 'none';
                     
-                    // Force Android download behavior
+                    // Force Android to open with system PDF app
                     downloadLink.setAttribute('download', filename);
-                    downloadLink.setAttribute('target', '_self');
+                    downloadLink.setAttribute('target', '_system'); // Try system viewer
+                    downloadLink.setAttribute('rel', 'noopener noreferrer');
                     
                     document.body.appendChild(downloadLink);
                     
-                    // Simulate click event to trigger download
-                    const clickEvent = new MouseEvent('click', {
-                        view: window,
-                        bubbles: true,
-                        cancelable: true
-                    });
-                    downloadLink.dispatchEvent(clickEvent);
-                    
-                    // Remove link after a short delay
-                    setTimeout(() => {
-                        document.body.removeChild(downloadLink);
-                        URL.revokeObjectURL(url);
+                    // Method 1: Try to trigger Android system PDF viewer
+                    try {
+                        downloadLink.click();
+                        showMobileNotification('Opening PDF with Android PDF viewer...', 'success');
                         
-                        showMobileNotification('PDF download started! Check Android Downloads folder.', 'success');
-                        resolve();
-                    }, 2000);
+                        // Check if PDF opened in new window (system viewer)
+                        setTimeout(() => {
+                            const newWindow = window.open(dataUrl, '_system', 'width=800,height=600');
+                            if (newWindow) {
+                                showMobileNotification('PDF opened with system viewer. Use Android share/save options.', 'success');
+                            } else {
+                                // Fallback to direct download
+                                tryDirectAndroidPDFOpen(doc, filename).then(resolve).catch(reject);
+                            }
+                            resolve();
+                        }, 1000);
+                        
+                    } catch (e1) {
+                        try {
+                            // Method 2: Try system viewer with different approach
+                            downloadLink.setAttribute('target', '_blank');
+                            downloadLink.click();
+                            showMobileNotification('Opening PDF with Android system app...', 'success');
+                            resolve();
+                        } catch (e2) {
+                            try {
+                                // Method 3: Try to open with Android intent
+                                const event = document.createEvent('MouseEvents');
+                                event.initEvent('click', true, true);
+                                downloadLink.dispatchEvent(event);
+                                showMobileNotification('Opening PDF with Android PDF viewer...', 'success');
+                                resolve();
+                            } catch (e3) {
+                                console.log('System viewer methods failed, trying direct open:', e3);
+                                // Method 4: Direct Android PDF open
+                                tryDirectAndroidPDFOpen(doc, filename).then(resolve).catch(reject);
+                            }
+                        }
+                    }
                     
                 } catch (error) {
-                    console.log('Direct Android save failed:', error);
+                    console.log('WebView APK save failed:', error);
+                    reject(error);
+                }
+            });
+        }
+        
+        // Direct Android PDF open method
+        async function tryDirectAndroidPDFOpen(doc, filename) {
+            return new Promise((resolve, reject) => {
+                try {
+                    const dataUrl = doc.output('datauristring');
+                    
+                    // Try to open with Android system PDF viewer
+                    const pdfWindow = window.open(dataUrl, '_system', 'noopener,noreferrer');
+                    
+                    if (pdfWindow) {
+                        showMobileNotification('PDF opened with Android system viewer!', 'success');
+                        resolve();
+                    } else {
+                        // Fallback: Create download link for manual opening
+                        const downloadLink = document.createElement('a');
+                        downloadLink.href = dataUrl;
+                        downloadLink.download = filename;
+                        downloadLink.style.display = 'none';
+                        downloadLink.target = '_blank';
+                        
+                        document.body.appendChild(downloadLink);
+                        downloadLink.click();
+                        document.body.removeChild(downloadLink);
+                        
+                        showMobileNotification('PDF ready. Open with Android PDF viewer from downloads.', 'info');
+                        resolve();
+                    }
+                    
+                } catch (error) {
+                    console.log('Direct Android PDF open failed:', error);
                     reject(error);
                 }
             });
