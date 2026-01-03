@@ -19,6 +19,8 @@ if (typeof Appwrite === 'undefined') {
         WORKING_DAYS_TABLE: 'working_days',
         PRODUCTS_TABLE: 'product',
         RATINGS_TABLE: 'ratings',
+        STORAGE_BUCKET_ID: '68b1c57b001542be7fbe',
+        PROJECT_ID: '68b17582003582da69c8',
         client,
         account,
         databases,

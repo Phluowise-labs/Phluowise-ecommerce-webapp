@@ -1,0 +1,622 @@
+/* Mobile Responsive CSS for 360x740 screens */
+/* Standardized scaling for all Phluowise pages */
+
+/* Base viewport and scaling */
+@media screen and (max-width: 360px) {
+    html {
+        font-size: 14px;
+    }
+    
+    body {
+        font-size: 14px;
+        line-height: 1.4;
+    }
+}
+
+/* Header Bar - Scale down for 360px */
+@media screen and (max-width: 360px) {
+    .header-bar {
+        height: 90px !important;
+        padding: 0 12px !important;
+    }
+    
+    .header-bar h1 {
+        font-size: 16px !important;
+        max-width: 180px !important;
+    }
+    
+    .header-bar button {
+        height: 38px !important;
+        width: 38px !important;
+    }
+    
+    .header-bar svg {
+        width: 20px !important;
+        height: 20px !important;
+    }
+}
+
+/* Bottom Tab Navigation - Scale for 360px */
+@media screen and (max-width: 360px) {
+    .tab-bar {
+        height: 56px !important;
+        padding: 0 8px !important;
+    }
+    
+    .tab-bar svg {
+        width: 24px !important;
+        height: 24px !important;
+    }
+    
+    .tab-bar span {
+        font-size: 11px !important;
+        margin-top: 2px !important;
+    }
+}
+
+/* Search Container - Scale for 360px */
+@media screen and (max-width: 360px) {
+    .search-container {
+        height: 36px !important;
+        padding: 0 16px !important;
+        margin-top: 8px !important;
+    }
+    
+    .search-container input {
+        font-size: 14px !important;
+        height: 36px !important;
+    }
+    
+    .search-container svg {
+        width: 16px !important;
+        height: 16px !important;
+    }
+}
+
+/* Filter Buttons - Scale for 360px */
+@media screen and (max-width: 360px) {
+    #aroundBtn, #allBtn {
+        height: 32px !important;
+        padding: 0 12px !important;
+        font-size: 12px !important;
+    }
+    
+    #toggleViewBtn {
+        height: 36px !important;
+        width: 36px !important;
+    }
+}
+
+/* Sliding Menu - Scale for 360px */
+@media screen and (max-width: 360px) {
+    .sliding-menu {
+        width: 85% !important;
+        max-width: 300px !important;
+    }
+    
+    .sliding-menu .profile-image-container {
+        height: 90px !important;
+        width: 90px !important;
+    }
+    
+    .sliding-menu .profile-image {
+        height: 50px !important;
+        width: 50px !important;
+    }
+    
+    .sliding-menu .edit-button {
+        height: 32px !important;
+        width: 32px !important;
+    }
+    
+    .sliding-menu h2 {
+        font-size: 18px !important;
+    }
+    
+    .sliding-menu p {
+        font-size: 14px !important;
+    }
+    
+    .sliding-menu .menu-item {
+        height: 50px !important;
+        padding: 0 16px !important;
+    }
+    
+    .sliding-menu .menu-item svg {
+        width: 20px !important;
+        height: 20px !important;
+    }
+    
+    .sliding-menu .menu-item span {
+        font-size: 14px !important;
+    }
+    
+    .sliding-menu .logout-btn {
+        height: 52px !important;
+        padding: 0 16px !important;
+    }
+    
+    .sliding-menu .logout-btn span {
+        font-size: 14px !important;
+    }
+}
+
+/* Company Cards - Scale for 360px */
+@media screen and (max-width: 360px) {
+    .company-card {
+        padding: 12px !important;
+        margin-bottom: 8px !important;
+    }
+    
+    .company-card .company-image {
+        width: 60px !important;
+        height: 60px !important;
+    }
+    
+    .company-card .company-name {
+        font-size: 16px !important;
+    }
+    
+    .company-card .company-location {
+        font-size: 12px !important;
+    }
+    
+    .company-card .company-rating {
+        font-size: 12px !important;
+    }
+    
+    .company-card .verified-checkmark {
+        font-size: 16px !important;
+    }
+}
+
+/* Grid View - Scale for 360px */
+@media screen and (max-width: 360px) {
+    .companies-grid {
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 8px !important;
+        padding: 0 8px !important;
+    }
+    
+    .grid-card {
+        padding: 8px !important;
+    }
+    
+    .grid-card .company-image {
+        width: 100% !important;
+        height: 80px !important;
+    }
+    
+    .grid-card .company-name {
+        font-size: 14px !important;
+    }
+    
+    .grid-card .company-location {
+        font-size: 11px !important;
+    }
+}
+
+/* Modal Scaling - Scale for 360px */
+@media screen and (max-width: 360px) {
+    .modal {
+        max-width: 320px !important;
+        padding: 16px !important;
+    }
+    
+    .modal h2 {
+        font-size: 18px !important;
+    }
+    
+    .modal p {
+        font-size: 14px !important;
+    }
+    
+    .modal button {
+        height: 40px !important;
+        font-size: 14px !important;
+        padding: 0 16px !important;
+    }
+}
+
+/* Location Permission Modal - Scale for 360px */
+@media screen and (max-width: 360px) {
+    #locationModal .modal-content {
+        max-width: 300px !important;
+        height: 350px !important;
+        padding: 20px !important;
+    }
+    
+    #locationModal h2 {
+        font-size: 18px !important;
+    }
+    
+    #locationModal p {
+        font-size: 14px !important;
+    }
+    
+    #locationModal button {
+        height: 36px !important;
+        width: 140px !important;
+        font-size: 14px !important;
+    }
+    
+    #locationModal .ellipse-image {
+        width: 100px !important;
+        height: 98px !important;
+    }
+    
+    #locationModal .location-image {
+        width: 42px !important;
+        height: 42px !important;
+    }
+}
+
+/* Pull to Refresh Indicator - Scale for 360px */
+@media screen and (max-width: 360px) {
+    .pull-to-refresh-indicator {
+        padding: 8px 16px !important;
+        font-size: 12px !important;
+        border-radius: 0 0 16px 16px !important;
+    }
+    
+    .refresh-spinner {
+        width: 28px !important;
+        height: 28px !important;
+    }
+}
+
+/* Form Elements - Scale for 360px */
+@media screen and (max-width: 360px) {
+    .form-input,
+    .form-textarea,
+    .form-select {
+        font-size: 14px !important;
+        padding: 12px 16px !important;
+    }
+    
+    .form-label {
+        font-size: 14px !important;
+        margin-bottom: 8px !important;
+    }
+    
+    .btn-primary,
+    .btn-secondary {
+        height: 44px !important;
+        font-size: 14px !important;
+        padding: 0 20px !important;
+    }
+}
+
+/* Service Page Specific - Scale for 360px */
+@media screen and (max-width: 360px) {
+    .service-card {
+        padding: 12px !important;
+        margin-bottom: 8px !important;
+    }
+    
+    .service-card h3 {
+        font-size: 16px !important;
+    }
+    
+    .service-card p {
+        font-size: 13px !important;
+    }
+    
+    .service-card .price {
+        font-size: 18px !important;
+    }
+    
+    .bottom-sheet-content {
+        border-radius: 20px 20px 0 0 !important;
+        padding: 16px !important;
+    }
+    
+    .quantity-display {
+        font-size: 36px !important;
+        min-width: 60px !important;
+    }
+    
+    .quantity-btn {
+        width: 44px !important;
+        height: 44px !important;
+        font-size: 20px !important;
+    }
+}
+
+/* Schedule Page Specific - Scale for 360px */
+@media screen and (max-width: 360px) {
+    .schedule-item {
+        padding: 12px !important;
+        margin-bottom: 8px !important;
+    }
+    
+    .schedule-item .date {
+        font-size: 14px !important;
+    }
+    
+    .schedule-item .time {
+        font-size: 14px !important;
+    }
+    
+    .schedule-item .service {
+        font-size: 16px !important;
+    }
+    
+    .schedule-item .status {
+        font-size: 12px !important;
+    }
+}
+
+/* Profile Page Specific - Scale for 360px */
+@media screen and (max-width: 360px) {
+    .profile-header {
+        padding: 16px !important;
+    }
+    
+    .profile-image {
+        width: 80px !important;
+        height: 80px !important;
+    }
+    
+    .profile-name {
+        font-size: 18px !important;
+    }
+    
+    .profile-email {
+        font-size: 14px !important;
+    }
+    
+    .profile-section {
+        padding: 12px !important;
+        margin-bottom: 8px !important;
+    }
+    
+    .profile-section h3 {
+        font-size: 16px !important;
+    }
+    
+    .profile-section p {
+        font-size: 14px !important;
+    }
+}
+
+/* About Page Specific - Scale for 360px */
+@media screen and (max-width: 360px) {
+    .about-content {
+        padding: 16px !important;
+    }
+    
+    .about-content h1 {
+        font-size: 20px !important;
+    }
+    
+    .about-content h2 {
+        font-size: 18px !important;
+    }
+    
+    .about-content p {
+        font-size: 14px !important;
+        line-height: 1.5 !important;
+    }
+    
+    .about-content ul {
+        padding-left: 20px !important;
+    }
+    
+    .about-content li {
+        font-size: 14px !important;
+        margin-bottom: 4px !important;
+    }
+}
+
+/* Report Page Specific - Scale for 360px */
+@media screen and (max-width: 360px) {
+    .report-form {
+        padding: 16px !important;
+    }
+    
+    .report-form h2 {
+        font-size: 18px !important;
+    }
+    
+    .report-form label {
+        font-size: 14px !important;
+    }
+    
+    .report-form input,
+    .report-form textarea,
+    .report-form select {
+        font-size: 14px !important;
+        padding: 12px 16px !important;
+    }
+    
+    .report-form button {
+        height: 44px !important;
+        font-size: 14px !important;
+    }
+}
+
+/* Authentication Pages - Scale for 360px */
+@media screen and (max-width: 360px) {
+    .auth-container {
+        padding: 16px !important;
+    }
+    
+    .auth-container h1 {
+        font-size: 20px !important;
+    }
+    
+    .auth-container p {
+        font-size: 14px !important;
+    }
+    
+    .auth-container input {
+        font-size: 14px !important;
+        padding: 12px 16px !important;
+    }
+    
+    .auth-container button {
+        height: 44px !important;
+        font-size: 14px !important;
+    }
+    
+    .auth-container .logo {
+        width: 80px !important;
+        height: 80px !important;
+    }
+}
+
+/* Utility Classes - Scale for 360px */
+@media screen and (max-width: 360px) {
+    .text-lg {
+        font-size: 16px !important;
+    }
+    
+    .text-xl {
+        font-size: 18px !important;
+    }
+    
+    .text-2xl {
+        font-size: 20px !important;
+    }
+    
+    .text-3xl {
+        font-size: 22px !important;
+    }
+    
+    .p-4 {
+        padding: 12px !important;
+    }
+    
+    .p-6 {
+        padding: 16px !important;
+    }
+    
+    .px-4 {
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+    }
+    
+    .px-6 {
+        padding-left: 16px !important;
+        padding-right: 16px !important;
+    }
+    
+    .py-2 {
+        padding-top: 8px !important;
+        padding-bottom: 8px !important;
+    }
+    
+    .py-4 {
+        padding-top: 12px !important;
+        padding-bottom: 12px !important;
+    }
+    
+    .m-4 {
+        margin: 12px !important;
+    }
+    
+    .m-6 {
+        margin: 16px !important;
+    }
+    
+    .mx-4 {
+        margin-left: 12px !important;
+        margin-right: 12px !important;
+    }
+    
+    .my-2 {
+        margin-top: 8px !important;
+        margin-bottom: 8px !important;
+    }
+    
+    .my-4 {
+        margin-top: 12px !important;
+        margin-bottom: 12px !important;
+    }
+    
+    .gap-2 {
+        gap: 8px !important;
+    }
+    
+    .gap-4 {
+        gap: 12px !important;
+    }
+    
+    .gap-6 {
+        gap: 16px !important;
+    }
+}
+
+/* Loading States - Scale for 360px */
+@media screen and (max-width: 360px) {
+    .loading-spinner {
+        width: 32px !important;
+        height: 32px !important;
+    }
+    
+    .skeleton {
+        height: 20px !important;
+    }
+    
+    .skeleton-text {
+        height: 14px !important;
+        margin-bottom: 4px !important;
+    }
+}
+
+/* Error States - Scale for 360px */
+@media screen and (max-width: 360px) {
+    .error-message {
+        font-size: 13px !important;
+        padding: 8px 12px !important;
+    }
+    
+    .success-message {
+        font-size: 13px !important;
+        padding: 8px 12px !important;
+    }
+    
+    .warning-message {
+        font-size: 13px !important;
+        padding: 8px 12px !important;
+    }
+}
+
+/* Animations - Optimized for 360px */
+@media screen and (max-width: 360px) {
+    .fade-in {
+        animation-duration: 0.2s !important;
+    }
+    
+    .slide-up {
+        animation-duration: 0.3s !important;
+    }
+    
+    .slide-down {
+        animation-duration: 0.3s !important;
+    }
+    
+    .bounce {
+        animation-duration: 0.4s !important;
+    }
+}
+
+/* Print Styles - Ensure mobile layout prints correctly */
+@media print and (max-width: 360px) {
+    .tab-bar,
+    .header-bar button,
+    .sliding-menu {
+        display: none !important;
+    }
+    
+    .header-bar {
+        height: auto !important;
+        padding: 8px !important;
+    }
+    
+    body {
+        font-size: 12px !important;
+        line-height: 1.3 !important;
+    }
+}
