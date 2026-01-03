@@ -1110,6 +1110,26 @@
         // Load initial company data from database
         async function loadInitialCompanyData() {
             try {
+                // Check if user is authenticated
+                if (!window.account) {
+                    console.log('⏳ Waiting for Appwrite account to initialize...');
+                    setTimeout(() => loadInitialCompanyData(), 1000);
+                    return;
+                }
+
+                // Try to get current user
+                let user = null;
+                try {
+                    user = await window.account.get();
+                    console.log('✅ User authenticated:', user.email);
+                } catch (authError) {
+                    console.log('⚠️ No authenticated user - using fallback data');
+                    companies = window.companyDataManager.getFallbackData();
+                    companiesDataLoaded = true;
+                    renderCompanies();
+                    return;
+                }
+
                 // Wait for Appwrite to be available
                 if (!window.appwriteConfig || !window.databases) {
                     console.log('⏳ Waiting for Appwrite to initialize...');
