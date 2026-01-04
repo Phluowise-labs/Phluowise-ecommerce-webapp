@@ -4,6 +4,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-TRV3R43NQZ"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-TRV3R43NQZ');
+</script>
     <title>Phluowise - Shop Details</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -1125,6 +1134,42 @@
             transform: scale(1.2);
         }
 
+        /* Static Rating Stars */
+        .star-rating-btn {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .star-rating-btn:hover svg {
+            transform: scale(1.1);
+        }
+
+        .star-rating-btn svg {
+            transition: transform 0.2s ease;
+        }
+
+        .star-rating-btn svg path {
+            transition: fill 0.2s ease;
+        }
+
+        /* Responsive stars container */
+        #staticRatingStars {
+            max-width: 100%;
+            overflow-x: auto;
+            justify-content: center;
+        }
+
+        @media (max-width: 480px) {
+            #staticRatingStars {
+                gap: 1px;
+            }
+            
+            .star-rating-btn {
+                width: 28px !important;
+                height: 28px !important;
+            }
+        }
+
         /* Navigation Buttons */
         .step-navigation {
             display: flex;
@@ -1445,11 +1490,11 @@
                 <!-- Time Display Row (exact bg #292B2F, rounded, padding) -->
                 <div class="mt-2 w-full flex flex-row items-center justify-center p-1 rounded gap-6"
                     style="background-color: #292B2F;">
-                    <div class="flex flex-row justify-between w-[40%] items-center">
+                    <div class="flex flex-row justify-between w-[45%] items-center">
                         <span class="text-white text-base font-medium">Opening:</span>
                         <span id="openingTime" class="text-white text-base font-medium">08:00</span>
                     </div>
-                    <div class="flex flex-row justify-between w-[40%] items-center">
+                    <div class="flex flex-row justify-between w-[45%] items-center">
                         <span class="text-white text-base font-medium">Closing:</span>
                         <span id="closingTime" class="text-white text-base font-medium">17:00</span>
                     </div>
@@ -1459,8 +1504,8 @@
             <!-- SocialMedia Component (Exact from React Native) -->
             <div class="mt-1">
                 <div class="w-full flex flex-row justify-between items-center py-2 px-8" style="gap: 24px; background-color: var(--bottom-sheet-color); height: 42px;">
-                    <span class="text-white font-[500] text-lg">Social media</span>
-                    <div class="flex flex-row justify-center items-center" style="gap: 8px;">
+                    <span class="text-white font-[500] text-lg whitespace-nowrap">Social media</span>
+                    <div class="flex flex-row justify-center items-center overflow-x-auto hide-scrollbar" style="gap: 8px; max-width: 200px;">
                         <!-- Facebook -->
                         <div onclick="showSocialModal('Facebook')" class="flex flex-row justify-center items-center p-1 cursor-pointer hover:opacity-80 transition-opacity" style="background-color: #333333; height: 28px; width: 28px;">
                             <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
@@ -1609,7 +1654,7 @@
                 </div>
 
                 <!-- RATING VIEW (Rating.tsx - Exact with RatingBar, AllRating, Comment) -->
-                <div id="view-rating" class="hidden p-4">
+                <div id="view-rating" class="hidden p-4 pb-[100px]">
                     <!-- Loading spinner for ratings -->
                     <div id="ratingsLoader" class="flex flex-col items-center justify-center py-8">
                         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white mb-3"></div>
@@ -1715,50 +1760,40 @@
                         </div>
                     </div>
 
-                    <!-- Comment Component (Exact input with Star trigger and Tags popup) -->
-                    <div class="p-4 relative mb-[150px]" style="z-index: 5; height: 200px;">
+                    <!-- Comment Component (Floating input with inline star rating) -->
+                    <div class="fixed bottom-16 left-0 right-0 p-4 bg-gray-900/95 backdrop-blur-xl border-t border-gray-700/50" style="z-index: 10000; pointer-events: auto;">
+                        <!-- Static Rating Stars (shown when toggled) -->
+                        <div id="staticRatingStars" class="hidden mb-4 p-3 bg-black/50 rounded-[100px] flex justify-center gap-2">
+                            <button onclick="setStarRating(1)" class="w-8 h-8 star-rating-btn">
+                                <svg fill="#666" viewBox="0 0 24 24">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                </svg>
+                            </button>
+                            <button onclick="setStarRating(2)" class="w-8 h-8 star-rating-btn">
+                                <svg fill="#666" viewBox="0 0 24 24">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                </svg>
+                            </button>
+                            <button onclick="setStarRating(3)" class="w-8 h-8 star-rating-btn">
+                                <svg fill="#666" viewBox="0 0 24 24">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                </svg>
+                            </button>
+                            <button onclick="setStarRating(4)" class="w-8 h-8 star-rating-btn">
+                                <svg fill="#666" viewBox="0 0 24 24">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                </svg>
+                            </button>
+                            <button onclick="setStarRating(5)" class="w-8 h-8 star-rating-btn">
+                                <svg fill="#666" viewBox="0 0 24 24">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                </svg>
+                            </button>
+                        </div>
 
-                        <!-- Rating/Tags Popup (showRateView from Comment.tsx) -->
-                        <div id="ratingPopup" class="absolute left-0 right-0 hidden bg-transparent"
-                            style="top: -60px; z-index: 10;">
-                            <div
-                                class="flex flex-row items-center gap-4 py-2 overflow-x-auto hide-scrollbar justify-center">
-                                <!-- Stars Container (height: 45, width: 216, rounded: 100, bg: black) -->
-                                <div class="flex flex-row items-center justify-center gap-4 ml-2 rounded-[100px] bg-black"
-                                    style="height: 45px; width: 216px;">
-                                    <button onclick="setStarRating(1)" class="w-6 h-6 star-rating-btn">
-                                        <svg fill="#666" viewBox="0 0 24 24">
-                                            <path
-                                                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                        </svg>
-                                    </button>
-                                    <button onclick="setStarRating(2)" class="w-6 h-6 star-rating-btn">
-                                        <svg fill="#666" viewBox="0 0 24 24">
-                                            <path
-                                                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                        </svg>
-                                    </button>
-                                    <button onclick="setStarRating(3)" class="w-6 h-6 star-rating-btn">
-                                        <svg fill="#666" viewBox="0 0 24 24">
-                                            <path
-                                                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                        </svg>
-                                    </button>
-                                    <button onclick="setStarRating(4)" class="w-6 h-6 star-rating-btn">
-                                        <svg fill="#666" viewBox="0 0 24 24">
-                                            <path
-                                                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                        </svg>
-                                    </button>
-                                    <button onclick="setStarRating(5)" class="w-6 h-6 star-rating-btn">
-                                        <svg fill="#666" viewBox="0 0 24 24">
-                                            <path
-                                                d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                        </svg>
-                                    </button>
-                                </div>
-
-                                <!-- Tags Chips (height: 35, px: 24, rounded: 100, bg: #40444B) -->
+                        <!-- Tags (shown when rating is selected) -->
+                        <div id="ratingTags" class="hidden mb-4">
+                            <div class="flex flex-row gap-3 overflow-x-auto hide-scrollbar">
                                 <button onclick="toggleTag(this)"
                                     class="flex items-center justify-center rounded-[100px] bg-[#40444B] text-white text-lg font-semibold capitalize border border-transparent"
                                     style="height: 35px; padding: 0 24px;">
@@ -1777,23 +1812,25 @@
                             </div>
                         </div>
 
-                        <!-- Input Row (exact height: 43, rounded: 46, bg: #292B2FCC) -->
+                        <!-- Static Input Row with larger height and star icon -->
                         <div class="flex flex-row items-center gap-4">
-                            <div class="border flex flex-row items-center px-5 gap-4 mt-3 rounded-[46px]"
-                                style="height: 43px; background-color: #292B2FCC; border-color: var(--input-border); width: calc(100% - 60px);">
-                                <input type="text" placeholder="Write a review.."
-                                    class="bg-transparent border-none outline-none text-white text-lg flex-grow placeholder-white/60">
+                            <div class="border rounded-[46px] relative"
+                                style="height: 56px; background-color: #292B2FCC; border-color: var(--input-border); width: calc(100% - 60px); display: flex; align-items: center; padding: 0 20px;">
+                                <input type="text" id="ratingCommentInput" placeholder="Write a review.."
+                                    style="background: transparent; border: none; outline: none; color: white; font-size: 18px; flex: 1; padding-right: 40px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
                                 <!-- Star Icon Trigger -->
-                                <button onclick="toggleRatingPopup()">
-                                    <svg class="w-5 h-5 opacity-50 hover:opacity-100" fill="gold" viewBox="0 0 24 24">
-                                        <path
-                                            d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                <button onclick="toggleStaticRatingStars()" 
+                                    style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: transparent; border: none; cursor: pointer;"
+                                    onmouseover="this.querySelector('svg').style.opacity='1'"
+                                    onmouseout="this.querySelector('svg').style.opacity='0.5'">
+                                    <svg class="w-7 h-7" style="opacity: 0.5; transition: opacity 0.2s;" fill="gold" viewBox="0 0 24 24">
+                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                                     </svg>
                                 </button>
                             </div>
-                            <!-- Send Button (height: 43, width: 43, rounded-full) -->
-                            <button onclick="submitReview()" class="mt-3 border rounded-full flex items-center justify-center"
-                                style="background-color: var(--btn-color); border-color: var(--btn-border); height: 43px; width: 43px;">
+                            <!-- Send Button (larger) -->
+                            <button onclick="submitReview()" class="border rounded-full flex items-center justify-center"
+                                style="background-color: var(--btn-color); border-color: var(--btn-border); height: 56px; width: 56px;">
                                 <svg class="w-6 h-6" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
                                     <line x1="22" y1="2" x2="11" y2="13"></line>
                                     <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
@@ -4669,6 +4706,64 @@
             });
         }
         
+        // Update working hours based on selected day
+        function updateWorkingHours() {
+            const select = document.getElementById('workingDaysSelect');
+            const selectedDay = select.value;
+            
+            // Get working days from current company data
+            const workingHours = window.currentCompany?.workingHours || {};
+            
+            // Find the working hours for the selected day
+            const dayData = workingHours[selectedDay.toLowerCase()];
+            
+            if (dayData && dayData.open && dayData.close) {
+                // Use pre-parsed time data
+                const openingTime = dayData.open;
+                const closingTime = dayData.close;
+                
+                // Convert to 12-hour format for display
+                const formatTime = (time24) => {
+                    const [hours, minutes] = time24.split(':').map(Number);
+                    const ampm = hours >= 12 ? 'PM' : 'AM';
+                    const hours12 = hours % 12 || 12; // Convert 0 to 12 for 12 AM/PM
+                    return `${hours12}:${minutes.toString().padStart(2, '0')} ${ampm}`;
+                };
+
+                const openingTime12 = formatTime(openingTime);
+                const closingTime12 = formatTime(closingTime);
+                
+                // Update the display
+                document.getElementById('openingTime').textContent = openingTime12;
+                document.getElementById('closingTime').textContent = closingTime12;
+            } else {
+                // No working hours found for this day
+                document.getElementById('openingTime').textContent = 'Closed';
+                document.getElementById('closingTime').textContent = 'Closed';
+            }
+        }
+
+        // Initialize working hours when page loads
+        function initializeWorkingHours() {
+            const workingHoursLoader = document.getElementById('workingHoursLoader');
+            const workingHoursContent = document.getElementById('workingHoursContent');
+            
+            // Hide loader and show content
+            if (workingHoursLoader) workingHoursLoader.classList.add('hidden');
+            if (workingHoursContent) workingHoursContent.classList.remove('hidden');
+            
+            // Set today's day as default and update hours
+            const today = new Date().toLocaleDateString('en-US', { weekday: 'long' }).toLowerCase();
+            const select = document.getElementById('workingDaysSelect');
+            if (select) {
+                select.value = today;
+                updateWorkingHours();
+            }
+        }
+        function showMobileFeedback(message, type = 'info') {
+            showMobileNotification(message, type);
+        }
+
         // Mobile notification system
         function showMobileNotification(message, type = 'info') {
             // Remove existing notifications
@@ -4692,9 +4787,9 @@
             
             // Add Android-specific guidance
             const androidGuidance = isAPKEnvironment() ? 
-                '<div class="mt-2 text-xs opacity-75">📱 Check Android notification panel for download progress</div>' : 
+                '<div class="mt-2 text-xs opacity-75"> Check Android notification panel for download progress</div>' : 
                 isMobileDevice() ? 
-                '<div class="mt-2 text-xs opacity-75">📱 Check browser downloads and notifications</div>' : 
+                '<div class="mt-2 text-xs opacity-75"> Check browser downloads and notifications</div>' : 
                 '';
             
             notification.innerHTML = `
@@ -4820,58 +4915,163 @@
             }
         }
 
-        function submitReview() {
-            const commentInput = document.querySelector('#view-rating input[type="text"]');
+        // Logout function to switch accounts
+        async function logoutUser() {
+            try {
+                await window.account.deleteSession('current');
+                showMobileFeedback('Logged out successfully. Please login with your real account.', 'success');
+                // Optionally redirect to login page or refresh
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+            } catch (error) {
+                console.error('Logout error:', error);
+                showMobileFeedback('Error logging out. Please try again.', 'error');
+            }
+        }
+
+        async function submitReview() {
+            const commentInput = document.getElementById('ratingCommentInput');
             const comment = commentInput.value.trim();
 
             if (currentRating === 0) {
-                alert('Please select a star rating');
+                showMobileFeedback('Please select a star rating', 'error');
                 return;
             }
 
-            if (!comment) {
-                alert('Please write a review');
+            if (comment === '') {
+                showMobileFeedback('Please write a review', 'error');
                 return;
             }
 
-            const newReview = {
-                id: Date.now(),
-                name: 'You',
-                rating: currentRating,
-                comment: comment,
-                tags: Array.from(selectedTags),
-                date: new Date()
-            };
-
-            reviews.push(newReview);
-            saveReviews();
-
-            updateRatingDisplay();
-            renderReviews();
-
-            currentRating = 0;
-            selectedTags.clear();
-            commentInput.value = '';
-            updateStarDisplay();
-            
-            document.querySelectorAll('#ratingPopup button').forEach(btn => {
-                if (btn.textContent.includes('Sachets') || btn.textContent.includes('Bottle') || btn.textContent.includes('Dispenser')) {
-                    btn.style.backgroundColor = '#40444B';
-                    btn.style.borderColor = 'transparent';
+            try {
+                // Get current authenticated user
+                let customerId = null;
+                let userName = 'Anonymous';
+                
+                try {
+                    const user = await window.account.get();
+                    customerId = user.$id;
+                    // Try different possible name fields
+                    userName = user.name || user.fullName || user.full_name || user.email || 'User';
+                    console.log('👤 User data:', { id: user.$id, name: userName, email: user.email });
+                    
+                    // Check if this is a guest user
+                    if (user.email && user.email.includes('guest_')) {
+                        showMobileFeedback('Please logout from guest account and login with your real account', 'error');
+                        return;
+                    }
+                    
+                    // Store current user ID for display logic
+                    window.currentUserId = customerId;
+                } catch (authError) {
+                    showMobileFeedback('Please login to submit a review', 'error');
+                    return;
                 }
-            });
 
-            toggleRatingPopup();
+                // Get company and branch IDs
+                const urlParams = new URLSearchParams(window.location.search);
+                const branchId = urlParams.get('branch_id');
+                const branchData = window.currentCompany && window.currentCompany.branch_id ? window.currentCompany : null;
+                const resolvedBranchId = branchData?.branch_id || branchId;
+                const resolvedCompanyId = branchData?.company_id || (window.currentCompany?.company_id || '');
 
-            alert('Thank you for your review!');
+                // Generate unique rating_id
+                const ratingId = (Math.random().toString(36).slice(2, 10) + Date.now().toString(36)).slice(0, 20);
+
+                // Create payload for ratings database
+                const payload = {
+                    rating_id: ratingId,
+                    company_id: resolvedCompanyId,
+                    branch_id: resolvedBranchId,
+                    order_id: null,
+                    customer_id: customerId,
+                    stars: currentRating,
+                    comment: comment,
+                    created_at: new Date().toISOString(),
+                    location: window.currentCompany?.location || '',
+                    product_tags: Array.from(selectedTags)
+                };
+
+                // Save to Appwrite database
+                let dbSaveSuccess = false;
+                let createdDocument = null;
+                if (window.databases && window.appwriteConfig) {
+                    try {
+                        createdDocument = await window.databases.createDocument(
+                            window.appwriteConfig.DATABASE_ID,
+                            window.appwriteConfig.RATINGS_TABLE,
+                            window.ID.unique(),
+                            payload
+                        );
+                        console.log('✅ Rating saved to database');
+                        console.log('📄 Created document:', createdDocument);
+                        dbSaveSuccess = true;
+                    } catch (dbError) {
+                        console.log('⚠️ Database save failed:', dbError.message);
+                        showMobileFeedback('Failed to save to database. Please try again.', 'error');
+                        return;
+                    }
+                }
+
+                // Create local review object for display
+                const newReview = {
+                    id: ratingId,
+                    dbId: createdDocument?.$id || createdDocument?.rating_id, // Store database document ID
+                    ratingId: createdDocument?.rating_id || ratingId, // Store rating ID
+                    name: 'You', // Always show "You" for current user's own review
+                    rating: currentRating,
+                    comment: comment,
+                    tags: Array.from(selectedTags),
+                    date: new Date(),
+                    userId: customerId, // Store user ID for reference
+                    actualName: userName // Store actual name for other users
+                };
+
+                // Add to reviews array (at the beginning)
+                reviews.unshift(newReview);
+                
+                // Save to local storage
+                saveReviews();
+
+                // Update displays
+                updateRatingDisplay();
+                renderReviews();
+
+                // Reset form
+                currentRating = 0;
+                selectedTags.clear();
+                commentInput.value = '';
+                updateStarDisplay();
+                
+                // Hide stars and tags
+                document.getElementById('staticRatingStars').classList.add('hidden');
+                document.getElementById('ratingTags').classList.add('hidden');
+                
+                // Reset star colors
+                document.querySelectorAll('#staticRatingStars .star-rating-btn svg path').forEach(star => {
+                    star.setAttribute('fill', '#666');
+                });
+
+                // Show success feedback
+                showMobileFeedback('Review submitted successfully!', 'success');
+
+            } catch (error) {
+                console.error('❌ Error submitting review:', error);
+                showMobileFeedback('Failed to submit review. Please try again.', 'error');
+            }
         }
 
         async function loadReviews() {
+            console.log('🚀 Starting loadReviews function...');
+            
             const urlParams = new URLSearchParams(window.location.search);
             const branchId = urlParams.get('branch_id');
             const branchData = window.currentCompany && window.currentCompany.branch_id ? window.currentCompany : null;
             const resolvedBranchId = branchData?.branch_id || branchId;
-            const resolvedCompanyId = branchData?.company_id || (window.currentCompany?.company_id || '');
+            const resolvedCompanyId = branchData?.company_id || window.currentCompany?.company_id || branchId; // Use branchId as fallback
+
+            console.log('📍 LoadReviews params:', { branchId, resolvedBranchId, resolvedCompanyId });
 
             // Show ratings loader
             const ratingsLoader = document.getElementById('ratingsLoader');
@@ -4880,39 +5080,162 @@
             if (ratingContent) ratingContent.classList.add('hidden');
 
             try {
+                console.log('🔍 Checking database availability...');
+                console.log('🔍 window.databases:', !!window.databases);
+                console.log('🔍 window.appwriteConfig:', !!window.appwriteConfig);
+                console.log('🔍 window.Query:', !!window.Query);
+                
                 if (window.databases && window.appwriteConfig && window.Query) {
-                    const queries = [window.Query.equal('company_id', resolvedCompanyId)];
-                    if (resolvedBranchId) queries.push(window.Query.equal('branch_id', resolvedBranchId));
+                    console.log('✅ Database available, fetching from database...');
+                    console.log('🔍 Fetching ratings for company:', resolvedCompanyId, 'branch:', resolvedBranchId);
+                    
+                    // Build queries - only add company_id if it exists
+                    const queries = [];
+                    if (resolvedCompanyId && resolvedCompanyId !== '') {
+                        queries.push(window.Query.equal('company_id', resolvedCompanyId));
+                    }
+                    if (resolvedBranchId) {
+                        queries.push(window.Query.equal('branch_id', resolvedBranchId));
+                    }
+                    
+                    console.log('📋 Database queries:', queries);
+                    
                     const result = await window.databases.listDocuments(
                         window.appwriteConfig.DATABASE_ID,
                         window.appwriteConfig.RATINGS_TABLE,
-                        queries
+                        queries.length > 0 ? queries : undefined // If no queries, get all documents
                     );
-                    reviews = (result.documents || []).map(doc => ({
-                        id: doc.$id || doc.rating_id,
-                        name: 'Anonymous',
-                        rating: doc.stars,
-                        comment: doc.comment || '',
-                        tags: Array.isArray(doc.product_tags) ? doc.product_tags : [],
-                        date: doc.created_at ? new Date(doc.created_at) : (doc.$createdAt ? new Date(doc.$createdAt) : new Date())
-                    }));
+                    
+                    console.log('📊 Database result received');
+                    console.log('📝 Documents found:', result.documents?.length || 0);
+                    console.log('📄 Sample document:', result.documents?.[0]);
+                    
+                    if (!result.documents || result.documents.length === 0) {
+                        console.log('⚠️ No documents found in database, falling back to localStorage');
+                        throw new Error('No database documents');
+                    }
+                    
+                    // Get current user info for display logic (optional, for "You" display)
+                    let currentUserId = null;
+                    try {
+                        const user = await window.account.get();
+                        currentUserId = user.$id;
+                        window.currentUserId = currentUserId;
+                        console.log('👤 Current user found:', currentUserId);
+                    } catch (e) {
+                        // User not logged in - that's fine, still load all ratings
+                        console.log('👤 User not logged in, loading ratings as anonymous viewer');
+                    }
+                    
+                    // Extract customer IDs
+                    const customerIds = [...new Set(result.documents.map(doc => doc.customer_id).filter(id => id))];
+                    console.log('👥 Customer IDs to fetch:', customerIds);
+                    
+                    const customersMap = new Map();
+                    
+                    if (customerIds.length > 0) {
+                        console.log('🔄 Fetching customer names using Users API...');
+                        try {
+                            // Fetch user names using Appwrite Users API
+                            const customerPromises = customerIds.map(async (customerId) => {
+                                try {
+                                    console.log(`🔍 Fetching customer: ${customerId}`);
+                                    const customerResult = await window.databases.listDocuments(
+                                        window.appwriteConfig.DATABASE_ID,
+                                        'customer_tb', // Correct collection name
+                                        [window.Query.equal('$id', customerId)]
+                                    );
+                                    console.log(`📄 Customer result for ${customerId}:`, customerResult);
+                                    if (customerResult.documents && customerResult.documents.length > 0) {
+                                        const customerDoc = customerResult.documents[0];
+                                        console.log(`🔍 Full customer document for ${customerId}:`, customerDoc);
+                                        console.log(`🔍 Available fields:`, Object.keys(customerDoc));
+                                        
+                                        // Try different possible name fields
+                                        const customerName = customerDoc.full_name || customerDoc.name || customerDoc.customer_name || customerDoc.username || `Customer ${customerId.slice(0, 8)}`;
+                                        console.log(`✅ Found customer: ${customerId} -> ${customerName}`);
+                                        return { id: customerId, name: customerName };
+                                    } else {
+                                        console.log(`⚠️ No customer found for ID: ${customerId}`);
+                                        // Use fallback name
+                                        return { id: customerId, name: `User ${customerId.slice(0, 8)}` };
+                                    }
+                                } catch (e) {
+                                    console.log('❌ Could not fetch customer:', customerId, e);
+                                    return { id: customerId, name: `User ${customerId.slice(0, 8)}` };
+                                }
+                            });
+                            
+                            const customers = await Promise.all(customerPromises);
+                            customers.forEach(customer => {
+                                customersMap.set(customer.id, customer.name);
+                            });
+                            
+                            console.log('👥 Final customers map:', customersMap);
+                        } catch (e) {
+                            console.log('❌ Could not fetch customers, using anonymous names:', e);
+                        }
+                    } else {
+                        console.log('⚠️ No customer IDs found in ratings');
+                    }
+                    
+                    reviews = (result.documents || []).map(doc => {
+                        const customerName = customersMap.get(doc.customer_id) || 'Anonymous';
+                        console.log(`📄 Mapping rating: ${doc.customer_id} -> ${customerName}`);
+                        return {
+                            id: doc.$id || doc.rating_id,
+                            dbId: doc.$id, // Store actual database document ID
+                            ratingId: doc.rating_id, // Store rating_id if it exists
+                            name: customerName, // Use fetched customer name
+                            rating: doc.stars,
+                            comment: doc.comment || '',
+                            tags: Array.isArray(doc.product_tags) ? doc.product_tags : [],
+                            date: doc.created_at ? new Date(doc.created_at) : (doc.$createdAt ? new Date(doc.$createdAt) : new Date()),
+                            userId: doc.customer_id,
+                            actualName: customerName
+                        };
+                    });
+                    
+                    console.log('✅ Final reviews array from database:', reviews);
+                    
+                    // Update displays after loading
+                    updateRatingDisplay();
+                    renderReviews();
+                    
+                    if (ratingsLoader) ratingsLoader.classList.add('hidden');
+                    if (ratingContent) ratingContent.classList.remove('hidden');
                     return;
                 }
             } catch (e) {
-                console.error('Failed to load ratings from Appwrite, falling back to localStorage', e);
+                console.error('❌ Database fetch failed, falling back to localStorage:', e);
             }
 
+            console.log('📦 Loading from localStorage...');
             const storageKey = `reviews_${resolvedCompanyId || 'unknown'}_${resolvedBranchId || 'all'}`;
+            console.log('📦 Storage key:', storageKey);
+            
             const savedReviews = localStorage.getItem(storageKey);
+            console.log('📦 Saved reviews found:', !!savedReviews);
+            
             if (savedReviews) {
                 const parsed = JSON.parse(savedReviews);
+                console.log('📦 Parsed reviews from localStorage:', parsed);
                 reviews = parsed.map(review => ({
                     ...review,
                     date: review.date ? new Date(review.date) : new Date()
                 }));
+                console.log('📦 Final reviews array from localStorage:', reviews);
             } else {
+                console.log('📦 No saved reviews found, using empty array');
                 reviews = [];
             }
+            
+            // Update displays after loading
+            updateRatingDisplay();
+            renderReviews();
+            
+            if (ratingsLoader) ratingsLoader.classList.add('hidden');
+            if (ratingContent) ratingContent.classList.remove('hidden');
         }
 
         function saveReviews() {
@@ -4982,6 +5305,276 @@
             renderReviews();
         });
 
+        // Mobile-friendly modal functions
+        function showEditModal(review) {
+            // Create modal overlay
+            const modalOverlay = document.createElement('div');
+            modalOverlay.className = 'fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+            modalOverlay.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999;';
+            
+            // Create modal content
+            const modalContent = document.createElement('div');
+            modalContent.className = 'bg-gray-800/40 backdrop-blur-xl rounded-2xl p-6 max-w-md w-full border border-gray-600/50 shadow-2xl';
+            modalContent.innerHTML = `
+                <div class="mb-4">
+                    <h3 class="text-xl font-semibold text-white mb-2">Edit Your Review</h3>
+                    <p class="text-gray-400 text-sm">Update your review comment below</p>
+                </div>
+                <div class="mb-6">
+                    <textarea 
+                        id="editReviewText" 
+                        class="w-full p-3 bg-gray-800/50 backdrop-blur-sm border border-gray-600/50 rounded-lg text-white placeholder-gray-400 resize-none focus:outline-none focus:ring-2 focus:ring-blue-500/50 focus:border-transparent"
+                        rows="4"
+                        placeholder="Enter your review..."
+                    >${review.comment}</textarea>
+                    <div class="mt-2 text-right">
+                        <span id="charCount" class="text-gray-400 text-sm">${review.comment.length}/500</span>
+                    </div>
+                </div>
+                <div class="flex gap-3">
+                    <button 
+                        onclick="cancelEditModal()" 
+                        class="flex-1 px-4 py-3 bg-gray-700/50 backdrop-blur-sm hover:bg-gray-700/70 text-white rounded-lg font-medium transition-all border border-gray-600/30"
+                    >
+                        Cancel
+                    </button>
+                    <button 
+                        onclick="saveEditModal('${review.id}')" 
+                        class="flex-1 px-4 py-3 bg-blue-600/80 backdrop-blur-sm hover:bg-blue-700/80 text-white rounded-lg font-medium transition-all border border-blue-500/30"
+                    >
+                        Save Changes
+                    </button>
+                </div>
+            `;
+            
+            modalOverlay.appendChild(modalContent);
+            document.body.appendChild(modalOverlay);
+            
+            // Add character counter functionality
+            const textarea = document.getElementById('editReviewText');
+            const charCount = document.getElementById('charCount');
+            textarea.addEventListener('input', () => {
+                const length = textarea.value.length;
+                charCount.textContent = `${length}/500`;
+                if (length > 500) {
+                    charCount.className = 'text-red-400 text-sm';
+                } else {
+                    charCount.className = 'text-gray-400 text-sm';
+                }
+            });
+            
+            // Close on overlay click
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) {
+                    cancelEditModal();
+                }
+            });
+            
+            // Focus textarea
+            setTimeout(() => textarea.focus(), 100);
+        }
+        
+        function cancelEditModal() {
+            const modal = document.querySelector('[style*="position: fixed"]');
+            if (modal && modal.style.zIndex === '9999') {
+                modal.remove();
+            }
+        }
+        
+        async function saveEditModal(reviewId) {
+            const textarea = document.getElementById('editReviewText');
+            const newComment = textarea.value.trim();
+            
+            if (newComment === '') {
+                showMobileFeedback('Review cannot be empty', 'error');
+                return;
+            }
+            
+            if (newComment.length > 500) {
+                showMobileFeedback('Review must be 500 characters or less', 'error');
+                return;
+            }
+            
+            // Show loading state
+            const saveButton = document.querySelector('button[onclick="saveEditModal(\'' + reviewId + '\')"]');
+            const originalText = saveButton.textContent;
+            saveButton.textContent = 'Saving...';
+            saveButton.disabled = true;
+            
+            try {
+                const review = reviews.find(r => r.id === reviewId);
+                if (!review) throw new Error('Review not found');
+                
+                // Update in database - use the stored database document ID
+                if (window.databases && window.appwriteConfig) {
+                    const dbDocumentId = review.dbId || review.ratingId;
+                    if (!dbDocumentId) {
+                        throw new Error('No database document ID available for this review');
+                    }
+                    
+                    console.log(`🔄 Updating database document: ${dbDocumentId}`);
+                    
+                    await window.databases.updateDocument(
+                        window.appwriteConfig.DATABASE_ID,
+                        window.appwriteConfig.RATINGS_TABLE,
+                        dbDocumentId,
+                        {
+                            comment: newComment
+                        }
+                    );
+                    console.log('✅ Review updated in database');
+                }
+                
+                // Update local review
+                review.comment = newComment;
+                saveReviews();
+                renderReviews();
+                
+                // Close modal and show success
+                cancelEditModal();
+                showMobileFeedback('Review updated successfully!', 'success');
+                
+            } catch (error) {
+                console.error('❌ Error updating review:', error);
+                showMobileFeedback('Failed to update review. Please try again.', 'error');
+                
+                // Reset button
+                saveButton.textContent = originalText;
+                saveButton.disabled = false;
+            }
+        }
+        
+        function showDeleteModal(review) {
+            // Create modal overlay
+            const modalOverlay = document.createElement('div');
+            modalOverlay.className = 'fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4';
+            modalOverlay.style.cssText = 'position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 9999;';
+            
+            // Create modal content
+            const modalContent = document.createElement('div');
+            modalContent.className = 'bg-gray-800/40 backdrop-blur-xl rounded-2xl p-6 max-w-md w-full border border-gray-600/50 shadow-2xl';
+            modalContent.innerHTML = `
+                <div class="mb-6 text-center">
+                    <div class="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                    </div>
+                    <h3 class="text-xl font-semibold text-white mb-2">Delete Review?</h3>
+                    <p class="text-gray-400 text-sm">This action cannot be undone. Your review will be permanently removed.</p>
+                </div>
+                <div class="flex gap-3">
+                    <button 
+                        onclick="cancelDeleteModal()" 
+                        class="flex-1 px-4 py-3 bg-gray-700/50 backdrop-blur-sm hover:bg-gray-700/70 text-white rounded-lg font-medium transition-all border border-gray-600/30"
+                    >
+                        Cancel
+                    </button>
+                    <button 
+                        onclick="confirmDeleteModal('${review.id}')" 
+                        class="flex-1 px-4 py-3 bg-red-600/80 backdrop-blur-sm hover:bg-red-700/80 text-white rounded-lg font-medium transition-all border border-red-500/30"
+                    >
+                        Delete Review
+                    </button>
+                </div>
+            `;
+            
+            modalOverlay.appendChild(modalContent);
+            document.body.appendChild(modalOverlay);
+            
+            // Close on overlay click
+            modalOverlay.addEventListener('click', (e) => {
+                if (e.target === modalOverlay) {
+                    cancelDeleteModal();
+                }
+            });
+        }
+        
+        function cancelDeleteModal() {
+            const modal = document.querySelector('[style*="position: fixed"]');
+            if (modal && modal.style.zIndex === '9999') {
+                modal.remove();
+            }
+        }
+        
+        async function confirmDeleteModal(reviewId) {
+            // Show loading state
+            const deleteButton = document.querySelector('button[onclick="confirmDeleteModal(\'' + reviewId + '\')"]');
+            const originalText = deleteButton.textContent;
+            deleteButton.textContent = 'Deleting...';
+            deleteButton.disabled = true;
+            
+            try {
+                const review = reviews.find(r => r.id === reviewId);
+                if (!review) throw new Error('Review not found');
+                
+                // Delete from database - use the stored database document ID
+                if (window.databases && window.appwriteConfig) {
+                    const dbDocumentId = review.dbId || review.ratingId;
+                    if (!dbDocumentId) {
+                        throw new Error('No database document ID available for this review');
+                    }
+                    
+                    console.log(`🗑️ Deleting database document: ${dbDocumentId}`);
+                    
+                    await window.databases.deleteDocument(
+                        window.appwriteConfig.DATABASE_ID,
+                        window.appwriteConfig.RATINGS_TABLE,
+                        dbDocumentId
+                    );
+                    console.log('✅ Review deleted from database');
+                }
+                
+                // Remove from local reviews
+                reviews = reviews.filter(r => r.id !== reviewId);
+                saveReviews();
+                updateRatingDisplay();
+                renderReviews();
+                
+                // Close modal and show success
+                cancelDeleteModal();
+                showMobileFeedback('Review deleted successfully!', 'success');
+                
+            } catch (error) {
+                console.error('❌ Error deleting review:', error);
+                showMobileFeedback('Failed to delete review. Please try again.', 'error');
+                
+                // Reset button
+                deleteButton.textContent = originalText;
+                deleteButton.disabled = false;
+            }
+        }
+
+        // Update review function
+        async function updateReview(reviewId) {
+            const review = reviews.find(r => r.id === reviewId);
+            if (!review) return;
+            
+            // Check if user owns this review
+            if (review.userId && window.currentUserId && review.userId !== window.currentUserId) {
+                showMobileFeedback('You can only edit your own reviews', 'error');
+                return;
+            }
+            
+            // Show mobile-friendly edit modal
+            showEditModal(review);
+        }
+        
+        // Delete review function
+        async function deleteReview(reviewId) {
+            const review = reviews.find(r => r.id === reviewId);
+            if (!review) return;
+            
+            // Check if user owns this review
+            if (review.userId && window.currentUserId && review.userId !== window.currentUserId) {
+                showMobileFeedback('You can only delete your own reviews', 'error');
+                return;
+            }
+            
+            // Show mobile-friendly delete modal
+            showDeleteModal(review);
+        }
+
         function renderReviews() {
             const container = document.querySelector('#view-rating .flex.flex-col.gap-4');
             if (!container) return;
@@ -4990,7 +5583,12 @@
             
             reviews.slice().reverse().forEach(review => {
                 const reviewElement = document.createElement('div');
-                reviewElement.className = 'flex flex-col gap-4';
+                reviewElement.className = 'flex flex-col gap-6 mb-6';
+                
+                // Determine display name: "You" for current user, actual name for others
+                const displayName = (review.userId && window.currentUserId && review.userId === window.currentUserId) 
+                    ? 'You' 
+                    : (review.actualName || review.name);
                 
                 const stars = '★'.repeat(review.rating) + '☆'.repeat(5 - review.rating);
                 const dateStr = review.date && typeof review.date.toLocaleDateString === 'function' 
@@ -5001,21 +5599,45 @@
                     })
                     : 'Unknown date';
                 
+                const timeStr = review.date && typeof review.date.toLocaleTimeString === 'function'
+                    ? review.date.toLocaleTimeString('en-US', { 
+                        hour: 'numeric', 
+                        minute: '2-digit',
+                        hour12: true 
+                    })
+                    : 'Unknown time';
+                
                 reviewElement.innerHTML = `
                     <div class="flex flex-row gap-4">
-                        <div class="rounded-full border"
+                        <div class="rounded-full border flex-shrink-0"
                             style="height: 63px; width: 63px; background-color: #292B2F99; border-color: #DADADA;">
                             <div class="w-full h-full rounded-full flex items-center justify-center text-white text-xl font-bold">
-                                ${review.name.charAt(0).toUpperCase()}
+                                ${displayName.charAt(0).toUpperCase()}
                             </div>
                         </div>
-                        <div class="flex flex-col justify-between py-1">
-                            <span class="text-white font-medium text-lg pl-8">${review.name}</span>
-                            <div class="flex flex-row gap-2">
-                                <div class="flex flex-row gap-1">
-                                    <span class="text-white text-base">${stars}</span>
+                        <div class="flex flex-col justify-between py-1 flex-1 min-w-0">
+                            <div class="flex justify-between items-start">
+                                <div class="flex-1 min-w-0 pr-3">
+                                    <span class="text-white font-medium text-lg block">${displayName}</span>
+                                    <div class="flex flex-row gap-2 mt-1 flex-wrap items-center">
+                                        <div class="flex flex-row gap-1">
+                                            <span class="text-white text-base">${stars}</span>
+                                        </div>
+                                        <span class="text-white text-sm whitespace-nowrap">${dateStr} ${timeStr}</span>
+                                    </div>
                                 </div>
-                                <span class="text-white font-medium text-lg">${dateStr}</span>
+                                ${review.userId && window.currentUserId && review.userId === window.currentUserId ? `
+                                    <div class="flex gap-2 flex-shrink-0">
+                                        <button onclick="updateReview('${review.id}')" 
+                                                class="px-3 py-1 rounded-lg text-sm font-medium bg-blue-500/20 border border-blue-500/40 text-blue-300 hover:bg-blue-500/30 transition-colors whitespace-nowrap">
+                                            Edit
+                                        </button>
+                                        <button onclick="deleteReview('${review.id}')" 
+                                                class="px-3 py-1 rounded-lg text-sm font-medium bg-red-500/20 border border-red-500/40 text-red-300 hover:bg-red-500/30 transition-colors whitespace-nowrap">
+                                            Delete
+                                        </button>
+                                    </div>
+                                ` : ''}
                             </div>
                         </div>
                     </div>
@@ -5044,10 +5666,16 @@
         function setStarRating(rating) {
             currentRating = rating;
             updateStarDisplay();
+            
+            // Show tags when rating is selected
+            const tagsContainer = document.getElementById('ratingTags');
+            if (rating > 0) {
+                tagsContainer.classList.remove('hidden');
+            }
         }
 
         function updateStarDisplay() {
-            const stars = document.querySelectorAll('#ratingPopup .star-rating-btn svg path');
+            const stars = document.querySelectorAll('#staticRatingStars .star-rating-btn svg path');
             stars.forEach((star, index) => {
                 if (index < currentRating) {
                     star.setAttribute('fill', 'gold');
@@ -5057,9 +5685,19 @@
             });
         }
 
-        function toggleRatingPopup() {
-            const popup = document.getElementById('ratingPopup');
-            popup.classList.toggle('hidden');
+        function toggleStaticRatingStars() {
+            const starsContainer = document.getElementById('staticRatingStars');
+            const tagsContainer = document.getElementById('ratingTags');
+            
+            // Toggle stars visibility
+            starsContainer.classList.toggle('hidden');
+            
+            // Show tags if stars are visible AND a rating is selected
+            if (!starsContainer.classList.contains('hidden') && currentRating > 0) {
+                tagsContainer.classList.remove('hidden');
+            } else {
+                tagsContainer.classList.add('hidden');
+            }
         }
 
         // Map Functions
@@ -5489,6 +6127,8 @@
             // Update global currentCompany object with database values
             window.currentCompany = {
                 ...window.currentCompany,
+                company_id: branchData.company_id,
+                branch_id: branchData.branch_id,
                 phone: branchData.phone_number,
                 website: branchData.website,
                 name: branchData.branch_name,
@@ -5510,6 +6150,9 @@
                 location: branchData.location
             });
             console.log(' Updated company coordinates:', window.currentCompany.coordinates);
+            
+            // Initialize working hours display
+            initializeWorkingHours();
             
             // Update map with new coordinates if map is initialized
             if (window.map) {
