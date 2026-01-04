@@ -1349,6 +1349,17 @@
             align-items: center;
             justify-content: center;
             cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .quantity-btn-product:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.3);
+            transform: scale(1.05);
+        }
+
+        .quantity-btn-product:active {
+            transform: scale(0.95);
         }
 
         .quantity-display-product {
@@ -1760,90 +1771,88 @@
                         </div>
                     </div>
 
+                    <!-- Review Input Section (fixed above main nav, only shows in rating tab) -->
+                    <div id="floatingReviewInput" class="fixed bottom-[64px] left-0 right-0 p-4 bg-gray-900/95 backdrop-blur-xl border-t border-gray-700/50 z-[90]" style="pointer-events: auto;">
+                        <!-- Static Rating Stars (shown when toggled) -->
+                        <div id="staticRatingStars" class="hidden mb-4 p-3 bg-black/50 rounded-[100px] flex justify-center gap-2">
+                            <button onclick="setStarRating(1)" class="w-8 h-8 star-rating-btn">
+                                <svg fill="#666" viewBox="0 0 24 24">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                </svg>
+                            </button>
+                            <button onclick="setStarRating(2)" class="w-8 h-8 star-rating-btn">
+                                <svg fill="#666" viewBox="0 0 24 24">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                </svg>
+                            </button>
+                            <button onclick="setStarRating(3)" class="w-8 h-8 star-rating-btn">
+                                <svg fill="#666" viewBox="0 0 24 24">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                </svg>
+                            </button>
+                            <button onclick="setStarRating(4)" class="w-8 h-8 star-rating-btn">
+                                <svg fill="#666" viewBox="0 0 24 24">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                </svg>
+                            </button>
+                            <button onclick="setStarRating(5)" class="w-8 h-8 star-rating-btn">
+                                <svg fill="#666" viewBox="0 0 24 24">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <!-- Tags (shown when rating is selected) -->
+                        <div id="ratingTags" class="hidden mb-4">
+                            <div class="flex flex-row gap-3 overflow-x-auto hide-scrollbar">
+                                <button onclick="toggleTag(this)"
+                                    class="flex items-center justify-center rounded-[100px] bg-[#40444B] text-white text-lg font-semibold capitalize border border-transparent"
+                                    style="height: 35px; padding: 0 24px;">
+                                    Sachets
+                                </button>
+                                <button onclick="toggleTag(this)"
+                                    class="flex items-center justify-center rounded-[100px] bg-[#40444B] text-white text-lg font-semibold capitalize border border-transparent"
+                                    style="height: 35px; padding: 0 24px;">
+                                    Bottle
+                                </button>
+                                <button onclick="toggleTag(this)"
+                                    class="flex items-center justify-center rounded-[100px] bg-[#40444B] text-white text-lg font-semibold capitalize border border-transparent"
+                                    style="height: 35px; padding: 0 24px;">
+                                    Dispenser
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Static Input Row with larger height and star icon -->
+                        <div class="flex flex-row items-center gap-4">
+                            <div class="border rounded-[46px] relative"
+                                style="height: 56px; background-color: #292B2FCC; border-color: var(--input-border); width: calc(100% - 60px); display: flex; align-items: center; padding: 0 20px;">
+                                <input type="text" id="ratingCommentInput" placeholder="Write a review.."
+                                    style="background: transparent; border: none; outline: none; color: white; font-size: 18px; flex: 1; padding-right: 40px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                                <!-- Star Icon Trigger -->
+                                <button onclick="toggleStaticRatingStars()" 
+                                    style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: transparent; border: none; cursor: pointer;"
+                                    onmouseover="this.querySelector('svg').style.opacity='1'"
+                                    onmouseout="this.querySelector('svg').style.opacity='0.5'">
+                                    <svg class="w-7 h-7" style="opacity: 0.5; transition: opacity 0.2s;" fill="gold" viewBox="0 0 24 24">
+                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <!-- Send Button (larger) -->
+                            <button onclick="submitReview()" class="border rounded-full flex items-center justify-center"
+                                style="background-color: var(--btn-color); border-color: var(--btn-border); height: 56px; width: 56px;">
+                                <svg class="w-6 h-6" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+                                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                                </svg>
+                            </button>
+                        </div>
                     </div>
 
             </div>
         </div>
 
-    </div>
-
-    <!-- Floating Review Input (moved outside main container) -->
-    <div id="floatingReviewInput" class="fixed bottom-16 left-0 right-0 p-4 bg-gray-900/95 backdrop-blur-xl border-t border-gray-700/50" style="z-index: 10000; pointer-events: auto;">
-        <!-- Static Rating Stars (shown when toggled) -->
-        <div id="staticRatingStars" class="hidden mb-4 p-3 bg-black/50 rounded-[100px] flex justify-center gap-2">
-            <button onclick="setStarRating(1)" class="w-8 h-8 star-rating-btn">
-                <svg fill="#666" viewBox="0 0 24 24">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                </svg>
-            </button>
-            <button onclick="setStarRating(2)" class="w-8 h-8 star-rating-btn">
-                <svg fill="#666" viewBox="0 0 24 24">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                </svg>
-            </button>
-            <button onclick="setStarRating(3)" class="w-8 h-8 star-rating-btn">
-                <svg fill="#666" viewBox="0 0 24 24">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                </svg>
-            </button>
-            <button onclick="setStarRating(4)" class="w-8 h-8 star-rating-btn">
-                <svg fill="#666" viewBox="0 0 24 24">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                </svg>
-            </button>
-            <button onclick="setStarRating(5)" class="w-8 h-8 star-rating-btn">
-                <svg fill="#666" viewBox="0 0 24 24">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                </svg>
-            </button>
-        </div>
-
-        <!-- Tags (shown when rating is selected) -->
-        <div id="ratingTags" class="hidden mb-4">
-            <div class="flex flex-row gap-3 overflow-x-auto hide-scrollbar">
-                <button onclick="toggleTag(this)"
-                    class="flex items-center justify-center rounded-[100px] bg-[#40444B] text-white text-lg font-semibold capitalize border border-transparent"
-                    style="height: 35px; padding: 0 24px;">
-                    Sachets
-                </button>
-                <button onclick="toggleTag(this)"
-                    class="flex items-center justify-center rounded-[100px] bg-[#40444B] text-white text-lg font-semibold capitalize border border-transparent"
-                    style="height: 35px; padding: 0 24px;">
-                    Bottle
-                </button>
-                <button onclick="toggleTag(this)"
-                    class="flex items-center justify-center rounded-[100px] bg-[#40444B] text-white text-lg font-semibold capitalize border border-transparent"
-                    style="height: 35px; padding: 0 24px;">
-                    Dispenser
-                </button>
-            </div>
-        </div>
-
-        <!-- Static Input Row with larger height and star icon -->
-        <div class="flex flex-row items-center gap-4">
-            <div class="border rounded-[46px] relative"
-                style="height: 56px; background-color: #292B2FCC; border-color: var(--input-border); width: calc(100% - 60px); display: flex; align-items: center; padding: 0 20px;">
-                <input type="text" id="ratingCommentInput" placeholder="Write a review.."
-                    style="background: transparent; border: none; outline: none; color: white; font-size: 18px; flex: 1; padding-right: 40px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                <!-- Star Icon Trigger -->
-                <button onclick="toggleStaticRatingStars()" 
-                    style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: transparent; border: none; cursor: pointer;"
-                    onmouseover="this.querySelector('svg').style.opacity='1'"
-                    onmouseout="this.querySelector('svg').style.opacity='0.5'">
-                    <svg class="w-7 h-7" style="opacity: 0.5; transition: opacity 0.2s;" fill="gold" viewBox="0 0 24 24">
-                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                    </svg>
-                </button>
-            </div>
-            <!-- Send Button (larger) -->
-            <button onclick="submitReview()" class="border rounded-full flex items-center justify-center"
-                style="background-color: var(--btn-color); border-color: var(--btn-border); height: 56px; width: 56px;">
-                <svg class="w-6 h-6" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
-                    <line x1="22" y1="2" x2="11" y2="13"></line>
-                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                </svg>
-            </button>
-        </div>
     </div>
 
     <!-- Product Details Modal (from schedule.tsx bottom sheet) -->
@@ -1937,7 +1946,7 @@
 
     <!-- Schedule Flow Bottom Sheet (NEW VERSION - Integrated from second file) -->
     <div id="scheduleFlowSheet"
-        class="bottom-sheet-container fixed inset-0 z-[70] flex items-end justify-center pointer-events-none">
+        class="bottom-sheet-container fixed inset-0 z-[10001] flex items-end justify-center pointer-events-none">
 
         <!-- Content -->
         <div id="scheduleFlowContent" class="bottom-sheet-content w-full max-w-[400px] flex flex-col relative"
@@ -2762,6 +2771,11 @@
 
                 const priceText = Number(p.price || 0).toFixed(2);
                 const descText = p.description || p.type || '';
+                
+                // Escape variables for template literal
+                const escapedName = (p.name || '').replace(/`/g, '\\`');
+                const escapedDesc = (descText || '').replace(/`/g, '\\`');
+                const escapedImage = (p.image || '').replace(/`/g, '\\`');
 
                 card.innerHTML = `
                     <!-- Top Blur (intensity: 70, height: 40, zIndex: 2) -->
@@ -2780,7 +2794,7 @@
                          </div>
                          <!-- Button (height: 25, rounded: 5, bg: #40444B, shadow) -->
                          <button class="bg-[#40444B] rounded-[5px] px-2 flex items-center justify-center transform active:scale-95 transition-transform"
-                                 onclick="openProductModal('${p.name}', ${Number(p.price || 0)}, '${descText}', '${p.image}')"
+                                 onclick="openProductModal(\`${escapedName}\`, ${Number(p.price || 0)}, \`${escapedDesc}\`, \`${escapedImage}\`)"
                                  style="height: 25px; box-shadow: 0px 2px 4px rgba(0, 0, 0, 0.25);">
                               <span class="text-white text-sm font-[500]">less +</span>
                          </button>
@@ -3319,6 +3333,36 @@
             orderData.orderType = type;
         }
 
+        function updateProductQuantityDisplay(productId, product) {
+            // Find the product card in the DOM
+            const productCards = document.querySelectorAll('.product-select-card');
+            productCards.forEach(card => {
+                const button = card.querySelector('.quantity-btn-product');
+                if (button && button.getAttribute('onclick').includes(productId)) {
+                    const quantityContainer = card.querySelector('.product-select-quantity');
+                    if (product) {
+                        // Update quantity display
+                        const quantitySpan = card.querySelector('.quantity-display-product');
+                        if (quantitySpan) {
+                            quantitySpan.textContent = product.quantity;
+                        }
+                        // Ensure quantity container is visible
+                        if (quantityContainer) {
+                            quantityContainer.style.display = 'flex';
+                        }
+                    } else {
+                        // Remove quantity controls if product was removed
+                        const quantityContainer = card.querySelector('.product-select-quantity');
+                        if (quantityContainer) {
+                            quantityContainer.remove();
+                        }
+                        // Remove selected class
+                        card.classList.remove('selected');
+                    }
+                }
+            });
+        }
+
         function updateProductSelectionStep() {
             const productsGrid = document.getElementById('productsSelectionGrid');
             productsGrid.innerHTML = '';
@@ -3329,17 +3373,19 @@
                 productCard.className = `product-select-card ${isSelected ? 'selected' : ''}`;
                 productCard.onclick = () => toggleProductSelection(product);
 
+                const quantity = isSelected ? isSelected.quantity || 1 : 0;
+                const quantityControls = isSelected ? `
+                        <div class="product-select-quantity">
+                            <button onclick="event.stopPropagation(); changeProductQuantityInSelection(${product.id}, -1)" class="quantity-btn-product">-</button>
+                            <span class="quantity-display-product">${quantity}</span>
+                            <button onclick="event.stopPropagation(); changeProductQuantityInSelection(${product.id}, 1)" class="quantity-btn-product">+</button>
+                        </div>
+                    ` : '';
                 productCard.innerHTML = `
                     <img src="${product.image}" alt="${product.name}" class="product-select-image">
                     <div class="product-select-name">${product.name}</div>
                     <div class="product-select-price">GHS ${product.price.toFixed(2)}</div>
-                    ${isSelected ? `
-                        <div class="product-select-quantity">
-                            <button onclick="event.stopPropagation(); changeProductQuantityInSelection(${product.id}, -1)" class="quantity-btn-product">-</button>
-                            <span class="quantity-display-product">${isSelected.quantity}</span>
-                            <button onclick="event.stopPropagation(); changeProductQuantityInSelection(${product.id}, 1)" class="quantity-btn-product">+</button>
-                        </div>
-                    ` : ''}
+                    ${quantityControls}
                 `;
 
                 productsGrid.appendChild(productCard);
@@ -3364,23 +3410,30 @@
         }
 
         function changeProductQuantityInSelection(productId, amount) {
+            console.log('Changing quantity for product:', productId, 'amount:', amount);
             const productIndex = selectedProducts.findIndex(p => p.id === productId);
             
             if (productIndex > -1) {
                 const product = selectedProducts[productIndex];
                 const newQuantity = product.quantity + amount;
+                console.log('Current quantity:', product.quantity, 'New quantity:', newQuantity);
                 
                 if (newQuantity < 1) {
                     // Remove product if quantity becomes 0
                     selectedProducts.splice(productIndex, 1);
+                    console.log('Product removed due to zero quantity');
                 } else if (newQuantity > 100) {
                     showError(`Maximum quantity per product is 100 items`);
                     return;
                 } else {
                     selectedProducts[productIndex].quantity = newQuantity;
+                    console.log('Quantity updated to:', newQuantity);
                 }
                 
-                updateProductSelectionStep();
+                // Update the UI without full re-render
+                updateProductQuantityDisplay(productId, productIndex > -1 ? selectedProducts[productIndex] : null);
+            } else {
+                console.log('Product not found in selected products:', productId);
             }
         }
 
@@ -6155,7 +6208,7 @@
             initializeWorkingHours();
             
             // Update map with new coordinates if map is initialized
-            if (window.map) {
+            if (map) {
                 let coords = { lat: 5.6037, lng: -0.1870 }; // Default coordinates
                 
                 if (branchData.latitude && branchData.longitude) {

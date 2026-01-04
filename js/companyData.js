@@ -7,6 +7,7 @@ class CompanyDataManager {
         this.branches = [];
         this.workingDays = [];
         this.products = [];
+        this.socialMedia = [];
         this.isLoading = false;
         this.lastFetchTime = null;
         this.cacheTimeout = 5 * 60 * 1000; // 5 minutes cache
@@ -27,24 +28,26 @@ class CompanyDataManager {
         try {
             console.log('🔄 Fetching company data from database...');
             
-            // Fetch companies, branches, working days, and products in parallel
-            const [companiesResponse, branchesResponse, workingDaysResponse, productsResponse] = await Promise.all([
+            // Fetch companies, branches, working days, products, and social media in parallel
+            const [companiesResponse, branchesResponse, workingDaysResponse, productsResponse, socialMediaResponse] = await Promise.all([
                 this.fetchCompanies(),
                 this.fetchBranches(),
                 this.fetchWorkingDays(),
-                this.fetchProducts()
+                this.fetchProducts(),
+                this.fetchSocialMedia()
             ]);
 
             this.companies = companiesResponse;
             this.branches = branchesResponse;
             this.workingDays = workingDaysResponse;
             this.products = productsResponse;
+            this.socialMedia = socialMediaResponse;
             this.lastFetchTime = Date.now();
 
             // Process and merge data
             const mergedData = this.mergeCompanyAndBranchData();
             
-            console.log(`✅ Successfully loaded ${mergedData.length} companies with branches, working days, and products`);
+            console.log(`✅ Successfully loaded ${mergedData.length} companies with branches, working days, products, and social media`);
             return mergedData;
 
         } catch (error) {
@@ -165,6 +168,11 @@ class CompanyDataManager {
                     product.branch_id === branch.branch_id || product.company_id === branch.company_id
                 );
 
+                // Get social media for this branch/company
+                const branchSocialMedia = this.socialMedia.filter(sm => 
+                    sm.branch_id === branch.branch_id || sm.company_id === branch.company_id
+                );
+
                 // Create merged company object with branch info
                 const mergedCompany = {
                     id: branch.$id, // Use branch document ID as main ID
@@ -188,6 +196,7 @@ class CompanyDataManager {
                         ...product,
                         image: product.product_image || null // Map product_image to image field
                     })), // Add products with corrected image field
+                    social_media: branchSocialMedia, // Add social media links
                     // Additional fields for compatibility
                     time: this.generateTimeText(),
                     distance: null
@@ -283,9 +292,36 @@ class CompanyDataManager {
         );
     }
 
+    // Fetch social media from social_media table
+    async fetchSocialMedia() {
+        try {
+            const response = await window.databases.listDocuments(
+                window.appwriteConfig.DATABASE_ID,
+                window.appwriteConfig.SOCIAL_MEDIA_TABLE
+            );
+            console.log(`📱 Found ${response.documents.length} social media links`);
+            return response.documents;
+        } catch (error) {
+            console.error('❌ Error fetching social media:', error);
+            return [];
+        }
+    }
+
     // Get products for a specific company
     getProductsForCompany(companyId) {
         return this.products.filter(product => product.company_id === companyId);
+    }
+
+    // Get social media for a specific branch
+    getSocialMediaForBranch(branchId) {
+        return this.socialMedia.filter(sm => 
+            sm.branch_id === branchId || sm.company_id === branchId
+        );
+    }
+
+    // Get social media for a specific company
+    getSocialMediaForCompany(companyId) {
+        return this.socialMedia.filter(sm => sm.company_id === companyId);
     }
 }
 
