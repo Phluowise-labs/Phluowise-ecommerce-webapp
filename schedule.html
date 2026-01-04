@@ -1760,90 +1760,90 @@
                         </div>
                     </div>
 
-                    <!-- Comment Component (Floating input with inline star rating) -->
-                    <div class="fixed bottom-16 left-0 right-0 p-4 bg-gray-900/95 backdrop-blur-xl border-t border-gray-700/50" style="z-index: 10000; pointer-events: auto;">
-                        <!-- Static Rating Stars (shown when toggled) -->
-                        <div id="staticRatingStars" class="hidden mb-4 p-3 bg-black/50 rounded-[100px] flex justify-center gap-2">
-                            <button onclick="setStarRating(1)" class="w-8 h-8 star-rating-btn">
-                                <svg fill="#666" viewBox="0 0 24 24">
-                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                </svg>
-                            </button>
-                            <button onclick="setStarRating(2)" class="w-8 h-8 star-rating-btn">
-                                <svg fill="#666" viewBox="0 0 24 24">
-                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                </svg>
-                            </button>
-                            <button onclick="setStarRating(3)" class="w-8 h-8 star-rating-btn">
-                                <svg fill="#666" viewBox="0 0 24 24">
-                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                </svg>
-                            </button>
-                            <button onclick="setStarRating(4)" class="w-8 h-8 star-rating-btn">
-                                <svg fill="#666" viewBox="0 0 24 24">
-                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                </svg>
-                            </button>
-                            <button onclick="setStarRating(5)" class="w-8 h-8 star-rating-btn">
-                                <svg fill="#666" viewBox="0 0 24 24">
-                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                </svg>
-                            </button>
-                        </div>
-
-                        <!-- Tags (shown when rating is selected) -->
-                        <div id="ratingTags" class="hidden mb-4">
-                            <div class="flex flex-row gap-3 overflow-x-auto hide-scrollbar">
-                                <button onclick="toggleTag(this)"
-                                    class="flex items-center justify-center rounded-[100px] bg-[#40444B] text-white text-lg font-semibold capitalize border border-transparent"
-                                    style="height: 35px; padding: 0 24px;">
-                                    Sachets
-                                </button>
-                                <button onclick="toggleTag(this)"
-                                    class="flex items-center justify-center rounded-[100px] bg-[#40444B] text-white text-lg font-semibold capitalize border border-transparent"
-                                    style="height: 35px; padding: 0 24px;">
-                                    Bottle
-                                </button>
-                                <button onclick="toggleTag(this)"
-                                    class="flex items-center justify-center rounded-[100px] bg-[#40444B] text-white text-lg font-semibold capitalize border border-transparent"
-                                    style="height: 35px; padding: 0 24px;">
-                                    Dispenser
-                                </button>
-                            </div>
-                        </div>
-
-                        <!-- Static Input Row with larger height and star icon -->
-                        <div class="flex flex-row items-center gap-4">
-                            <div class="border rounded-[46px] relative"
-                                style="height: 56px; background-color: #292B2FCC; border-color: var(--input-border); width: calc(100% - 60px); display: flex; align-items: center; padding: 0 20px;">
-                                <input type="text" id="ratingCommentInput" placeholder="Write a review.."
-                                    style="background: transparent; border: none; outline: none; color: white; font-size: 18px; flex: 1; padding-right: 40px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
-                                <!-- Star Icon Trigger -->
-                                <button onclick="toggleStaticRatingStars()" 
-                                    style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: transparent; border: none; cursor: pointer;"
-                                    onmouseover="this.querySelector('svg').style.opacity='1'"
-                                    onmouseout="this.querySelector('svg').style.opacity='0.5'">
-                                    <svg class="w-7 h-7" style="opacity: 0.5; transition: opacity 0.2s;" fill="gold" viewBox="0 0 24 24">
-                                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
-                                    </svg>
-                                </button>
-                            </div>
-                            <!-- Send Button (larger) -->
-                            <button onclick="submitReview()" class="border rounded-full flex items-center justify-center"
-                                style="background-color: var(--btn-color); border-color: var(--btn-border); height: 56px; width: 56px;">
-                                <svg class="w-6 h-6" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
-                                    <line x1="22" y1="2" x2="11" y2="13"></line>
-                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                                </svg>
-                            </button>
-                        </div>
                     </div>
-
-                </div>
 
             </div>
         </div>
 
+    </div>
+
+    <!-- Floating Review Input (moved outside main container) -->
+    <div id="floatingReviewInput" class="fixed bottom-16 left-0 right-0 p-4 bg-gray-900/95 backdrop-blur-xl border-t border-gray-700/50" style="z-index: 10000; pointer-events: auto;">
+        <!-- Static Rating Stars (shown when toggled) -->
+        <div id="staticRatingStars" class="hidden mb-4 p-3 bg-black/50 rounded-[100px] flex justify-center gap-2">
+            <button onclick="setStarRating(1)" class="w-8 h-8 star-rating-btn">
+                <svg fill="#666" viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+            </button>
+            <button onclick="setStarRating(2)" class="w-8 h-8 star-rating-btn">
+                <svg fill="#666" viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+            </button>
+            <button onclick="setStarRating(3)" class="w-8 h-8 star-rating-btn">
+                <svg fill="#666" viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+            </button>
+            <button onclick="setStarRating(4)" class="w-8 h-8 star-rating-btn">
+                <svg fill="#666" viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+            </button>
+            <button onclick="setStarRating(5)" class="w-8 h-8 star-rating-btn">
+                <svg fill="#666" viewBox="0 0 24 24">
+                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                </svg>
+            </button>
+        </div>
+
+        <!-- Tags (shown when rating is selected) -->
+        <div id="ratingTags" class="hidden mb-4">
+            <div class="flex flex-row gap-3 overflow-x-auto hide-scrollbar">
+                <button onclick="toggleTag(this)"
+                    class="flex items-center justify-center rounded-[100px] bg-[#40444B] text-white text-lg font-semibold capitalize border border-transparent"
+                    style="height: 35px; padding: 0 24px;">
+                    Sachets
+                </button>
+                <button onclick="toggleTag(this)"
+                    class="flex items-center justify-center rounded-[100px] bg-[#40444B] text-white text-lg font-semibold capitalize border border-transparent"
+                    style="height: 35px; padding: 0 24px;">
+                    Bottle
+                </button>
+                <button onclick="toggleTag(this)"
+                    class="flex items-center justify-center rounded-[100px] bg-[#40444B] text-white text-lg font-semibold capitalize border border-transparent"
+                    style="height: 35px; padding: 0 24px;">
+                    Dispenser
+                </button>
+            </div>
+        </div>
+
+        <!-- Static Input Row with larger height and star icon -->
+        <div class="flex flex-row items-center gap-4">
+            <div class="border rounded-[46px] relative"
+                style="height: 56px; background-color: #292B2FCC; border-color: var(--input-border); width: calc(100% - 60px); display: flex; align-items: center; padding: 0 20px;">
+                <input type="text" id="ratingCommentInput" placeholder="Write a review.."
+                    style="background: transparent; border: none; outline: none; color: white; font-size: 18px; flex: 1; padding-right: 40px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                <!-- Star Icon Trigger -->
+                <button onclick="toggleStaticRatingStars()" 
+                    style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); background: transparent; border: none; cursor: pointer;"
+                    onmouseover="this.querySelector('svg').style.opacity='1'"
+                    onmouseout="this.querySelector('svg').style.opacity='0.5'">
+                    <svg class="w-7 h-7" style="opacity: 0.5; transition: opacity 0.2s;" fill="gold" viewBox="0 0 24 24">
+                        <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
+                    </svg>
+                </button>
+            </div>
+            <!-- Send Button (larger) -->
+            <button onclick="submitReview()" class="border rounded-full flex items-center justify-center"
+                style="background-color: var(--btn-color); border-color: var(--btn-border); height: 56px; width: 56px;">
+                <svg class="w-6 h-6" fill="none" stroke="white" stroke-width="2" viewBox="0 0 24 24">
+                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                </svg>
+            </button>
+        </div>
     </div>
 
     <!-- Product Details Modal (from schedule.tsx bottom sheet) -->
@@ -6177,33 +6177,39 @@
             updateWorkingDaysFromDB(branchData);
         }
         
-        // Update social media links - fetch from social_media collection
+        // Update social media links - use social_media data from branchData
         async function updateSocialMediaLinks(branchData) {
             console.log('🔍 Checking social media fields in branchData:', branchData);
+            console.log('📱 Social media data from branchData.social_media:', branchData.social_media);
             
             try {
-                // Fetch social media data from social_media collection for this branch
-                const socialMediaQuery = [
-                    window.Query.equal('branch_id', branchData.branch_id)
-                ];
+                // Use social media data that's already been fetched with company data
+                const socialMediaData = branchData.social_media || [];
+                console.log('📱 Social media data array:', socialMediaData);
                 
-                const socialMediaResponse = await window.databases.listDocuments(
-                    window.appwriteConfig.DATABASE_ID,
-                    'social_media',
-                    socialMediaQuery
-                );
-                
-                console.log('📱 Social media data from social_media collection:', socialMediaResponse.documents);
-                
-                if (socialMediaResponse.documents.length > 0) {
-                    const socialData = socialMediaResponse.documents[0];
+                if (socialMediaData.length > 0) {
+                    // If social media data exists as an array, use the first item or merge all
+                    const socialData = socialMediaData.length === 1 ? socialMediaData[0] : 
+                        socialMediaData.reduce((merged, item) => ({...merged, ...item}), {});
+                    
+                    console.log('📱 Raw socialData object:', socialData);
+                    console.log('📱 Available fields in socialData:', Object.keys(socialData));
+                    
+                    // Log each field individually
+                    console.log('📱 Facebook field:', socialData.facebook, socialData.facebook_url);
+                    console.log('📱 Instagram field:', socialData.instagram, socialData.instagram_url);
+                    console.log('📱 Twitter field:', socialData.twitter, socialData.twitter_url);
+                    console.log('📱 LinkedIn field:', socialData.linkedIn, socialData.linkedin_url);
+                    console.log('📱 Discord field:', socialData.discord, socialData.discord_url);
+                    console.log('📱 WhatsApp field:', socialData.whatsapp, socialData.whatsapp_url);
                     
                     const socialPlatforms = {
                         'Facebook': socialData.facebook || socialData.facebook_url || '',
                         'Instagram': socialData.instagram || socialData.instagram_url || '',
                         'Twitter': socialData.twitter || socialData.twitter_url || '',
-                        'LinkedIn': socialData.linkedin || socialData.linkedin_url || '',
-                        'Discord': socialData.discord || socialData.discord_url || ''
+                        'LinkedIn': socialData.linkedIn || socialData.linkedin_url || '',
+                        'Discord': socialData.discord || socialData.discord_url || '',
+                        'WhatsApp': socialData.whatsapp || socialData.whatsapp_url || ''
                     };
                     
                     console.log('📱 Social media URLs found:', socialPlatforms);
@@ -6228,7 +6234,7 @@
                 } else {
                     console.log('📱 No social media data found for this branch');
                     // Show empty modal for all platforms
-                    ['Facebook', 'Instagram', 'Twitter', 'LinkedIn', 'Discord'].forEach(platform => {
+                    ['Facebook', 'Instagram', 'Twitter', 'LinkedIn', 'Discord', 'WhatsApp'].forEach(platform => {
                         const socialIcons = document.querySelectorAll(`div[onclick*="${platform}"]`);
                         socialIcons.forEach(icon => {
                             icon.setAttribute('onclick', `showSocialModal('${platform}')`);
@@ -6236,7 +6242,7 @@
                     });
                 }
             } catch (error) {
-                console.error(' Error fetching social media data:', error);
+                console.error(' Error processing social media data:', error);
             }
         }
         
