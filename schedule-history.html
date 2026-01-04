@@ -1028,7 +1028,7 @@
         function addOrder(orderData) {
             const newOrder = {
                 orderId: orderData.orderId || 'ORD' + Date.now(),
-                company: orderData.product.company,
+                company: orderData.company || orderData.product?.company || 'Unknown Company',
                 location: orderData.recipient ? 'Delivery Location' : 'Accra, Ghana',
                 payment: orderData.payment ? getPaymentMethodText(orderData.payment.method) : 'Pending',
                 time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
@@ -1248,7 +1248,7 @@
                         
                         <!-- Info Section (width: 44%) -->
                         <div class="flex flex-col ml-2 items-start" style="width: 44%; gap: 2px;">
-                            <span class="text-white text-xl font-[500] truncate text-left w-full">${order.company}<span class="material-symbols-outlined verified-checkmark">verified</span></span>
+                            <span class="text-white text-xl font-[500] truncate text-left w-full">${order.company || 'Unknown Company'}<span class="material-symbols-outlined verified-checkmark">verified</span></span>
                             <span class="text-white text-lg font-[500] truncate text-left w-full">${order.location}</span>
                             ${order.payment ? `<span class="text-white text-base font-[500] truncate text-left w-full">${order.payment}</span>` : ''}
                             <div class="text-white flex flex-row gap-3 text-left">

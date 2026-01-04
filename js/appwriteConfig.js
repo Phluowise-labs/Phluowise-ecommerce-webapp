@@ -20,6 +20,8 @@ if (typeof Appwrite === 'undefined') {
         PRODUCTS_TABLE: 'product',
         SOCIAL_MEDIA_TABLE: 'social_media',
         RATINGS_TABLE: 'ratings',
+        ORDERS_TABLE: 'orders',
+        ORDER_ITEMS_TABLE: 'order_items',
         STORAGE_BUCKET_ID: '68b1c57b001542be7fbe',
         PROJECT_ID: '68b17582003582da69c8',
         client,

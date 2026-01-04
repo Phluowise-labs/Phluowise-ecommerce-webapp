@@ -93,6 +93,10 @@ async function signUp(fullName, email, phone, password, userType) {
                 // Session already exists, try to get current user and create customer record
                 try {
                     const user = await account.get();
+                    
+                    // Cache user data for offline use
+                    localStorage.setItem('currentUser', JSON.stringify(user));
+                    
                     const customerData = await databases.listDocuments(
                         appwriteConfig.DATABASE_ID,
                         appwriteConfig.CUSTOMER_TABLE,
@@ -197,6 +201,10 @@ async function signIn(email, password) {
 
         // Get user info from Appwrite
         const user = await account.get();
+        
+        // Cache user data for offline use
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        console.log('✅ User data cached');
         
         // Check if customer exists in our database
         const customerData = await databases.listDocuments(
@@ -324,6 +332,10 @@ async function signOut() {
 async function checkSession() {
     try {
         const user = await account.get();
+        
+        // Cache user data for offline use
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        console.log('✅ User data cached in checkSession');
         
         // Verify customer record exists
         const customerData = await databases.listDocuments(
@@ -465,6 +477,10 @@ async function resetPassword(userId, secret, password, confirmPassword) {
 async function validateCustomerSession() {
     try {
         const user = await account.get();
+        
+        // Cache user data for offline use
+        localStorage.setItem('currentUser', JSON.stringify(user));
+        
         const customerData = await databases.listDocuments(
             appwriteConfig.DATABASE_ID,
             appwriteConfig.CUSTOMER_TABLE,
@@ -490,6 +506,9 @@ function getCurrentCustomer() {
 async function getUserProfile() {
     try {
         const user = await account.get();
+        
+        // Cache user data for offline use
+        localStorage.setItem('currentUser', JSON.stringify(user));
         
         // Get customer data from customer_tb
         const customerData = await databases.listDocuments(
@@ -538,6 +557,9 @@ async function updateProfile(profileData) {
     
     try {
         const user = await account.get();
+        
+        // Cache user data for offline use
+        localStorage.setItem('currentUser', JSON.stringify(user));
         
         // Validation
         if (!profileData.full_name) {

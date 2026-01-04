@@ -4280,7 +4280,7 @@
                 // Add the completed order
                 const newOrder = {
                     orderId: orderData.orderId,
-                    company: selectedCompany,
+                    company: selectedCompany || 'Unknown Company',
                     location: orderData.recipient ? orderData.recipient.address : 'Accra, Ghana',
                     payment: 'Mobile Money',
                     time: formattedTime,
