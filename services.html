@@ -2398,7 +2398,18 @@
         const totalSteps = 11;
         let selectedPaymentMethod = null;
         let orderData = {
-            recipient: {} // Initialize recipient object to fix the error
+            recipient: {}, // Initialize recipient object to fix the error
+            // Customer details (who placed the order) - will be populated from database
+            customer: {
+                id: '',
+                uid: '',
+                email: '',
+                name: '',
+                phone: '',
+                type: ''
+            },
+            // Purchase recipient type
+            purchase_recipient_type: 'you' // Default to 'you'
         };
         let userRating = 0;
         let selectedCompany = '';
@@ -3035,7 +3046,18 @@
             updateStepIndicators();
             // Reset data
             orderData = {
-                recipient: {} // Reset recipient object
+                recipient: {}, // Reset recipient object
+                // Customer details (who placed the order) - will be populated from database
+                customer: {
+                    id: '',
+                    uid: '',
+                    email: '',
+                    name: '',
+                    phone: '',
+                    type: ''
+                },
+                // Purchase recipient type
+                purchase_recipient_type: 'you' // Default to 'you'
             };
             selectedPaymentMethod = null;
             userRating = 0;
@@ -3388,52 +3410,32 @@
         // Recipient type selection
         function selectRecipientType(type) {
             recipientType = type;
-
+            orderData.purchase_recipient_type = type; // Set purchase recipient type
+            
             // Update UI
             document.querySelectorAll('.recipient-type-btn').forEach(btn => {
                 btn.classList.remove('active');
             });
+            event.target.classList.add('active');
 
-            document.getElementById(`recipient${type.charAt(0).toUpperCase() + type.slice(1)}`).classList.add('active');
+            // Show/hide relevant fields
+            const individualFields = document.getElementById('individualRecipientFields');
+            const businessFields = document.getElementById('businessRecipientFields');
+            const youFields = document.getElementById('youRecipientFields');
 
-            // Show/hide fields based on type
-            const nameContainer = document.getElementById('recipientNameContainer');
-            const phoneContainer = document.getElementById('recipientPhoneContainer');
-            const emailContainer = document.getElementById('recipientEmailContainer');
-            const businessTypeContainer = document.getElementById('businessTypeContainer');
-            const businessNameContainer = document.getElementById('businessNameContainer');
-            const youInfo = document.getElementById('youRecipientInfo');
-            const savedContainer = document.getElementById('savedRecipientsContainer');
-
-            if (type === 'you') {
-                nameContainer.classList.add('hidden');
-                phoneContainer.classList.add('hidden');
-                emailContainer.classList.add('hidden');
-                businessTypeContainer.classList.add('hidden');
-                businessNameContainer.classList.add('hidden');
-                youInfo.classList.remove('hidden');
-                savedContainer.classList.add('hidden');
-
-                // Load user profile data
+            if (type === 'individual') {
+                individualFields.style.display = 'block';
+                businessFields.style.display = 'none';
+                youFields.style.display = 'none';
+            } else if (type === 'business') {
+                individualFields.style.display = 'block';
+                businessFields.style.display = 'block';
+                youFields.style.display = 'none';
+            } else { // 'you'
+                individualFields.style.display = 'none';
+                businessFields.style.display = 'none';
+                youFields.style.display = 'block';
                 loadUserProfileData();
-            } else {
-                nameContainer.classList.remove('hidden');
-                phoneContainer.classList.remove('hidden');
-                emailContainer.classList.remove('hidden');
-                youInfo.classList.add('hidden');
-
-                if (type === 'business') {
-                    businessTypeContainer.classList.remove('hidden');
-                    businessNameContainer.classList.remove('hidden');
-                } else {
-                    businessTypeContainer.classList.add('hidden');
-                    businessNameContainer.classList.add('hidden');
-                }
-
-                // Show saved recipients if any
-                if (savedRecipients.length > 0) {
-                    savedContainer.classList.remove('hidden');
-                }
             }
         }
 
@@ -3475,37 +3477,66 @@
         // Add event listener to save user address when updated
         document.getElementById('recipientAddress').addEventListener('input', saveUserAddress);
 
+        // Load customer data from database
+        async function loadCustomerData() {
+            try {
+                // Get current user from Appwrite
+                if (window.account) {
+                    const user = await window.account.get();
+                    
+                    // Get customer profile from database
+                    const customerProfile = await getCustomerProfile(user.$id);
+                    
+                    if (customerProfile) {
+                        // Update orderData with customer details
+                        orderData.customer = {
+                            id: customerProfile.$id,
+                            uid: customerProfile.uid,
+                            email: customerProfile.email,
+                            name: customerProfile.full_name,
+                            phone: customerProfile.phone_number,
+                            type: customerProfile.user_type
+                        };
+                        
+                        // Update "You" display fields
+                        document.getElementById('youNameDisplay').textContent = customerProfile.full_name;
+                        document.getElementById('youPhoneDisplay').textContent = customerProfile.phone_number;
+                        document.getElementById('youEmailDisplay').textContent = customerProfile.email;
+                        
+                        console.log('✅ Customer data loaded:', orderData.customer);
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Error loading customer data:', error);
+            }
+        }
+
+        // Get customer profile from database
+        async function getCustomerProfile(uid) {
+            try {
+                const response = await window.databases.listDocuments(
+                    window.appwriteConfig.DATABASE_ID,
+                    window.appwriteConfig.CUSTOMER_TABLE,
+                    [window.Query.equal('uid', uid)]
+                );
+                
+                if (response.documents.length > 0) {
+                    return response.documents[0];
+                }
+                return null;
+            } catch (error) {
+                console.error('❌ Error fetching customer profile:', error);
+                return null;
+            }
+        }
+
         // Load saved recipients from localStorage
         function loadSavedRecipients() {
-            // Load from localStorage
-            const savedRecipientsData = localStorage.getItem('savedRecipients');
-            if (savedRecipientsData) {
-                savedRecipients = JSON.parse(savedRecipientsData);
-            } else {
-                // For demo purposes, creating some sample saved recipients
-                savedRecipients = [
-                    {
-                        id: 1,
-                        name: 'Jane Smith',
-                        phone: '0241234567',
-                        email: 'jane@example.com',
-                        address: '123 Main St, Accra',
-                        type: 'individual'
-                    },
-                    {
-                        id: 2,
-                        name: 'ABC Corporation',
-                        phone: '0209876543',
-                        email: 'info@abccorp.com',
-                        address: '456 Business Ave, Tema',
-                        type: 'business',
-                        businessName: 'ABC Corporation',
-                        businessType: 'office'
-                    }
-                ];
-                // Save to localStorage
-                localStorage.setItem('savedRecipients', JSON.stringify(savedRecipients));
-            }
+            // Initialize with empty array - will be populated from database
+            savedRecipients = [];
+            
+            // Clear any existing sample data from localStorage
+            localStorage.removeItem('savedRecipients');
 
             updateSavedRecipientsList();
         }
@@ -4262,16 +4293,72 @@
             completeOrderFlow();
         }
 
-        // Save order to localStorage for schedule history
-        function saveOrderToHistory() {
+        // Save order to localStorage for schedule history and database
+        async function saveOrderToHistory() {
             try {
-                // console.log('🚀 Starting to save order to schedule history...');
-                // console.log('📦 Order data to save:', orderData);
+                console.log('🚀 Starting to save order to schedule history and database...');
+                console.log('📦 Order data to save:', orderData);
+
+                // First, save to database using OrderManager
+                if (window.OrderManager && orderData.customer && orderData.customer.id) {
+                    try {
+                        const orderManager = new window.OrderManager();
+                        
+                        // Prepare order data for database (orders table)
+                        const dbOrderData = {
+                            // Required customer field
+                            customer_id: orderData.customer.id,
+                            
+                            // Order details (other customer details to be added later when columns exist)
+                            branchId: window.currentCompany?.branch_id || '',
+                            deliveryTime: orderData.deliveryTime,
+                            deliveryDate: orderData.deliveryDate,
+                            orderComment: orderData.deliveryInstructions || '',
+                            deliveryAddress: orderData.recipient.address,
+                            paymentMethod: orderData.payment?.method || 'mobile',
+                            transactionId: orderData.transactionId || '',
+                            deliveryName: orderData.recipient.name,
+                            deliveryOrgType: orderData.recipient.type || '',
+                            total: Number(orderData.total || 0),
+                            buyerId: orderData.customer.id
+                        };
+
+                        // Create order in database
+                        const createdOrder = await orderManager.createOrder(dbOrderData);
+                        
+                        // Create purchase recipient information
+                        const recipientData = {
+                            purchase_recipient_type: orderData.purchase_recipient_type,
+                            recipient_name: orderData.recipient.name || '',
+                            recipient_phone: orderData.recipient.phone || '',
+                            recipient_email: orderData.recipient.email || '',
+                            recipient_address: orderData.recipient.address || '',
+                            recipient_type: orderData.recipient.type || '',
+                            business_name: orderData.recipient.businessName || '',
+                            business_type: orderData.recipient.businessType || '',
+                            self_pickup: orderData.purchase_recipient_type === 'you',
+                            self_delivery_address: orderData.purchase_recipient_type === 'you' ? orderData.recipient.address : ''
+                        };
+
+                        await orderManager.createPurchaseRecipientInfo(createdOrder.$id, recipientData);
+                        
+                        // Create order items
+                        if (orderData.products && orderData.products.length > 0) {
+                            await orderManager.createOrderItems(createdOrder.$id, orderData.products, dbOrderData);
+                        }
+                        
+                        console.log('✅ Order saved to database:', createdOrder.$id);
+                        
+                    } catch (dbError) {
+                        console.error('❌ Error saving order to database:', dbError);
+                        // Continue with localStorage fallback
+                    }
+                }
 
                 // Get existing orders from localStorage
                 let existingOrders = localStorage.getItem('phluowiseOrders');
                 let orders = existingOrders ? JSON.parse(existingOrders) : [];
-                // console.log('📋 Existing orders count:', orders.length);
+                console.log('📋 Existing orders count:', orders.length);
 
                 // Format date and time for display
                 const formattedDate = formatDate(selectedDate);
@@ -4294,6 +4381,8 @@
                     serviceFee: orderData.serviceFee,
                     total: orderData.total,
                     recipient: orderData.recipient,
+                    customer: orderData.customer, // Include customer details
+                    purchase_recipient_type: orderData.purchase_recipient_type, // Include purchase type
                     paymentDetails: orderData.payment,
                     timestamp: new Date().toISOString(),
                     rating: orderData.rating,
@@ -4305,25 +4394,25 @@
                 };
 
                 orders.unshift(newOrder); // Add to beginning
-                // console.log('➕ New order created:', newOrder);
-                // console.log('📊 Total orders after adding:', orders.length);
+                console.log('➕ New order created:', newOrder);
+                console.log('📊 Total orders after adding:', orders.length);
 
                 // Save to localStorage
                 localStorage.setItem('phluowiseOrders', JSON.stringify(orders));
-                // console.log('💾 Order saved to localStorage with key: phluowiseOrders');
-                // console.log('💾 Order saved to schedule history:', orderData.orderId);
+                console.log('💾 Order saved to localStorage with key: phluowiseOrders');
+                console.log('💾 Order saved to schedule history:', orderData.orderId);
 
                 // Verify it was saved
                 const savedOrders = localStorage.getItem('phluowiseOrders');
                 const parsedOrders = JSON.parse(savedOrders);
-                // console.log('✅ Verification - saved orders count:', parsedOrders.length);
+                console.log('✅ Verification - saved orders count:', parsedOrders.length);
 
                 // Trigger storage event for schedule-history.html
                 window.dispatchEvent(new Event('storage'));
-                // console.log('🔄 Storage event dispatched to schedule-history.html');
+                console.log('🔄 Storage event dispatched to schedule-history.html');
 
             } catch (error) {
-                // console.error('❌ Error saving order to history:', error);
+                console.error('❌ Error saving order to history:', error);
                 showError('Error saving order. Please try again.');
             }
         }
@@ -4349,7 +4438,7 @@
         }
 
         // Initialize
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', async function () {
             const savedTheme = localStorage.getItem('theme') || 'dark';
             document.body.classList.remove('dark-theme', 'gray-theme', 'light-theme');
             document.body.classList.add(savedTheme + '-theme');
@@ -4361,18 +4450,31 @@
             const searchInput = document.getElementById('searchInput');
             searchInput.addEventListener('input', handleSearch);
 
-            // Load service data from database
-            loadServiceData();
+            // Load customer data from database
+            await loadCustomerData();
 
-            // Add event listener to save user address when updated
-            const addressField = document.getElementById('recipientAddress');
-            if (addressField) {
-                addressField.addEventListener('input', saveUserAddress);
-            }
+            // Load saved recipients
+            loadSavedRecipients();
 
-            // Load user profile data
-            loadUserProfileData();
+            // Initialize date and time inputs
+            initializeDateInput();
+            generateTimeSlots();
+
+            // Set greeting
+            setGreeting();
         });
+
+        // Load service data from database
+        loadServiceData();
+
+        // Add event listener to save user address when updated
+        const addressField = document.getElementById('recipientAddress');
+        if (addressField) {
+            addressField.addEventListener('input', saveUserAddress);
+        }
+
+        // Load user profile data
+        loadUserProfileData();
 
         // Open Terms of Service function
         function openTermsOfService() {

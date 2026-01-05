@@ -1,0 +1,112 @@
+// Browser-compatible database schema checker
+// This script checks the current orders and order_items table structure
+
+// Function to check database schema (to be run in browser console)
+async function checkDatabaseSchema() {
+    try {
+        console.log('🔍 Checking current order and order_items table structure...\n');
+
+        // Check orders table
+        console.log('📋 ORDERS TABLE:');
+        try {
+            const ordersResponse = await databases.listDocuments('68b1b7590035346a3be9', 'orders', [], 1);
+            if (ordersResponse.documents.length > 0) {
+                console.log('Current orders structure:', JSON.stringify(ordersResponse.documents[0], null, 2));
+            } else {
+                console.log('No orders found in table');
+            }
+        } catch (error) {
+            console.log('❌ Error accessing orders table:', error.message);
+        }
+
+        console.log('\n📋 ORDER_ITEMS TABLE:');
+        try {
+            const orderItemsResponse = await databases.listDocuments('68b1b7590035346a3be9', 'order_items', [], 1);
+            if (orderItemsResponse.documents.length > 0) {
+                console.log('Current order_items structure:', JSON.stringify(orderItemsResponse.documents[0], null, 2));
+            } else {
+                console.log('No order_items found in table');
+            }
+        } catch (error) {
+            console.log('❌ Error accessing order_items table:', error.message);
+        }
+
+        console.log('\n🔧 RECOMMENDED SCHEMA FOR PURCHASE TYPES:');
+        console.log('\n📋 ORDERS TABLE - ADDITIONAL COLUMNS NEEDED:');
+        console.log(JSON.stringify({
+            // Customer details (who placed the order)
+            customer_id: "customer_tb.$id (who placed the order)",
+            customer_uid: "customer_tb.uid (Appwrite user ID)",
+            customer_email: "customer_tb.email",
+            customer_name: "customer_tb.full_name",
+            customer_phone: "customer_tb.phone_number",
+            customer_type: "customer_tb.user_type (individual/business)",
+            
+            // Purchase recipient type
+            purchase_recipient_type: "'you'/'individual'/'business'",
+            
+            // Recipient details (who receives the order - different from customer)
+            recipient_name: "string (if not 'you')",
+            recipient_phone: "string (if not 'you')", 
+            recipient_email: "string (if not 'you')",
+            recipient_address: "string (if not 'you')",
+            recipient_type: "'individual'/'business' (if not 'you')",
+            
+            // Business recipient details (if purchase_recipient_type is 'business')
+            business_name: "string (if business recipient)",
+            business_type: "string (if business recipient)",
+            
+            // Self-purchase details (if purchase_recipient_type is 'you')
+            self_pickup: "boolean (if customer will pick up themselves)",
+            self_delivery_address: "string (customer's own address)",
+        }, null, 2));
+
+        console.log('\n📋 ORDER_ITEMS TABLE - NO CHANGES NEEDED');
+        console.log('Current structure should work fine with product details');
+
+    } catch (error) {
+        console.error('❌ Error:', error);
+    }
+}
+
+// Function to add missing columns to orders table
+async function addMissingOrderColumns() {
+    try {
+        console.log('🔧 Adding missing columns to orders table...');
+        
+        // This would need to be done via Appwrite console or API
+        // For now, we'll show what columns need to be added
+        const missingColumns = [
+            'customer_id',
+            'customer_uid', 
+            'customer_email',
+            'customer_name',
+            'customer_phone',
+            'customer_type',
+            'purchase_recipient_type',
+            'recipient_name',
+            'recipient_phone',
+            'recipient_email', 
+            'recipient_address',
+            'recipient_type',
+            'business_name',
+            'business_type',
+            'self_pickup',
+            'self_delivery_address'
+        ];
+        
+        console.log('Missing columns to add:', missingColumns);
+        console.log('⚠️  These columns need to be added manually in Appwrite console');
+        
+    } catch (error) {
+        console.error('❌ Error:', error);
+    }
+}
+
+// Make functions available globally
+window.checkDatabaseSchema = checkDatabaseSchema;
+window.addMissingOrderColumns = addMissingOrderColumns;
+
+console.log('📋 Database schema checker loaded!');
+console.log('Run checkDatabaseSchema() in console to check current structure');
+console.log('Run addMissingOrderColumns() to see what columns need to be added');

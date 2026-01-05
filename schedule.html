@@ -16,7 +16,7 @@
     <title>Phluowise - Shop Details</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=verified,flag_2" />
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     <link rel="stylesheet" href="css/notifications.css" />
     <link rel="stylesheet" href="css/mobile-responsive.css" />
     <script>
@@ -65,6 +65,19 @@
 
         /* Material Symbols Styles */
         .material-symbols-outlined {
+          font-family: 'Material Symbols Outlined';
+          font-weight: normal;
+          font-style: normal;
+          font-size: 24px;
+          line-height: 1;
+          letter-spacing: normal;
+          text-transform: none;
+          display: inline-block;
+          white-space: nowrap;
+          word-wrap: normal;
+          direction: ltr;
+          -webkit-font-feature-settings: 'liga';
+          -webkit-font-smoothing: antialiased;
           font-variation-settings:
           'FILL' 1,
           'wght' 400,
@@ -74,7 +87,7 @@
         
         .verified-checkmark {
             color: #F19E39;
-            font-size: 20px;
+            font-size: 24px;
             vertical-align: middle;
             margin-left: 4px;
         }
@@ -1432,8 +1445,8 @@
                     </div>
                     
                     <h1 id="companyName" class="text-white text-2xl font-bold hidden">
-                        <!-- Company name will be loaded from database -->
-                        <span id="verifiedBadge" class="material-symbols-outlined verified-checkmark hidden">verified</span>
+                        <span id="companyNameText"></span>
+                        <span id="verifiedBadge" class="material-symbols-outlined verified-checkmark">verified</span>
                     </h1>
                     
                     <!-- Loading spinner for location -->
@@ -1920,7 +1933,7 @@
     </div>
 
     <!-- Terms of Service Modal -->
-    <div id="termsModal" class="fixed inset-0 z-[70] flex items-center justify-center p-4 hidden"
+    <div id="termsModal" class="fixed inset-0 z-[10002] flex items-center justify-center p-4 hidden"
         style="background-color: rgba(0,0,0,0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);">
         <div class="rounded-[20px] w-full max-w-[400px] h-[80vh] bg-[#1D1D1D] border border-[rgba(255,255,255,0.1)] flex flex-col">
             <!-- Header -->
@@ -1931,15 +1944,33 @@
                 </button>
             </div>
             
-            <!-- Content with Notion iframe -->
-            <div class="flex-1 overflow-hidden">
-                <iframe src="https://concrete-aurora-836.notion.site/ebd//1c7c077ea6428075b4c6f68ad38d15c1" 
-                        width="100%" 
-                        height="100%" 
-                        frameborder="0" 
-                        allowfullscreen
-                        class="rounded-b-[20px]">
-                </iframe>
+            <!-- Content with simple text terms -->
+            <div class="flex-1 overflow-y-auto p-4">
+                <div class="text-white space-y-4">
+                    <h4 class="text-lg font-semibold">Terms of Service</h4>
+                    
+                    <div class="space-y-3 text-sm text-gray-300">
+                        <p><strong>1. Order Acceptance:</strong> By placing an order, you agree to purchase the selected products/services at the listed prices.</p>
+                        
+                        <p><strong>2. Payment Terms:</strong> Payment must be completed before order processing. We accept mobile money payments as specified.</p>
+                        
+                        <p><strong>3. Delivery:</strong> Delivery times are estimates. We are not responsible for delays beyond our control.</p>
+                        
+                        <p><strong>4. Returns:</strong> Products can be returned within 7 days of delivery in original condition.</p>
+                        
+                        <p><strong>5. Privacy:</strong> Your information is protected according to our privacy policy and will not be shared without consent.</p>
+                        
+                        <p><strong>6. Service Availability:</strong> Services are subject to availability and may be modified or discontinued.</p>
+                        
+                        <p><strong>7. Contact:</strong> For questions about these terms, please contact our customer service.</p>
+                        
+                        <p><strong>8. Governing Law:</strong> These terms are governed by the laws of Ghana.</p>
+                    </div>
+                    
+                    <div class="pt-4 border-t border-gray-600">
+                        <p class="text-xs text-gray-400">Last updated: January 2026</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -2592,6 +2623,8 @@
 
         async function fetchProductsForCurrentBranch() {
             try {
+                console.log('🛒 Starting product fetch for current branch...');
+                
                 // Ensure Appwrite is available
                 if (!window.databases || !window.appwriteConfig) {
                     console.error('❌ Appwrite not available for products - SDK not loaded');
@@ -2608,6 +2641,13 @@
                 const resolvedBranchId = branchData?.branch_id || branchId;
                 const resolvedCompanyId = branchData?.company_id;
 
+                console.log('🛒 Product fetch parameters:', {
+                    urlBranchId: branchId,
+                    resolvedBranchId,
+                    resolvedCompanyId,
+                    hasBranchData: !!branchData
+                });
+
                 if (resolvedBranchId) {
                     filterQueries.push(window.Query.equal('branch_id', resolvedBranchId));
                 }
@@ -2615,14 +2655,26 @@
                     filterQueries.push(window.Query.equal('company_id', resolvedCompanyId));
                 }
 
-                // Fallback: no branch/company filter, just fetch all and filter client-side
+                // Build the query - if we have both branch_id and company_id, use AND logic
+                let finalQuery;
+                if (filterQueries.length > 1) {
+                    finalQuery = [window.Query.and(filterQueries)];
+                } else if (filterQueries.length === 1) {
+                    finalQuery = filterQueries;
+                } else {
+                    // Fallback: no branch/company filter, just fetch all
+                    finalQuery = [window.Query.orderDesc('$createdAt')];
+                }
+
                 const response = await window.databases.listDocuments(
                     window.appwriteConfig.DATABASE_ID,
                     window.appwriteConfig.PRODUCTS_TABLE,
-                    filterQueries.length > 0 ? filterQueries : [window.Query.orderDesc('$createdAt')]
+                    finalQuery
                 );
 
                 const productsFromDb = response.documents || [];
+                console.log(`🛒 Found ${productsFromDb.length} products in database`);
+                console.log('🛒 Raw products from DB:', productsFromDb);
 
                 // Map DB fields to UI model, including image resolution
                 companyProducts = productsFromDb.map((doc, index) => {
@@ -2664,13 +2716,18 @@
                     };
                 });
 
+                console.log(`🛒 Successfully mapped ${companyProducts.length} products for UI`);
+                console.log('🛒 Final companyProducts array:', companyProducts);
+
                 // Refresh selection grid UI if on product selection step
                 if (typeof updateProductSelectionStep === 'function') {
+                    console.log('🛒 Updating product selection step UI...');
                     updateProductSelectionStep();
                 }
 
                 // Also refresh Products subview grid
                 if (typeof renderProducts === 'function') {
+                    console.log('🛒 Rendering products in subview...');
                     renderProducts();
                 }
             } catch (error) {
@@ -2921,51 +2978,65 @@
 
         // Schedule Flow Bottom Sheet Functions
         function openScheduleBottomSheet() {
-            console.log('Opening schedule bottom sheet...');
-            
-            // Reset to first step
-            currentStep = 1;
-            
-            const sheet = document.getElementById('scheduleFlowSheet');
-            const content = document.getElementById('scheduleFlowContent');
-            
-            console.log('Sheet element:', sheet);
-            console.log('Content element:', content);
-            
-            if (!sheet) {
-                console.error('Schedule flow sheet not found!');
-                return;
-            }
-            
-            if (!content) {
-                console.error('Schedule flow content not found!');
-                return;
-            }
-            
-            console.log('Adding active classes...');
-            sheet.classList.add('active');
-            content.classList.add('active');
-            sheet.classList.remove('pointer-events-none');
-            
-            console.log('Classes added. Sheet classes:', sheet.className);
-            console.log('Content classes:', content.className);
-            
-            // Load saved recipients
-            loadSavedRecipients();
-            
-            // Initialize date input with minimum date (today + 2 hours)
-            initializeDateInput();
-            
-            // Load user profile data
-            loadUserProfileData();
-            
-            // Reset selected products
-            selectedProducts = [];
-            orderData.products = [];
-            
-            console.log('About to call goToStep...');
-            goToStep('terms');
-            console.log('goToStep completed');
+            return new Promise(async (resolve) => {
+                console.log('Opening schedule bottom sheet...');
+                
+                // Reset to first step
+                currentStep = 1;
+                
+                const sheet = document.getElementById('scheduleFlowSheet');
+                const content = document.getElementById('scheduleFlowContent');
+                
+                console.log('Sheet element:', sheet);
+                console.log('Content element:', content);
+                
+                if (!sheet) {
+                    console.error('Schedule flow sheet not found!');
+                    resolve();
+                    return;
+                }
+                
+                if (!content) {
+                    console.error('Schedule flow content not found!');
+                    resolve();
+                    return;
+                }
+                
+                console.log('Adding active classes...');
+                sheet.classList.add('active');
+                content.classList.add('active');
+                sheet.classList.remove('pointer-events-none');
+                
+                console.log('Classes added. Sheet classes:', sheet.className);
+                console.log('Content classes:', content.className);
+                
+                // Load saved recipients
+                loadSavedRecipients();
+                
+                // Initialize date input with minimum date (today + 2 hours)
+                initializeDateInput();
+                
+                // Load user profile data
+                loadUserProfileData();
+                
+                // Reset selected products
+                selectedProducts = [];
+                orderData.products = [];
+                
+                // Ensure products are loaded for this branch
+                if (companyProducts.length === 0) {
+                    console.log('🛒 No products loaded, fetching now...');
+                    await fetchProductsForCurrentBranch();
+                } else {
+                    console.log(`🛒 Products already loaded (${companyProducts.length} products)`);
+                }
+                
+                console.log('About to call goToStep...');
+                goToStep('terms');
+                console.log('goToStep completed');
+                
+                resolve();
+            });
         }
 
         function closeScheduleFlow() {
@@ -3384,10 +3455,28 @@
         }
 
         function updateProductSelectionStep() {
+            console.log('🛒 Updating product selection step...');
             const productsGrid = document.getElementById('productsSelectionGrid');
+            
+            if (!productsGrid) {
+                console.error('❌ productsSelectionGrid element not found!');
+                return;
+            }
+            
+            console.log(`🛒 Clearing grid and rendering ${companyProducts.length} products`);
             productsGrid.innerHTML = '';
 
-            companyProducts.forEach(product => {
+            if (companyProducts.length === 0) {
+                console.log('🛒 No products available to display');
+                const noProductsMessage = document.createElement('div');
+                noProductsMessage.className = 'no-products-selected';
+                noProductsMessage.textContent = 'No products available for this branch.';
+                productsGrid.appendChild(noProductsMessage);
+                return;
+            }
+
+            companyProducts.forEach((product, index) => {
+                console.log(`🛒 Rendering product ${index + 1}: ${product.name}`);
                 const isSelected = selectedProducts.find(p => p.id === product.id);
                 const productCard = document.createElement('div');
                 productCard.className = `product-select-card ${isSelected ? 'selected' : ''}`;
@@ -3410,6 +3499,8 @@
 
                 productsGrid.appendChild(productCard);
             });
+            
+            console.log(`🛒 Successfully rendered ${companyProducts.length} products in selection grid`);
         }
 
         function toggleProductSelection(product) {
@@ -3514,21 +3605,72 @@
         }
 
         function loadUserProfileData() {
-            const userProfile = JSON.parse(localStorage.getItem('userProfile')) || {
-                name: 'John Doe',
-                phone1: '0241234567',
-                email: 'john@example.com',
-                address: '123 Main Street, Accra'
-            };
+            // Get current user data from Appwrite or customer_tb
+            const userProfile = JSON.parse(localStorage.getItem('userProfile')) || {};
+            
+            // Try to get current user from Appwrite auth
+            if (window.account && window.account.get) {
+                window.account.get().then(currentUser => {
+                    if (currentUser) {
+                        console.log('👤 Current user from Appwrite:', currentUser);
+                        // Fetch full customer data from customer_tb
+                        fetchCustomerData(currentUser.$id).then(customerData => {
+                            if (customerData) {
+                                const profileData = {
+                                    name: customerData.full_name || userProfile.name || '',
+                                    phone1: customerData.phone_number || userProfile.phone1 || '',
+                                    email: customerData.email || userProfile.email || '',
+                                    address: userProfile.address || ''
+                                };
+                                localStorage.setItem('userProfile', JSON.stringify(profileData));
+                                updateUserProfileDisplay(profileData);
+                            }
+                        });
+                    }
+                }).catch(error => {
+                    console.log('❌ Error getting current user:', error);
+                    // Fallback to stored profile
+                    updateUserProfileDisplay(userProfile);
+                });
+            } else {
+                // Fallback to stored profile
+                updateUserProfileDisplay(userProfile);
+            }
+        }
 
-            document.getElementById('youNameDisplay').textContent = userProfile.name || 'John Doe';
-            document.getElementById('youPhoneDisplay').textContent = userProfile.phone1 || '0241234567';
-            document.getElementById('youEmailDisplay').textContent = userProfile.email || 'john@example.com';
-            document.getElementById('youAddressDisplay').textContent = userProfile.address || '123 Main Street, Accra';
+        function updateUserProfileDisplay(profile) {
+            document.getElementById('youNameDisplay').textContent = profile.name || 'Your Name';
+            document.getElementById('youPhoneDisplay').textContent = profile.phone1 || 'Your Phone';
+            document.getElementById('youEmailDisplay').textContent = profile.email || 'Your Email';
+            document.getElementById('youAddressDisplay').textContent = profile.address || 'Your Address';
 
             const addressField = document.getElementById('recipientAddress');
-            if (addressField && userProfile.address) {
-                addressField.value = userProfile.address;
+            if (addressField && profile.address) {
+                addressField.value = profile.address;
+            }
+        }
+
+        async function fetchCustomerData(uid) {
+            try {
+                if (!window.databases || !window.appwriteConfig) {
+                    console.error('❌ Appwrite not available');
+                    return null;
+                }
+
+                const response = await window.databases.listDocuments(
+                    window.appwriteConfig.DATABASE_ID,
+                    window.appwriteConfig.CUSTOMER_TABLE,
+                    [window.Query.equal('uid', uid)]
+                );
+
+                if (response.documents.length > 0) {
+                    console.log('👤 Found customer data:', response.documents[0]);
+                    return response.documents[0];
+                }
+                return null;
+            } catch (error) {
+                console.error('❌ Error fetching customer data:', error);
+                return null;
             }
         }
 
@@ -3543,33 +3685,17 @@
         }
 
         function loadSavedRecipients() {
+            // Try to load saved recipients from localStorage first
             const savedRecipientsData = localStorage.getItem('savedRecipients');
             if (savedRecipientsData) {
                 savedRecipients = JSON.parse(savedRecipientsData);
             } else {
-                savedRecipients = [
-                    {
-                        id: 1,
-                        name: 'Jane Smith',
-                        phone: '0241234567',
-                        email: 'jane@example.com',
-                        address: '123 Main St, Accra',
-                        type: 'individual'
-                    },
-                    {
-                        id: 2,
-                        name: 'ABC Corporation',
-                        phone: '0209876543',
-                        email: 'info@abccorp.com',
-                        address: '456 Business Ave, Tema',
-                        type: 'business',
-                        businessName: 'ABC Corporation',
-                        businessType: 'office'
-                    }
-                ];
+                // Initialize with empty array - no more hardcoded sample data
+                savedRecipients = [];
                 localStorage.setItem('savedRecipients', JSON.stringify(savedRecipients));
             }
 
+            // Only load actual saved recipients, not all customers
             updateSavedRecipientsList();
         }
 
@@ -3588,7 +3714,7 @@
                 recipientItem.style.position = 'relative';
 
                 recipientItem.innerHTML = `
-                    <button onclick="deleteSavedRecipient(${recipient.id})" class="delete-recipient-btn" title="Delete recipient">
+                    <button onclick="event.stopPropagation(); deleteSavedRecipient(${recipient.id})" class="delete-recipient-btn" title="Delete recipient">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                             <path d="M3 6h18"/>
                             <path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2 2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
@@ -3779,11 +3905,19 @@
             // Filter out products with quantity 0 for calculations
             const productsWithQuantity = selectedProducts.filter(product => product.quantity > 0);
             
+            console.log('🔍 calculateTotals - productsWithQuantity:', productsWithQuantity);
+            console.log('🔍 calculateTotals - SERVICE_FEE_PER_ITEM:', SERVICE_FEE_PER_ITEM);
+            
             orderData.subtotal = productsWithQuantity.reduce((sum, product) => 
                 sum + (product.price * product.quantity), 0);
             const totalItems = productsWithQuantity.reduce((sum, product) => sum + product.quantity, 0);
             orderData.serviceFee = totalItems * SERVICE_FEE_PER_ITEM;
             orderData.total = orderData.subtotal + orderData.serviceFee;
+            
+            console.log('🔍 calculateTotals - subtotal:', orderData.subtotal);
+            console.log('🔍 calculateTotals - totalItems:', totalItems);
+            console.log('🔍 calculateTotals - serviceFee:', orderData.serviceFee);
+            console.log('🔍 calculateTotals - total:', orderData.total);
         }
 
         function updateOrderReview() {
@@ -3916,6 +4050,7 @@
                     paymentMethod: orderData.payment.network,
                     deliveryName: selectedProducts.map(p => p.name).join(', '),
                     deliveryOrgType: orderData.recipient.type || 'individual',
+                    total: Number(orderData.total || 0), // Add total amount
                     purchase_type: orderData.recipient.type === 'you' ? 'self' : 
                                    orderData.recipient.type === 'business' ? 'business' : 'someone_else',
                     // Recipient details (if different from buyer)
@@ -3945,6 +4080,37 @@
                     selectedProducts,
                     workingDays
                 );
+
+                // Save purchase recipient info to database
+                if (orderData.recipient) {
+                    console.log('🔍 Creating purchase recipient info for order:', order.$id);
+                    console.log('🔍 Recipient data:', orderData.recipient);
+                    
+                    const recipientPayload = {
+                        purchase_recipient_type: orderData.recipient.type || 'you',
+                        recipient_name: orderData.recipient.type !== 'you' ? orderData.recipient.name : '',
+                        recipient_phone: orderData.recipient.type !== 'you' ? orderData.recipient.phone : '',
+                        recipient_email: orderData.recipient.type !== 'you' ? orderData.recipient.email : '',
+                        recipient_address: orderData.recipient.address || '',
+                        recipient_type: orderData.recipient.type || '',
+                        business_name: orderData.recipient.type === 'business' ? orderData.recipient.businessName : '',
+                        business_type: orderData.recipient.type === 'business' ? orderData.recipient.businessType : '',
+                        self_pickup: orderData.recipient.selfPickup || false,
+                        self_delivery_address: orderData.recipient.selfDeliveryAddress || ''
+                    };
+                    
+                    console.log('🔍 Recipient payload:', recipientPayload);
+
+                    try {
+                        const recipientResult = await orderManager.createPurchaseRecipientInfo(order.$id, recipientPayload);
+                        console.log('✅ Purchase recipient info saved to database:', recipientResult);
+                    } catch (recipientError) {
+                        console.error('❌ Error saving purchase recipient info:', recipientError);
+                        // Don't fail the order if recipient info fails, but log the error
+                    }
+                } else {
+                    console.log('⚠️ No recipient data found in orderData');
+                }
 
                 // Store order data for success page
                 orderData.orderId = order.$id;
@@ -4227,43 +4393,17 @@
 
         function saveOrderToHistory() {
             try {
-                let existingOrders = localStorage.getItem('phluowiseOrders');
-                let orders = existingOrders ? JSON.parse(existingOrders) : [];
-
-                const formattedDate = formatDate(selectedDate);
-                const formattedTime = formatTime(selectedTime);
-
-                const newOrder = {
-                    orderId: orderData.orderId,
-                    company: window.currentCompany?.name || branchData?.branch_name || 'Unknown Company',
-                    location: orderData.recipient ? orderData.recipient.address : 'Accra, Ghana',
-                    payment: 'Mobile Money',
-                    time: formattedTime,
-                    date: formattedDate,
-                    price: `GH₵${orderData.total.toFixed(2)}`,
-                    status: 'pending',
-                    statusText: 'Pending',
-                    statusColor: '#F2A78C',
-                    products: orderData.products,
-                    subtotal: orderData.subtotal,
-                    serviceFee: orderData.serviceFee,
-                    total: orderData.total,
-                    recipient: orderData.recipient,
-                    paymentDetails: orderData.payment,
-                    timestamp: new Date().toISOString(),
-                    rating: orderData.rating,
-                    comment: orderData.comment,
-                    transactionId: orderData.transactionId,
-                    deliveryInstructions: orderData.deliveryInstructions,
-                    deliveryDate: selectedDate,
-                    deliveryTime: selectedTime
-                };
-
-                orders.unshift(newOrder);
-                localStorage.setItem('phluowiseOrders', JSON.stringify(orders));
+                console.log('🚀 Order already saved to database during payment processing');
+                console.log('📦 Order data:', orderData);
+                console.log('🏢 Company:', window.currentCompany?.name || window.currentCompany?.branch_name);
+                
+                // Order is already saved to database via OrderManager
+                // No need to save to localStorage anymore
+                
+                console.log('✅ Order successfully saved to database with ID:', orderData.orderId);
 
             } catch (error) {
-                console.error('Error saving order to history:', error);
+                console.error('Error in saveOrderToHistory:', error);
                 showError('Error saving order. Please try again.');
             }
         }
@@ -6320,8 +6460,19 @@
             if (locationElement) locationElement.classList.remove('hidden');
             
             if (companyNameElement && branchData.branch_name) {
-                companyNameElement.textContent = branchData.branch_name;
-                console.log(' Updated company name:', branchData.branch_name);
+                const companyNameText = document.getElementById('companyNameText');
+                if (companyNameText) {
+                    companyNameText.textContent = branchData.branch_name;
+                    console.log(' Updated company name:', branchData.branch_name);
+                }
+            }
+            
+            // Update verification badge (always visible)
+            const verifiedBadge = document.getElementById('verifiedBadge');
+            if (verifiedBadge) {
+                console.log('✅ Verified badge is visible for:', branchData.branch_name);
+            } else {
+                console.log('❌ verifiedBadge element not found!');
             }
             
             if (locationElement && branchData.location) {
@@ -6379,6 +6530,7 @@
                 name: branchData.branch_name,
                 location: branchData.location,
                 email: branchData.email,
+                is_verified: branchData.is_verified || false, // Add verification status
                 // Use coordinates from database if available, otherwise fallback to default
                 coordinates: {
                     lat: branchData.latitude || 5.6037,
@@ -6430,6 +6582,9 @@
             
             // 7. Update working days and hours
             updateWorkingDaysFromDB(branchData);
+            
+            // 8. Fetch products for this branch
+            await fetchProductsForCurrentBranch();
         }
         
         // Update social media links - use social_media data from branchData

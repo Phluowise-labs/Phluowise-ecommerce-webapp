@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verification Test</title>
+    <script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.0/dist/appwrite.js"></script>
+</head>
+<body>
+    <h1>Verification Test</h1>
+    <div id="results"></div>
+    
+    <script>
+        const { Client, Databases } = Appwrite;
+        
+        const client = new Client()
+            .setEndpoint('https://nyc.cloud.appwrite.io/v1')
+            .setProject('68b17582003582da69c8');
+            
+        const databases = new Databases(client);
+        
+        async function testVerification() {
+            const results = document.getElementById('results');
+            results.innerHTML = '<p>Loading...</p>';
+            
+            try {
+                console.log('🔍 Testing verification table...');
+                
+                // Test company_verification table
+                const verificationResponse = await databases.listDocuments(
+                    '68b1b7590035346a3be9',
+                    'company_verification'
+                );
+                
+                console.log('Verification records:', verificationResponse.documents);
+                
+                let html = `<h2>Verification Records (${verificationResponse.documents.length})</h2>`;
+                
+                if (verificationResponse.documents.length === 0) {
+                    html += '<p>No verification records found.</p>';
+                } else {
+                    verificationResponse.documents.forEach((doc, index) => {
+                        html += `
+                            <div style="border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
+                                <h3>Record #${index + 1}</h3>
+                                <p><strong>Company ID:</strong> ${doc.company_id || 'N/A'}</p>
+                                <p><strong>Status:</strong> ${doc.status || 'N/A'}</p>
+                                <p><strong>Document ID:</strong> ${doc.$id}</p>
+                                <p><strong>Created:</strong> ${doc.$createdAt}</p>
+                                <details>
+                                    <summary>Full Document</summary>
+                                    <pre>${JSON.stringify(doc, null, 2)}</pre>
+                                </details>
+                            </div>
+                        `;
+                    });
+                }
+                
+                // Test companies table
+                const companiesResponse = await databases.listDocuments(
+                    '68b1b7590035346a3be9',
+                    'company_tb'
+                );
+                
+                html += `<h2>Companies (${companiesResponse.documents.length})</h2>`;
+                companiesResponse.documents.forEach((doc, index) => {
+                    html += `
+                        <div style="border: 1px solid #ccc; padding: 10px; margin: 10px 0;">
+                            <h3>Company #${index + 1}</h3>
+                            <p><strong>Name:</strong> ${doc.name || 'N/A'}</p>
+                            <p><strong>Company ID:</strong> ${doc.company_id || 'N/A'}</p>
+                            <p><strong>Document ID:</strong> ${doc.$id}</p>
+                        </div>
+                    `;
+                });
+                
+                results.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error:', error);
+                results.innerHTML = `<p style="color: red;">Error: ${error.message}</p>`;
+            }
+        }
+        
+        // Run test when page loads
+        window.addEventListener('load', testVerification);
+    </script>
+</body>
+</html>

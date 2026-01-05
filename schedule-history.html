@@ -15,6 +15,7 @@
   gtag('config', 'G-TRV3R43NQZ');
 </script>
     <title>Phluowise - Schedule History</title>
+    <script src="https://cdn.jsdelivr.net/npm/appwrite@14.0.1"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <link rel="stylesheet"
@@ -793,11 +794,13 @@
 
     <script src="js/appwriteConfig.js"></script>
     <script src="js/theme.js"></script>
+    <script src="js/orderManager.js"></script>
     <script>
         let currentView = 'status';
         let orders = [];
         let currentOrderForDetails = null;
         let myBottles = [];
+        let orderManager = new OrderManager();
 
         document.addEventListener('DOMContentLoaded', () => {
             // console.log('🚀 Schedule History page loading...');
@@ -806,8 +809,8 @@
             document.body.classList.remove('dark-theme', 'gray-theme', 'light-theme');
             document.body.classList.add(savedTheme + '-theme');
 
-            // Load orders from localStorage
-            // console.log('📋 Loading orders from localStorage...');
+            // Load orders from database
+            // console.log('📋 Loading orders from database...');
             loadOrders();
 
             // Load bottles from localStorage
@@ -829,110 +832,195 @@
                 }
             });
 
+            // Listen for network status changes
+            window.addEventListener('online', () => {
+                console.log('🌐 Network connection restored, reloading orders...');
+                loadOrders();
+                renderOrders();
+            });
+
+            window.addEventListener('offline', () => {
+                console.log('📴 Network connection lost');
+            });
+
             // Check for new orders every 2 seconds (for demo purposes)
-            setInterval(() => {
-                const currentOrders = localStorage.getItem('phluowiseOrders');
-                if (currentOrders && JSON.parse(currentOrders).length !== orders.length) {
+            setInterval(async () => {
+                const currentOrdersCount = orders.length;
+                await loadOrders();
+                if (orders.length !== currentOrdersCount) {
                     // console.log('🔄 New orders detected, reloading...');
-                    loadOrders();
                     renderOrders();
                 }
             }, 2000);
 
-            // Add initial dummy data for testing
-            addDummyDataForTesting();
-
-            // console.log('✅ Schedule History page initialized');
+            console.log('✅ Schedule History page initialized');
         });
 
         // Load orders from localStorage when page loads
-        function loadOrders() {
-            // console.log('🔄 Loading orders from localStorage...');
-            const savedOrders = localStorage.getItem('phluowiseOrders');
-            // console.log('📦 Raw localStorage data:', savedOrders);
-
-            if (savedOrders) {
-                try {
-                    orders = JSON.parse(savedOrders);
-                } catch (parseError) {
-                    orders = [];
-                }
-            } else {
-                // console.log('⚠️ No orders found in localStorage, creating sample data...');
-                // If no saved orders, create sample data for demonstration
-                orders = [
-                    {
-                        orderId: 'ORD' + Date.now(),
-                        company: 'Voltic Water Company',
-                        location: 'Accra, Ghana',
-                        payment: 'MTN Mobile Money',
-                        time: '12:30 PM',
-                        date: new Date().toLocaleDateString(),
-                        price: 'GH₵25.00',
-                        quantity: 1,
-                        subtotal: 20.00,
-                        serviceFee: 5.00,
-                        total: 25.00,
-                        status: 'pending',
-                        statusText: 'Pending',
-                        statusColor: '#F2A78C',
-                        product: 'Sachets water',
-                        recipient: { name: 'John Doe', phone: '0201234567', email: 'john@example.com' },
-                        timestamp: new Date().toISOString()
-                    },
-                    {
-                        orderId: 'ORD' + (Date.now() - 86400000), // Yesterday
-                        company: 'Bel-Aqua Ghana',
-                        location: 'Tema, Ghana',
-                        payment: 'Card',
-                        time: '10:15 AM',
-                        date: new Date(Date.now() - 86400000).toLocaleDateString(),
-                        price: 'GH₵27.00',
-                        quantity: 1,
-                        subtotal: 22.00,
-                        serviceFee: 5.00,
-                        total: 27.00,
-                        status: 'accepted',
-                        statusText: 'Order accepted',
-                        statusColor: '#2C9043',
-                        product: 'Dispenser Bottle (20L)',
-                        productType: 'dispenser',
-                        bottleSize: '20L',
-                        isLargeBottle: true,
-                        recipient: { name: 'Jane Smith', phone: '0239876543', email: 'jane@example.com' },
-                        timestamp: new Date(Date.now() - 86400000).toISOString()
-                    },
-                    {
-                        orderId: 'ORD' + (Date.now() - 172800000), // 2 days ago
-                        company: 'Special Ice Water',
-                        location: 'Kumasi, Ghana',
-                        payment: 'Bank Transfer',
-                        time: '2:45 PM',
-                        date: new Date(Date.now() - 172800000).toLocaleDateString(),
-                        price: 'GH₵29.00',
-                        quantity: 1,
-                        subtotal: 24.00,
-                        serviceFee: 5.00,
-                        total: 29.00,
-                        status: 'completed',
-                        statusText: 'Completed',
-                        statusColor: '#2CAA48',
-                        product: 'Dispenser Bottle (500ml)',
-                        productType: 'dispenser',
-                        bottleSize: '500ml',
-                        isLargeBottle: false,
-                        recipient: { name: 'Mike Johnson', phone: '0245678901', email: 'mike@example.com' },
-                        timestamp: new Date(Date.now() - 172800000).toISOString(),
-                        bottleReturned: true,
-                        bottleStatus: 'accepted',
-                        bottleDeliveryTime: '10:00',
-                        bottleDeliveryDate: '2025-12-28'
-                    }
-                ];
-                // console.log('📋 Using sample orders:', orders);
+        async function loadOrders() {
+            console.log('🔄 Loading orders from database...');
+            
+            // Check network status first
+            if (!navigator.onLine) {
+                console.log('⚠️ No internet connection, showing empty orders');
+                orders = [];
+                return;
             }
-
-            // console.log('🎯 Final orders array length:', orders.length);
+            
+            try {
+                // Get current customer ID from multiple sources
+                let customerId = null;
+                
+                // Try customerData from localStorage
+                const customerData = JSON.parse(localStorage.getItem('customerData') || '{}');
+                customerId = customerData.$id || customerData.uid;
+                
+                // Try userProfile from localStorage
+                if (!customerId) {
+                    const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+                    customerId = userProfile.$id || userProfile.uid;
+                }
+                
+                // Try direct auth check
+                if (!customerId && window.account) {
+                    try {
+                        const user = await window.account.get();
+                        customerId = user.$id;
+                    } catch (authError) {
+                        console.log('⚠️ Could not get auth user:', authError);
+                    }
+                }
+                
+                console.log('🔍 Customer ID sources:', {
+                    customerData: customerData.$id || customerData.uid,
+                    userProfile: JSON.parse(localStorage.getItem('userProfile') || '{}').$id || JSON.parse(localStorage.getItem('userProfile') || '{}').uid,
+                    auth: customerId
+                });
+                
+                if (!customerId) {
+                    console.log('⚠️ No customer ID found from any source, showing empty orders');
+                    orders = [];
+                    return;
+                }
+                
+                // Fetch orders from database
+                const ordersFromDB = await orderManager.getOrdersByCustomer(customerId);
+                console.log('📋 Orders from database:', ordersFromDB);
+                
+                // Transform database orders to the format expected by the UI
+                orders = await Promise.all(ordersFromDB.map(async (order) => {
+                    // Get order items
+                    const orderItems = await orderManager.getOrderItems(order.$id);
+                    
+                    // Get purchase recipient info
+                    const recipientInfo = await orderManager.getPurchaseRecipientInfo(order.$id);
+                    
+                    // Transform order items to products format
+                    const products = orderItems.map(item => ({
+                        id: item.productId || item.productName,
+                        name: item.productName,
+                        price: item.productPrice,
+                        quantity: item.productQty,
+                        image: item.productImage,
+                        type: item.productType
+                    }));
+                    
+                    // Calculate totals if not present
+                    const subtotal = order.total || products.reduce((sum, p) => sum + (p.price * p.quantity), 0);
+                    const serviceFee = order.serviceFee || 5;
+                    const total = order.total || (subtotal + serviceFee);
+                    
+                    // Create recipient object from recipient info
+                    const recipient = recipientInfo ? {
+                        type: recipientInfo.purchase_recipient_type,
+                        name: recipientInfo.recipient_name,
+                        phone: recipientInfo.recipient_phone,
+                        email: recipientInfo.recipient_email,
+                        address: recipientInfo.recipient_address,
+                        businessName: recipientInfo.business_name,
+                        businessType: recipientInfo.business_type
+                    } : null;
+                    
+                    return {
+                        orderId: order.$id || order.orderId,
+                        company: order.deliveryName || 'Unknown Company',
+                        location: recipient?.address || order.deliveryAddress || 'Accra, Ghana',
+                        payment: order.paymentMethod || 'Mobile Money',
+                        time: order.deliveryTime || 'N/A',
+                        date: order.deliveryDate || 'N/A',
+                        price: `GH₵${total.toFixed(2)}`,
+                        status: order.orderStatus || 'pending',
+                        statusText: order.orderStatus === 'pending' ? 'Pending' : 
+                                  order.orderStatus === 'confirmed' ? 'Accepted' : 
+                                  order.orderStatus === 'denied' ? 'Denied' : 'Pending',
+                        statusColor: order.orderStatus === 'pending' ? '#F2A78C' : 
+                                     order.orderStatus === 'confirmed' ? '#2C9043' : 
+                                     order.orderStatus === 'denied' ? '#F85D5D' : '#F2A78C',
+                        products: products,
+                        subtotal: subtotal,
+                        serviceFee: serviceFee,
+                        total: total,
+                        recipient: recipient,
+                        paymentDetails: { network: order.paymentMethod },
+                        timestamp: order.$createdAt,
+                        transactionId: order.transactionId,
+                        deliveryInstructions: order.orderComment,
+                        deliveryDate: order.deliveryDate,
+                        deliveryTime: order.deliveryTime
+                    };
+                }));
+                
+                console.log('✅ Orders loaded and transformed:', orders);
+                
+                // If no orders from database, add some test data for debugging
+                if (orders.length === 0) {
+                    console.log('⚠️ No orders found, adding test data for debugging');
+                    orders = [
+                        {
+                            orderId: 'TEST_ORDER_001',
+                            company: 'Test Company',
+                            location: 'Test Location, Ghana',
+                            payment: 'Mobile Money',
+                            time: '14:30',
+                            date: '2025-01-05',
+                            price: 'GH₵25.50',
+                            status: 'pending',
+                            statusText: 'Pending',
+                            statusColor: '#F2A78C',
+                            products: [
+                                {
+                                    id: '1',
+                                    name: 'Test Product',
+                                    price: 20,
+                                    quantity: 1,
+                                    image: null,
+                                    type: 'product'
+                                }
+                            ],
+                            subtotal: 20,
+                            serviceFee: 5.50,
+                            total: 25.50,
+                            recipient: {
+                                type: 'individual',
+                                name: 'Test Recipient',
+                                phone: '+233123456789',
+                                email: 'test@example.com',
+                                address: 'Test Address'
+                            },
+                            paymentDetails: { network: 'MTN' },
+                            timestamp: new Date().toISOString(),
+                            transactionId: 'TEST_TXN_001',
+                            deliveryInstructions: 'Test delivery instructions',
+                            deliveryDate: '2025-01-06',
+                            deliveryTime: '14:30'
+                        }
+                    ];
+                }
+                
+            } catch (error) {
+                console.error('❌ Error loading orders from database:', error);
+                orders = [];
+            }
         }
 
         // Add dummy data for testing
@@ -1175,15 +1263,15 @@
 
         // Render order cards (exact from ScheduleProduct.tsx)
         function renderOrders() {
-            // console.log('🎨 Rendering orders for view:', currentView);
-            // console.log('📊 Total orders to render:', orders.length);
+            console.log('🎨 Rendering orders for view:', currentView);
+            console.log('📊 Total orders to render:', orders.length);
 
             const container = document.getElementById('ordersList');
             container.innerHTML = '';
 
             let renderedCount = 0;
             orders.forEach((order, index) => {
-                // console.log(`🔍 Processing order ${index + 1}:`, order.status, '->', currentView);
+                console.log(`🔍 Processing order ${index + 1}:`, order.company, 'status:', order.status, '->', currentView);
 
                 // Filter based on current view
                 if (currentView === 'ongoing' && order.status !== 'accepted') {
@@ -1639,7 +1727,7 @@
             closeOrderModal(); // Close the status modal first
 
             if (!currentOrderForDetails) {
-                // Try to find the order from orders array
+                // Try to find order from orders array
                 currentOrderForDetails = orders[0];
             }
 
@@ -1648,19 +1736,61 @@
                 return;
             }
 
+            console.log('🔍 Opening order details for:', currentOrderForDetails);
+
             const sheet = document.getElementById('orderDetailsSheet');
             const content = document.getElementById('orderDetailsContent');
             const detailsArea = document.getElementById('orderDetailsContentArea');
 
-            // Determine the appropriate image based on product type
-            let productImage = null;
-            if (currentOrderForDetails.product && (currentOrderForDetails.product.toLowerCase().includes('dispenser') || currentOrderForDetails.product.toLowerCase().includes('bottle'))) {
-                if (currentOrderForDetails.product.toLowerCase().includes('20l') || currentOrderForDetails.bottleSize === '20L' || currentOrderForDetails.isLargeBottle) {
-                    productImage = 'images/products/large-bottle.jpg';
-                } else {
-                    productImage = 'images/products/dispenser.jpg';
+            // Handle both old and new order data structures
+            const isNewOrderStructure = currentOrderForDetails.products && Array.isArray(currentOrderForDetails.products);
+            
+            // Get product info based on data structure
+            let productInfo = {
+                name: 'N/A',
+                image: null,
+                quantity: 1,
+                unitPrice: 0
+            };
+
+            if (isNewOrderStructure) {
+                // New structure with products array
+                if (currentOrderForDetails.products.length > 0) {
+                    productInfo = {
+                        name: currentOrderForDetails.products.length > 1 ? 
+                            `${currentOrderForDetails.products.length} products` : 
+                            currentOrderForDetails.products[0].name || 'N/A',
+                        image: currentOrderForDetails.products[0]?.image || null,
+                        quantity: currentOrderForDetails.products.reduce((sum, p) => sum + (p.quantity || 0), 0),
+                        unitPrice: currentOrderForDetails.products[0]?.price || 0
+                    };
+                }
+            } else {
+                // Old structure
+                productInfo = {
+                    name: currentOrderForDetails.product || currentOrderForDetails.name || 'N/A',
+                    image: null,
+                    quantity: currentOrderForDetails.quantity || 1,
+                    unitPrice: currentOrderForDetails.unitPrice || (currentOrderForDetails.subtotal / (currentOrderForDetails.quantity || 1)) || 0
+                };
+            }
+
+            // Determine product image
+            let productImage = productInfo.image;
+            if (!productImage && productInfo.name) {
+                if (productInfo.name.toLowerCase().includes('dispenser') || productInfo.name.toLowerCase().includes('bottle')) {
+                    if (productInfo.name.toLowerCase().includes('20l') || currentOrderForDetails.bottleSize === '20L' || currentOrderForDetails.isLargeBottle) {
+                        productImage = 'images/products/large-bottle.jpg';
+                    } else {
+                        productImage = 'images/products/dispenser.jpg';
+                    }
                 }
             }
+
+            // Get pricing info
+            const subtotal = isNewOrderStructure ? currentOrderForDetails.subtotal : (currentOrderForDetails.subtotal || 0);
+            const serviceFee = isNewOrderStructure ? currentOrderForDetails.serviceFee : (currentOrderForDetails.serviceFee || 5);
+            const total = isNewOrderStructure ? currentOrderForDetails.total : (currentOrderForDetails.price || currentOrderForDetails.total || 0);
 
             // Populate order details
             detailsArea.innerHTML = `
@@ -1680,12 +1810,29 @@
                                 }
                             </div>
                             <div class="flex-1">
-                                <h4 class="text-white text-lg font-semibold">${currentOrderForDetails.product || 'N/A'}</h4>
+                                <h4 class="text-white text-lg font-semibold">${productInfo.name}</h4>
                                 <p class="text-gray-400 text-sm">${currentOrderForDetails.company || 'N/A'}<span class="material-symbols-outlined verified-checkmark" style="font-size: 16px; margin-left: 2px;">verified</span></p>
-                                <p class="text-gray-400 text-sm">Quantity: ${currentOrderForDetails.quantity || 1}</p>
+                                <p class="text-gray-400 text-sm">Quantity: ${productInfo.quantity}</p>
                             </div>
                         </div>
                     </div>
+                    
+                    ${isNewOrderStructure && currentOrderForDetails.products.length > 1 ? `
+                    <!-- Detailed Product List -->
+                    <div class="bg-gray-800/50 rounded-xl p-4">
+                        <h3 class="text-white text-lg font-bold mb-3">Product Details</h3>
+                        <div class="space-y-3">
+                            ${currentOrderForDetails.products.map((product, index) => `
+                                <div class="flex justify-between items-center py-2 border-b border-gray-700">
+                                    <div class="flex-1">
+                                        <p class="text-white font-medium">${product.name}</p>
+                                        <p class="text-gray-400 text-sm">Qty: ${product.quantity || 1}</p>
+                                    </div>
+                                    <p class="text-white font-medium">GHS${((product.price || 0) * (product.quantity || 1)).toFixed(2)}</p>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>` : ''}
                     
                     <!-- Order Summary -->
                     <div class="bg-gray-800/50 rounded-xl p-4">
@@ -1701,12 +1848,27 @@
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-gray-400">Product:</span>
-                                <span class="text-white font-medium">${currentOrderForDetails.product || 'N/A'}</span>
+                                <span class="text-white font-medium">${productInfo.name}</span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-gray-400">Quantity:</span>
-                                <span class="text-white font-medium">${currentOrderForDetails.quantity || 1}</span>
+                                <span class="text-white font-medium">${productInfo.quantity}</span>
                             </div>
+                            ${currentOrderForDetails.deliveryDate ? `
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Delivery Date:</span>
+                                <span class="text-white font-medium">${currentOrderForDetails.deliveryDate}</span>
+                            </div>` : ''}
+                            ${currentOrderForDetails.deliveryTime ? `
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Delivery Time:</span>
+                                <span class="text-white font-medium">${currentOrderForDetails.deliveryTime}</span>
+                            </div>` : ''}
+                            ${currentOrderForDetails.orderComment || currentOrderForDetails.deliveryInstructions ? `
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Delivery Instructions:</span>
+                                <span class="text-white font-medium text-right" style="max-width: 60%;">${currentOrderForDetails.orderComment || currentOrderForDetails.deliveryInstructions}</span>
+                            </div>` : ''}
                         </div>
                     </div>
                     
@@ -1716,19 +1878,19 @@
                         <div class="space-y-2">
                             <div class="flex justify-between">
                                 <span class="text-gray-400">Unit Price:</span>
-                                <span class="text-white font-medium">GHS${currentOrderForDetails.unitPrice || (currentOrderForDetails.subtotal / (currentOrderForDetails.quantity || 1) || 0).toFixed(2)}</span>
+                                <span class="text-white font-medium">GHS${productInfo.unitPrice.toFixed(2)}</span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-gray-400">Subtotal:</span>
-                                <span class="text-white font-medium">GHS${currentOrderForDetails.subtotal || 0}</span>
+                                <span class="text-white font-medium">GHS${subtotal.toFixed(2)}</span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-gray-400">Service Fee:</span>
-                                <span class="text-white font-medium">GHS${currentOrderForDetails.serviceFee || 5}</span>
+                                <span class="text-white font-medium">GHS${serviceFee.toFixed(2)}</span>
                             </div>
                             <div class="flex justify-between pt-2 border-t border-gray-700">
                                 <span class="text-white font-bold text-lg">Total:</span>
-                                <span class="text-white font-bold text-lg">${currentOrderForDetails.price || 'N/A'}</span>
+                                <span class="text-white font-bold text-lg">GHS${total.toFixed(2)}</span>
                             </div>
                         </div>
                     </div>
@@ -1858,6 +2020,40 @@
                 return;
             }
 
+            // Handle both old and new order data structures
+            const isNewOrderStructure = currentOrderForDetails.products && Array.isArray(currentOrderForDetails.products);
+            
+            // Get product info based on data structure
+            let productInfo = {
+                name: 'N/A',
+                quantity: 1,
+                unitPrice: 0
+            };
+
+            if (isNewOrderStructure) {
+                // New structure with products array
+                const firstProduct = currentOrderForDetails.products[0];
+                if (firstProduct) {
+                    productInfo = {
+                        name: firstProduct.name || 'N/A',
+                        quantity: currentOrderForDetails.products.reduce((sum, p) => sum + (p.quantity || 0), 0),
+                        unitPrice: firstProduct.price || 0
+                    };
+                }
+            } else {
+                // Old structure
+                productInfo = {
+                    name: currentOrderForDetails.product || currentOrderForDetails.name || 'N/A',
+                    quantity: currentOrderForDetails.quantity || 1,
+                    unitPrice: currentOrderForDetails.unitPrice || (currentOrderForDetails.subtotal / (currentOrderForDetails.quantity || 1)) || 0
+                };
+            }
+
+            // Get pricing info
+            const subtotal = isNewOrderStructure ? currentOrderForDetails.subtotal : (currentOrderForDetails.subtotal || 0);
+            const serviceFee = isNewOrderStructure ? currentOrderForDetails.serviceFee : (currentOrderForDetails.serviceFee || 5);
+            const total = isNewOrderStructure ? currentOrderForDetails.total : (currentOrderForDetails.price || currentOrderForDetails.total || 0);
+
             // Create PDF content
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF();
@@ -1880,12 +2076,50 @@
             yPosition += 8;
             doc.text(`Company: ${currentOrderForDetails.company || 'N/A'}`, 20, yPosition);
             yPosition += 8;
-            doc.text(`Product: ${currentOrderForDetails.product || 'N/A'}`, 20, yPosition);
+            doc.text(`Product: ${productInfo.name}`, 20, yPosition);
             yPosition += 8;
-            doc.text(`Quantity: ${currentOrderForDetails.quantity || 1}`, 20, yPosition);
+            doc.text(`Quantity: ${productInfo.quantity}`, 20, yPosition);
             yPosition += 8;
+            
+            // Add detailed product list if multiple products
+            if (isNewOrderStructure && currentOrderForDetails.products.length > 1) {
+                yPosition += 5;
+                doc.setFontSize(12);
+                doc.text('Product Details:', 20, yPosition);
+                yPosition += 8;
+                
+                currentOrderForDetails.products.forEach((product, index) => {
+                    doc.text(`  ${index + 1}. ${product.name} (Qty: ${product.quantity || 1}) - GHS${((product.price || 0) * (product.quantity || 1)).toFixed(2)}`, 25, yPosition);
+                    yPosition += 6;
+                });
+                yPosition += 5;
+            }
+            
             doc.text(`Status: ${currentOrderForDetails.statusText || 'Pending'}`, 20, yPosition);
             yPosition += 15;
+            
+            // Delivery Information
+            if (currentOrderForDetails.deliveryDate || currentOrderForDetails.deliveryTime || currentOrderForDetails.orderComment || currentOrderForDetails.deliveryInstructions) {
+                doc.setFontSize(14);
+                doc.text('Delivery Information', 20, yPosition);
+                yPosition += 10;
+                
+                doc.setFontSize(11);
+                if (currentOrderForDetails.deliveryDate) {
+                    doc.text(`Delivery Date: ${currentOrderForDetails.deliveryDate}`, 20, yPosition);
+                    yPosition += 8;
+                }
+                if (currentOrderForDetails.deliveryTime) {
+                    doc.text(`Delivery Time: ${currentOrderForDetails.deliveryTime}`, 20, yPosition);
+                    yPosition += 8;
+                }
+                if (currentOrderForDetails.orderComment || currentOrderForDetails.deliveryInstructions) {
+                    const instructions = currentOrderForDetails.orderComment || currentOrderForDetails.deliveryInstructions;
+                    doc.text(`Delivery Instructions: ${instructions}`, 20, yPosition);
+                    yPosition += 8;
+                }
+                yPosition += 5;
+            }
             
             // Price Breakdown
             doc.setFontSize(14);
@@ -1893,13 +2127,13 @@
             yPosition += 10;
             
             doc.setFontSize(11);
-            doc.text(`Unit Price: GHS${currentOrderForDetails.unitPrice || (currentOrderForDetails.subtotal / (currentOrderForDetails.quantity || 1) || 0).toFixed(2)}`, 20, yPosition);
+            doc.text(`Unit Price: GHS${productInfo.unitPrice.toFixed(2)}`, 20, yPosition);
             yPosition += 8;
-            doc.text(`Subtotal: GHS${currentOrderForDetails.subtotal || 0}`, 20, yPosition);
+            doc.text(`Subtotal: GHS${subtotal.toFixed(2)}`, 20, yPosition);
             yPosition += 8;
-            doc.text(`Service Fee: GHS${currentOrderForDetails.serviceFee || 5}`, 20, yPosition);
+            doc.text(`Service Fee: GHS${serviceFee.toFixed(2)}`, 20, yPosition);
             yPosition += 8;
-            doc.text(`Total: GHS ${currentOrderForDetails.price || 'N/A'}`, 20, yPosition);
+            doc.text(`Total: GHS${total.toFixed(2)}`, 20, yPosition);
             yPosition += 15;
             
             // Recipient Information

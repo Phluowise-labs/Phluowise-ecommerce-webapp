@@ -8,6 +8,7 @@ class CompanyDataManager {
         this.workingDays = [];
         this.products = [];
         this.socialMedia = [];
+        this.verifications = [];
         this.isLoading = false;
         this.lastFetchTime = null;
         this.cacheTimeout = 5 * 60 * 1000; // 5 minutes cache
@@ -28,13 +29,14 @@ class CompanyDataManager {
         try {
             console.log('🔄 Fetching company data from database...');
             
-            // Fetch companies, branches, working days, products, and social media in parallel
-            const [companiesResponse, branchesResponse, workingDaysResponse, productsResponse, socialMediaResponse] = await Promise.all([
+            // Fetch companies, branches, working days, products, social media, and verification in parallel
+            const [companiesResponse, branchesResponse, workingDaysResponse, productsResponse, socialMediaResponse, verificationResponse] = await Promise.all([
                 this.fetchCompanies(),
                 this.fetchBranches(),
                 this.fetchWorkingDays(),
                 this.fetchProducts(),
-                this.fetchSocialMedia()
+                this.fetchSocialMedia(),
+                this.fetchVerifications()
             ]);
 
             this.companies = companiesResponse;
@@ -42,6 +44,7 @@ class CompanyDataManager {
             this.workingDays = workingDaysResponse;
             this.products = productsResponse;
             this.socialMedia = socialMediaResponse;
+            this.verifications = verificationResponse;
             this.lastFetchTime = Date.now();
 
             // Process and merge data
@@ -173,6 +176,24 @@ class CompanyDataManager {
                     sm.branch_id === branch.branch_id || sm.company_id === branch.company_id
                 );
 
+                // Get verification status for this company
+                const verification = this.verifications.find(v => v.company_id === branch.company_id);
+                const isVerified = verification && verification.status === 'verified';
+                
+                console.log(`🔍 Checking verification for company ${branch.company_id}:`);
+                console.log('- Found verification:', verification);
+                console.log('- Verification status:', verification ? verification.status : 'N/A');
+                console.log('- isVerified:', isVerified);
+                console.log('- Branch name:', branch.branch_name);
+                
+                // Debug: Show all verification records for troubleshooting
+                if (this.verifications.length > 0) {
+                    console.log('🔍 All verification records:');
+                    this.verifications.forEach((v, i) => {
+                        console.log(`  ${i + 1}. company_id: ${v.company_id}, status: ${v.status}, $id: ${v.$id}`);
+                    });
+                }
+
                 // Create merged company object with branch info
                 const mergedCompany = {
                     id: branch.$id, // Use branch document ID as main ID
@@ -190,6 +211,7 @@ class CompanyDataManager {
                     profile_image: branch.profile_image,
                     header_image: branch.header_image,
                     branch_type: branch.branch_type,
+                    is_verified: isVerified, // Add verification status
                     coordinates: this.generateCoordinates(branch.location),
                     working_days: branchWorkingDays, // Add working days
                     products: branchProducts.map(product => ({
@@ -303,6 +325,28 @@ class CompanyDataManager {
             return response.documents;
         } catch (error) {
             console.error('❌ Error fetching social media:', error);
+            return [];
+        }
+    }
+
+    // Fetch verification data from company_verification table
+    async fetchVerifications() {
+        try {
+            const response = await window.databases.listDocuments(
+                window.appwriteConfig.DATABASE_ID,
+                window.appwriteConfig.COMPANY_VERIFICATION_TABLE
+            );
+            console.log(`✅ Found ${response.documents.length} verification records:`);
+            response.documents.forEach((doc, index) => {
+                console.log(`📋 Verification #${index + 1}:`, {
+                    company_id: doc.company_id,
+                    status: doc.status,
+                    $id: doc.$id
+                });
+            });
+            return response.documents;
+        } catch (error) {
+            console.error('❌ Error fetching verification data:', error);
             return [];
         }
     }
