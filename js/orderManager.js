@@ -106,7 +106,7 @@ class OrderManager {
                 purchase_recipient_type: recipientData.purchase_recipient_type || 'you',
                 recipient_name: recipientData.recipient_name || '',
                 recipient_phone: recipientData.recipient_phone || '',
-                recipient_email: recipientData.recipient_email || '',
+                recipient_email: recipientData.recipient_email && recipientData.recipient_email.trim() !== '' ? recipientData.recipient_email : null,
                 recipient_address: recipientData.recipient_address || '',
                 recipient_type: recipientData.recipient_type || '',
                 business_name: recipientData.business_name || '',
@@ -142,6 +142,8 @@ class OrderManager {
                 console.log('🔍 Processing item for orderItem:', item);
                 console.log('🔍 Item type:', item.type);
                 console.log('🔍 Item productType:', item.productType);
+                console.log('🔍 Item name:', item.name);
+                console.log('🔍 Item productName:', item.productName);
                 
                 // Generate unique ID using timestamp and random number as fallback (max 20 chars)
                 let uniqueOrderItemId;
@@ -163,13 +165,17 @@ class OrderManager {
                     console.log('🔍 Fallback orderItemId length:', uniqueOrderItemId.length);
                 }
 
+                // Get product name with fallbacks to handle undefined
+                const productName = item.name || item.productName || item.type || 'Unknown Product';
+                console.log('🔍 Final product name to use:', productName);
+
                 const orderItem = {
                     orderItemId: uniqueOrderItemId,
                     orderId: orderId,
                     branchId: orderData.branchId || item.branchId,
-                    productId: item.productId || item.id,
-                    productName: item.name || item.productName,
-                    productImage: item.image || item.productImage || '',
+                    productId: String(item.productId || item.id || '').substring(0, 20),
+                    productName: productName,
+                    productImage: (item.image || item.productImage || '').startsWith('http') ? (item.image || item.productImage) : '',
                     productType: item.type || item.productType || 'default',
                     productPrice: Number(item.price || item.productPrice || 0),
                     productQty: Number(item.quantity || 1),
@@ -179,6 +185,7 @@ class OrderManager {
                 };
                 
                 console.log('🔍 Final orderItem productType:', orderItem.productType);
+                console.log('🔍 Final orderItem productName:', orderItem.productName);
 
                 const result = await this.databases.createDocument(
                     this.config.DATABASE_ID,

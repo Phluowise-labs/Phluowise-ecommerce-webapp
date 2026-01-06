@@ -2590,11 +2590,13 @@
         </a>
     </div>
 
+    <!-- Appwrite SDK and Config -->
     <script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.1"></script>
     <script src="js/appwriteConfig.js"></script>
     <script src="js/companyData.js"></script>
+    <script src="js/cacheManager.js"></script>
     <script src="js/orderManager.js"></script>
-    <script src="js/theme.js"></script>
+    <script src="js/notifications.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         // Global variables for the schedule flow
@@ -3605,35 +3607,51 @@
 
         function loadUserProfileData() {
             // Get current user data from Appwrite or customer_tb
-            const userProfile = JSON.parse(localStorage.getItem('userProfile')) || {};
+            let userProfile = {};
+            
+            // Try to get data from cache manager first
+            if (window.cacheManager) {
+                userProfile = window.cacheManager.getCache('user_profile') || {};
+            } else {
+                // Fallback to regular localStorage
+                userProfile = JSON.parse(localStorage.getItem('userProfile')) || {};
+            }
             
             // Try to get current user from Appwrite auth
             if (window.account && window.account.get) {
-                window.account.get().then(currentUser => {
-                    if (currentUser) {
-                        console.log('👤 Current user from Appwrite:', currentUser);
-                        // Fetch full customer data from customer_tb
-                        fetchCustomerData(currentUser.$id).then(customerData => {
-                            if (customerData) {
-                                const profileData = {
-                                    name: customerData.full_name || userProfile.name || '',
-                                    phone1: customerData.phone_number || userProfile.phone1 || '',
-                                    email: customerData.email || userProfile.email || '',
-                                    address: userProfile.address || ''
-                                };
-                                localStorage.setItem('userProfile', JSON.stringify(profileData));
-                                updateUserProfileDisplay(profileData);
-                            }
-                        });
+                window.account.get().then(user => {
+                    console.log('👤 Current user from Appwrite:', user);
+                    
+                    // Update profile with Appwrite data if available
+                    if (user && user.name && user.email) {
+                        profileData = {
+                            full_name: user.name,
+                            email: user.email,
+                            phone_number: userProfile.phone_number || '',
+                            address: userProfile.address || ''
+                        };
+                        
+                        // Cache updated profile
+                        if (window.cacheManager) {
+                            window.cacheManager.setCache('user_profile', profileData);
+                        } else {
+                            localStorage.setItem('userProfile', JSON.stringify(profileData));
+                        }
+                        
+                        updateUserProfileDisplay(profileData);
                     }
-                }).catch(error => {
-                    console.log('❌ Error getting current user:', error);
-                    // Fallback to stored profile
-                    updateUserProfileDisplay(userProfile);
+                }).catch(err => {
+                    console.log('⚠️ Could not get Appwrite user:', err);
+                    // Use cached profile data
+                    if (userProfile && userProfile.full_name) {
+                        updateUserProfileDisplay(userProfile);
+                    }
                 });
             } else {
-                // Fallback to stored profile
-                updateUserProfileDisplay(userProfile);
+                // Use cached profile data
+                if (userProfile && userProfile.full_name) {
+                    updateUserProfileDisplay(userProfile);
+                }
             }
         }
 
@@ -3676,9 +3694,26 @@
         function saveUserAddress() {
             const address = document.getElementById('recipientAddress').value;
             if (address && recipientType === 'you') {
-                const userProfile = JSON.parse(localStorage.getItem('userProfile')) || {};
+                // Get existing user profile
+                let userProfile = {};
+                
+                if (window.cacheManager) {
+                    userProfile = window.cacheManager.getCache('user_profile') || {};
+                } else {
+                    userProfile = JSON.parse(localStorage.getItem('userProfile')) || {};
+                }
+                
                 userProfile.address = address;
-                localStorage.setItem('userProfile', JSON.stringify(userProfile));
+                
+                // Save using cache manager if available
+                if (window.cacheManager) {
+                    window.cacheManager.setCache('user_profile', userProfile);
+                    console.log('💾 User profile cached with updated address');
+                } else {
+                    // Fallback to regular localStorage
+                    localStorage.setItem('userProfile', JSON.stringify(userProfile));
+                }
+                
                 document.getElementById('youAddressDisplay').textContent = address;
             }
         }
@@ -4092,9 +4127,9 @@
                     
                     const recipientPayload = {
                         purchase_recipient_type: orderData.recipient.type || 'you',
-                        recipient_name: orderData.recipient.type !== 'you' ? orderData.recipient.name : '',
-                        recipient_phone: orderData.recipient.type !== 'you' ? orderData.recipient.phone : '',
-                        recipient_email: orderData.recipient.type !== 'you' ? orderData.recipient.email : '',
+                        recipient_name: orderData.recipient.type !== 'you' ? orderData.recipient.name : (orderData.customer?.full_name || ''),
+                        recipient_phone: orderData.recipient.type !== 'you' ? orderData.recipient.phone : (orderData.customer?.phone_number || ''),
+                        recipient_email: orderData.recipient.type !== 'you' ? orderData.recipient.email : (orderData.customer?.email || ''),
                         recipient_address: orderData.recipient.address || '',
                         recipient_type: orderData.recipient.type || '',
                         business_name: orderData.recipient.type === 'business' ? orderData.recipient.businessName : '',
@@ -4400,15 +4435,33 @@
             try {
                 console.log('🚀 Order already saved to database during payment processing');
                 console.log('📦 Order data:', orderData);
-                console.log('🏢 Company:', window.currentCompany?.name || window.currentCompany?.branch_name);
-                
-                // Order is already saved to database via OrderManager
-                // No need to save to localStorage anymore
-                
+
+                // Cache order data locally for offline access
+                if (window.cacheManager) {
+                    window.cacheManager.setCache('orders', orderData, orderData.orderId);
+                    console.log('💾 Order cached locally for offline access');
+                }
+
+                // Trigger storage event for schedule-history.html
+                window.dispatchEvent(new Event('storage'));
+                console.log('🔄 Storage event dispatched to schedule-history.html');
+
                 console.log('✅ Order successfully saved to database with ID:', orderData.orderId);
 
             } catch (error) {
                 console.error('Error in saveOrderToHistory:', error);
+                
+                // Handle offline scenario - add to sync queue
+                if (window.cacheManager && window.cacheManager.isOffline()) {
+                    console.log('📴 Offline mode - adding order to sync queue');
+                    const syncId = window.cacheManager.addToSyncQueue('save_order', orderData, 'high');
+                    
+                    if (syncId) {
+                        console.log('📋 Order queued for sync with ID:', syncId);
+                        return;
+                    }
+                }
+                
                 showError('Error saving order. Please try again.');
             }
         }

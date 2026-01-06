@@ -26,6 +26,9 @@ if (typeof Appwrite === 'undefined') {
         COMPANY_VERIFICATION_TABLE: 'company_verification',
         STORAGE_BUCKET_ID: '68b1c57b001542be7fbe',
         PROJECT_ID: '68b17582003582da69c8',
+        BUCKETS: {
+            PRODUCTS: '68b1c57b001542be7fbe'
+        },
         client,
         account,
         databases,

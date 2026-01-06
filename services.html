@@ -2436,6 +2436,8 @@
         const MAX_RETRIES = 10;
         
         async function loadServiceData() {
+            console.log('🔄 Loading services with web2app cache-first strategy...');
+            
             try {
                 // Check if user is authenticated
                 if (!window.account && loadRetryCount < MAX_RETRIES) {
@@ -2457,9 +2459,116 @@
                     return;
                 }
 
+                // STEP 1: Always try cache first for instant UI
+                if (window.cacheManager) {
+                    const cachedServices = window.cacheManager.getCache('companies'); // Use same key as home.html
+                    if (cachedServices && cachedServices.length > 0) {
+                        console.log('📦 Loading services from cache for instant UI:', cachedServices.length);
+                        services = cachedServices;
+                        servicesDataLoaded = true;
+                        
+                        // Initialize serviceProducts object for each company
+                        services.forEach(service => {
+                            if (!serviceProducts[service.name]) {
+                                serviceProducts[service.name] = [];
+                            }
+                        });
+                        
+                        renderServices();
+                        
+                        // STEP 2: Background refresh - check if cache needs update
+                        setTimeout(() => refreshServicesInBackground(), 1000);
+                        return;
+                    }
+                }
+                
+                // STEP 3: No cache available - load from database with fallback
+                await loadServicesFromDatabaseWithFallback();
+                
+            } catch (error) {
+                console.error('❌ Error in loadServiceData:', error);
+                await loadServicesFromDatabaseWithFallback();
+            }
+        }
+
+        // Background refresh for services
+        async function refreshServicesInBackground() {
+            if (!navigator.onLine) {
+                console.log('📴 Offline - skipping services background refresh');
+                return;
+            }
+            
+            try {
+                console.log('🔄 Background refresh - checking for new service data...');
+                const freshData = await window.companyDataManager.fetchCompanyData();
+                
+                // Check if data has changed
+                if (hasServicesChanged(freshData, services)) {
+                    console.log('🆕 New service data detected - updating cache and UI');
+                    services = freshData;
+                    servicesDataLoaded = true;
+                    
+                    // Update cache
+                    if (window.cacheManager) {
+                        window.cacheManager.setCache('companies', freshData);
+                        console.log('💾 Services cache updated with fresh data');
+                    }
+                    
+                    // Re-initialize serviceProducts
+                    serviceProducts = {};
+                    services.forEach(service => {
+                        if (!serviceProducts[service.name]) {
+                            serviceProducts[service.name] = [];
+                        }
+                    });
+                    
+                    // Update UI
+                    renderServices();
+                } else {
+                    console.log('📊 No new service data - cache is current');
+                }
+            } catch (error) {
+                console.error('❌ Background refresh for services failed:', error);
+                // Don't show error to user - UI already working with cache
+            }
+        }
+
+        // Check if services data has changed
+        function hasServicesChanged(newData, oldData) {
+            if (!oldData || oldData.length === 0) return true;
+            if (!newData || newData.length === 0) return false;
+            if (newData.length !== oldData.length) return true;
+            
+            // Check for updated timestamps or new services
+            for (let i = 0; i < newData.length; i++) {
+                const newService = newData[i];
+                const oldService = oldData.find(s => s.company_id === newService.company_id);
+                
+                if (!oldService) return true; // New service found
+                
+                // Check for updates
+                if (newService.$updatedAt && oldService.$updatedAt) {
+                    if (newService.$updatedAt !== oldService.$updatedAt) return true;
+                }
+            }
+            
+            return false;
+        }
+
+        // Load services from database with multiple fallback layers
+        async function loadServicesFromDatabaseWithFallback() {
+            try {
+                // Try database first
+                console.log('📡 Loading services from database...');
                 services = await window.companyDataManager.fetchCompanyData();
                 servicesDataLoaded = true;
                 
+                // Cache the loaded services
+                if (window.cacheManager) {
+                    window.cacheManager.setCache('companies', services);
+                    console.log('💾 Services cached for offline access');
+                }
+                
                 // Initialize serviceProducts object for each company
                 services.forEach(service => {
                     if (!serviceProducts[service.name]) {
@@ -2468,13 +2577,41 @@
                 });
                 
                 renderServices();
+                console.log(`✅ Loaded ${services.length} services from database`);
                 
             } catch (error) {
-                console.error('❌ Error loading service data:', error);
-                // Use fallback data if database fails
+                console.error('❌ Database load for services failed:', error);
+                
+                // Fallback 1: Try cache manager again
+                if (window.cacheManager) {
+                    const cachedServices = window.cacheManager.getCache('companies');
+                    if (cachedServices && cachedServices.length > 0) {
+                        console.log('📦 Using cache manager as fallback for services:', cachedServices.length);
+                        services = cachedServices;
+                        servicesDataLoaded = true;
+                        
+                        // Initialize serviceProducts object for each company
+                        services.forEach(service => {
+                            if (!serviceProducts[service.name]) {
+                                serviceProducts[service.name] = [];
+                            }
+                        });
+                        
+                        renderServices();
+                        return;
+                    }
+                }
+                
+                // Fallback 2: Use companyDataManager fallback data
+                console.log('🔄 Using companyDataManager fallback data for services...');
                 services = window.companyDataManager.getFallbackData();
                 servicesDataLoaded = true;
                 
+                // Cache fallback data
+                if (window.cacheManager) {
+                    window.cacheManager.setCache('companies', services);
+                }
+                
                 // Initialize serviceProducts object for each company
                 services.forEach(service => {
                     if (!serviceProducts[service.name]) {
@@ -2483,6 +2620,7 @@
                 });
                 
                 renderServices();
+                console.log('⚠️ Using fallback data for services - app works offline');
             }
         }
 
@@ -2704,7 +2842,7 @@
                     id: Date.now(),
                     company: companyName,
                     name: productName,
-                    price: price,
+                    price: parseFloat(price) || 0,
                     image: image,
                     quantity: minQuantity,
                     type: type
@@ -2750,7 +2888,7 @@
                     id: Date.now(),
                     company: companyName,
                     name: productName,
-                    price: price,
+                    price: parseFloat(price) || 0,
                     image: image,
                     quantity: minQuantity,
                     type: type
@@ -2949,7 +3087,7 @@
         }
 
         // Schedule order - Open bottom sheet
-        function scheduleOrder(companyName) {
+        async function scheduleOrder(companyName) {
             selectedCompany = companyName;
 
             // Get selected products for this company
@@ -2960,11 +3098,11 @@
                 return;
             }
 
-            startScheduleFlow();
+            await startScheduleFlow();
         }
 
         // Open schedule flow - same as scheduleOrder
-        function openScheduleFlow(companyName) {
+        async function openScheduleFlow(companyName) {
             selectedCompany = companyName;
 
             // Get selected products for this company
@@ -2984,7 +3122,7 @@
 
             // Update selectedProducts with the products for this company
             selectedProducts = [...products];
-            startScheduleFlow();
+            await startScheduleFlow();
         }
 
         // Show error message in bottom sheet
@@ -3017,7 +3155,14 @@
         }
 
         // Schedule Flow Bottom Sheet
-        function startScheduleFlow() {
+        async function startScheduleFlow() {
+            // Validate authentication before starting order flow
+            const isAuthenticated = await validateUserAuthentication();
+            if (!isAuthenticated) {
+                showError('You must be logged in to schedule an order. Please log in and try again.');
+                return;
+            }
+
             // Reset to first step
             currentStep = 1;
             updateStepIndicators();
@@ -3735,15 +3880,25 @@
             }
         }
 
-        // Load user profile data from localStorage
+        // Load user profile data from localStorage with cache manager
         function loadUserProfileData() {
-            // Try to get data from localStorage first
-            const userProfile = JSON.parse(localStorage.getItem('userProfile')) || {};
+            // Try to get data from cache manager first
+            let userProfile = {};
+            
+            if (window.cacheManager) {
+                userProfile = window.cacheManager.getCache('user_profile') || {};
+            } else {
+                // Fallback to regular localStorage
+                userProfile = JSON.parse(localStorage.getItem('userProfile')) || {};
+            }
 
             document.getElementById('youNameDisplay').textContent = userProfile.name || 'John Doe';
             document.getElementById('youPhoneDisplay').textContent = userProfile.phone1 || '0500000000';
-            document.getElementById('youEmailDisplay').textContent = userProfile.email || 'john@example.com';
-            document.getElementById('youAddressDisplay').textContent = userProfile.address || '123 Main St, Accra, Ghana';
+            document.getElementById('youEmailDisplay').textContent = userProfile.email || 'user@example.com';
+            
+            if (userProfile.address) {
+                document.getElementById('youAddressDisplay').textContent = userProfile.address;
+            }
 
             // Also pre-fill the delivery address field with the saved address
             const addressField = document.getElementById('recipientAddress');
@@ -3757,13 +3912,25 @@
             const address = document.getElementById('recipientAddress').value;
             if (address && recipientType === 'you') {
                 // Get existing user profile
-                const userProfile = JSON.parse(localStorage.getItem('userProfile')) || {};
+                let userProfile = {};
+                
+                if (window.cacheManager) {
+                    userProfile = window.cacheManager.getCache('user_profile') || {};
+                } else {
+                    userProfile = JSON.parse(localStorage.getItem('userProfile')) || {};
+                }
 
                 // Update address
                 userProfile.address = address;
 
-                // Save back to localStorage
-                localStorage.setItem('userProfile', JSON.stringify(userProfile));
+                // Save using cache manager if available
+                if (window.cacheManager) {
+                    window.cacheManager.setCache('user_profile', userProfile);
+                    console.log('💾 User profile cached with updated address');
+                } else {
+                    // Fallback to regular localStorage
+                    localStorage.setItem('userProfile', JSON.stringify(userProfile));
+                }
 
                 // Update display
                 document.getElementById('youAddressDisplay').textContent = address;
@@ -3784,14 +3951,16 @@
                 // Get current user from Appwrite
                 if (window.account) {
                     const user = await window.account.get();
+                    console.log('🔍 Current user:', user.$id);
                     
                     // Get customer profile from database
                     const customerProfile = await getCustomerProfile(user.$id);
+                    console.log('🔍 Customer profile found:', !!customerProfile);
                     
                     if (customerProfile) {
                         // Update orderData with customer details
                         orderData.customer = {
-                            id: customerProfile.$id,
+                            id: customerProfile.$id, // This is the critical field
                             uid: customerProfile.uid,
                             email: customerProfile.email,
                             name: customerProfile.full_name,
@@ -3799,14 +3968,54 @@
                             type: customerProfile.user_type
                         };
                         
+                        console.log('✅ Customer data loaded:', orderData.customer);
+                        
                         // Update "You" display fields
-                        document.getElementById('youNameDisplay').textContent = customerProfile.full_name;
-                        document.getElementById('youPhoneDisplay').textContent = customerProfile.phone_number;
-                        document.getElementById('youEmailDisplay').textContent = customerProfile.email;
+                        const youNameDisplay = document.getElementById('youNameDisplay');
+                        const youPhoneDisplay = document.getElementById('youPhoneDisplay');
+                        const youEmailDisplay = document.getElementById('youEmailDisplay');
+                        
+                        if (youNameDisplay) youNameDisplay.textContent = customerProfile.full_name;
+                        if (youPhoneDisplay) youPhoneDisplay.textContent = customerProfile.phone_number;
+                        if (youEmailDisplay) youEmailDisplay.textContent = customerProfile.email;
+                    } else {
+                        console.error('❌ No customer profile found for user:', user.$id);
+                        // Try to create a customer record if none exists
+                        await createCustomerRecord(user);
                     }
+                } else {
+                    console.error('❌ Appwrite account not available');
                 }
             } catch (error) {
                 console.error('❌ Error loading customer data:', error);
+                // Show user-friendly error
+                showError('Unable to load your profile. Please refresh the page and log in again.');
+            }
+        }
+
+        // Create customer record if it doesn't exist
+        async function createCustomerRecord(user) {
+            try {
+                console.log('🔧 Creating customer record for user:', user.$id);
+                const newCustomer = await window.databases.createDocument(
+                    window.appwriteConfig.DATABASE_ID,
+                    window.appwriteConfig.CUSTOMER_TABLE,
+                    window.ID.unique(),
+                    {
+                        full_name: user.name || 'User',
+                        email: user.email,
+                        phone_number: '',
+                        user_type: 'individual',
+                        uid: user.$id
+                    }
+                );
+                
+                console.log('✅ Customer record created:', newCustomer);
+                
+                // Reload customer data after creating record
+                await loadCustomerData();
+            } catch (createError) {
+                console.error('❌ Error creating customer record:', createError);
             }
         }
 
@@ -4192,7 +4401,7 @@
                         ${imageHtml}
                         <div class="selected-product-details">
                             <div class="selected-product-name">${product.name}</div>
-                            <div class="selected-product-price">GHS ${product.price.toFixed(2)} each</div>
+                            <div class="selected-product-price">GHS ${parseFloat(product.price).toFixed(2)} each</div>
                         </div>
                         <div class="selected-product-quantity">
                             <button onclick="changeProductQuantity(${index}, -1)" class="quantity-btn-small">-</button>
@@ -4430,7 +4639,7 @@
 
         // Update quantity calculations
         function updateQuantityCalculations() {
-            const subtotal = selectedProducts.reduce((sum, product) => sum + (product.price * product.quantity), 0);
+            const subtotal = selectedProducts.reduce((sum, product) => sum + (parseFloat(product.price) * product.quantity), 0);
             const serviceFee = calculateServiceFee();
             const total = subtotal + serviceFee;
 
@@ -4443,7 +4652,7 @@
         function updateOrderReview() {
             if (selectedProducts.length === 0) return;
 
-            const subtotal = selectedProducts.reduce((sum, product) => sum + (product.price * product.quantity), 0);
+            const subtotal = selectedProducts.reduce((sum, product) => sum + (parseFloat(product.price) * product.quantity), 0);
             const serviceFee = calculateServiceFee();
             const total = subtotal + serviceFee;
 
@@ -4458,7 +4667,7 @@
                     <img src="${product.image}" alt="${product.name}" class="review-product-image">
                     <div class="review-product-details">
                         <div class="review-product-name">${product.quantity}x ${product.name}</div>
-                        <div class="review-product-price">GHS ${(product.price * product.quantity).toFixed(2)}</div>
+                        <div class="review-product-price">GHS ${(parseFloat(product.price) * product.quantity).toFixed(2)}</div>
                     </div>
                 `;
                 productsList.appendChild(productItem);
@@ -4761,13 +4970,34 @@
             completeOrderFlow();
         }
 
-        // Save order to database only
+        // Save order to database with caching support
         async function saveOrderToHistory() {
             try {
                 console.log('🚀 Starting to save order to database...');
                 console.log('📦 Order data to save:', orderData);
 
+                // Ensure customer data is loaded before proceeding
+                if (!orderData.customer || !orderData.customer.id) {
+                    console.log('🔄 Customer data missing, reloading...');
+                    await loadCustomerData();
+                    
+                    // Check again after reloading
+                    if (!orderData.customer || !orderData.customer.id) {
+                        throw new Error('Customer data not available. Please ensure you are logged in.');
+                    }
+                }
+
+                // Cache order data locally first for offline access
+                if (window.cacheManager) {
+                    window.cacheManager.setCache('orders', orderData, orderData.orderId);
+                    console.log('💾 Order cached locally for offline access');
+                }
+
                 // Save to database using OrderManager
+                console.log('🔍 Checking OrderManager availability:', !!window.OrderManager);
+                console.log('🔍 Checking customer data:', !!orderData.customer);
+                console.log('🔍 Customer ID:', orderData.customer?.id);
+                
                 if (window.OrderManager && orderData.customer && orderData.customer.id) {
                     try {
                         const orderManager = new window.OrderManager();
@@ -4787,7 +5017,7 @@
                             deliveryDate: orderData.deliveryDate,
                             orderComment: orderData.deliveryInstructions || '',
                             deliveryAddress: orderData.recipient.address,
-                            paymentMethod: orderData.payment?.method || 'mobile',
+                            paymentMethod: selectedPaymentMethod || 'mobile',
                             transactionId: orderData.transactionId || '',
                             deliveryName: orderData.recipient.name,
                             deliveryOrgType: orderData.recipient.type || '',
@@ -4803,9 +5033,9 @@
                         // Create purchase recipient information
                         const recipientData = {
                             purchase_recipient_type: orderData.purchase_recipient_type,
-                            recipient_name: orderData.recipient.name || '',
-                            recipient_phone: orderData.recipient.phone || '',
-                            recipient_email: orderData.recipient.email || '',
+                            recipient_name: orderData.purchase_recipient_type === 'you' ? (orderData.customer?.full_name || '') : (orderData.recipient.name || ''),
+                            recipient_phone: orderData.purchase_recipient_type === 'you' ? (orderData.customer?.phone_number || '') : (orderData.recipient.phone || ''),
+                            recipient_email: orderData.purchase_recipient_type === 'you' ? (orderData.customer?.email || '') : (orderData.recipient.email || ''),
                             recipient_address: orderData.recipient.address || '',
                             recipient_type: orderData.recipient.type || '',
                             business_name: orderData.recipient.businessName || '',
@@ -4833,6 +5063,18 @@
                         throw dbError;
                     }
                 } else {
+                    console.error('❌ OrderManager not available or customer not logged in');
+                    console.error('❌ OrderManager available:', !!window.OrderManager);
+                    console.error('❌ Customer data available:', !!orderData.customer);
+                    console.error('❌ Customer ID available:', !!orderData.customer?.id);
+                    
+                    if (!window.OrderManager) {
+                        showError('Order system not available. Please refresh the page and try again.');
+                    } else if (!orderData.customer) {
+                        showError('You must be logged in to place an order. Please log in and try again.');
+                    } else if (!orderData.customer.id) {
+                        showError('User session expired. Please log in again and try placing the order.');
+                    }
                     throw new Error('OrderManager not available or customer not logged in');
                 }
 
@@ -4844,6 +5086,19 @@
 
             } catch (error) {
                 console.error('❌ Error saving order to history:', error);
+                
+                // Handle offline scenario - add to sync queue
+                if (window.cacheManager && window.cacheManager.isOffline()) {
+                    console.log('📴 Offline mode - adding order to sync queue');
+                    const syncId = window.cacheManager.addToSyncQueue('save_order', orderData, 'high');
+                    
+                    if (syncId) {
+                        showSuccess('Order saved locally. Will sync to database when connection is restored.');
+                        console.log('📋 Order queued for sync with ID:', syncId);
+                        return;
+                    }
+                }
+                
                 showError('Error saving order. Please try again.');
             }
         }
@@ -4868,6 +5123,34 @@
             document.getElementById('greetingText').textContent = greeting;
         }
 
+        // Validate user authentication and customer data
+        async function validateUserAuthentication() {
+            try {
+                if (!window.account) {
+                    throw new Error('Authentication system not available');
+                }
+                
+                const user = await window.account.get();
+                console.log('🔍 Authenticated user:', user.$id);
+                
+                // Check if customer data exists
+                if (!orderData.customer || !orderData.customer.id) {
+                    console.log('🔄 Loading customer data...');
+                    await loadCustomerData();
+                }
+                
+                // Final validation
+                if (!orderData.customer || !orderData.customer.id) {
+                    throw new Error('Customer profile not found. Please log out and log back in.');
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('❌ Authentication validation failed:', error);
+                return false;
+            }
+        }
+
         // Initialize
         document.addEventListener('DOMContentLoaded', async function () {
             const savedTheme = localStorage.getItem('theme') || 'dark';
@@ -4883,6 +5166,13 @@
 
             // Load customer data from database
             await loadCustomerData();
+
+            // Validate user authentication
+            const isAuthenticated = await validateUserAuthentication();
+            if (!isAuthenticated) {
+                console.error('❌ User authentication failed during initialization');
+                showError('Authentication issue detected. Please refresh the page and log in again.');
+            }
 
             // Load saved recipients
             loadSavedRecipients();
@@ -5249,8 +5539,8 @@
                     
                     const productName = product.name.substring(0, 25);
                     const quantity = product.quantity.toString();
-                    const unitPrice = `GHS ${product.price.toFixed(2)}`;
-                    const totalPrice = `GHS ${product.total.toFixed(2)}`;
+                    const unitPrice = `GHS ${parseFloat(product.price).toFixed(2)}`;
+                    const totalPrice = `GHS ${parseFloat(product.total).toFixed(2)}`;
                     
                     doc.text(productName, margin + 3, yPosition);
                     doc.text(quantity, margin + 80, yPosition);
@@ -5463,6 +5753,7 @@
 <script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.1"></script>
 <script src="js/appwriteConfig.js"></script>
 <script src="js/companyData.js"></script>
+<script src="js/cacheManager.js"></script>
 <script src="js/orderManager.js"></script>
 <script src="js/notifications.js"></script>
 </body>

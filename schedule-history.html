@@ -357,6 +357,100 @@
             0% { background-position: 200% 0; }
             100% { background-position: -200% 0; }
         }
+
+        /* Instant Loading Styles */
+        .instant-load {
+            opacity: 1;
+            transition: opacity 0.1s ease;
+        }
+
+        .data-loaded {
+            opacity: 1 !important;
+        }
+
+        /* Company Name Container Styles */
+        .company-name-container {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            max-width: 220px;
+            width: 100%;
+            position: relative;
+        }
+
+        .company-name-text {
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            line-height: 1.2;
+            text-align: left;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            flex: 1;
+            min-width: 0;
+            padding-right: 20px;
+        }
+
+        .verified-icon {
+            color: #FFD700;
+            font-size: 16px;
+            font-variation-settings:
+                'FILL' 1,
+                'wght' 400,
+                'GRAD' 0,
+                'opsz' 16;
+            position: absolute;
+            right: 0;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .company-name-container {
+                max-width: 180px;
+            }
+            
+            .company-name-text {
+                font-size: 16px;
+                padding-right: 18px;
+            }
+            
+            .verified-icon {
+                font-size: 14px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .company-name-container {
+                max-width: 160px;
+            }
+            
+            .company-name-text {
+                font-size: 15px;
+                padding-right: 16px;
+            }
+            
+            .verified-icon {
+                font-size: 13px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .company-name-container {
+                max-width: 140px;
+            }
+            
+            .company-name-text {
+                font-size: 18px;
+                padding-right: 15px;
+            }
+            
+            .verified-icon {
+                font-size: 16px;
+            }
+        }
     </style>
 </head>
 
@@ -377,6 +471,61 @@
                 </svg>
             </div>
         </button>
+    </div>
+
+    <!-- Status Tabs Component (Exact from Status.tsx: bg: #101010, height: 40, py-4, px-10) -->
+    <div style="background-color: #101010;">
+        <div class="py-4 px-10 overflow-x-auto">
+            <div class="flex flex-row items-center gap-1 min-w-max justify-start">
+                <!-- Status Button -->
+                <button onclick="setStatusView('status')" id="btn-status" class="rounded-lg px-4 instant-load" style="height: 40px; min-width: 80px;">
+                    <div class="items-center justify-center flex flex-1">
+                        <span class="text-white flex justify-center items-center font-[600]">Status</span>
+                    </div>
+                </button>
+                <!-- Ongoing Button -->
+                <button onclick="setStatusView('ongoing')" id="btn-ongoing" class="rounded-lg px-4 instant-load"
+                    style="height: 40px; background-color: transparent; min-width: 80px;">
+                    <div class="items-center justify-center flex-1">
+                        <span class="text-white flex justify-center items-center font-[600]">Ongoing</span>
+                    </div>
+                </button>
+                <!-- Denied Button -->
+                <button onclick="setStatusView('denied')" id="btn-denied" class="rounded-lg px-4 instant-load"
+                    style="height: 40px; background-color: transparent; min-width: 80px;">
+                    <div class="items-center justify-center flex-1">
+                        <span class="text-white flex justify-center items-center font-[600]">Denied</span>
+                    </div>
+                </button>
+                <!-- Completed Button -->
+                <button onclick="setStatusView('completed')" id="btn-completed" class="rounded-lg px-4 instant-load"
+                    style="height: 40px; background-color: transparent; min-width: 80px;">
+                    <div class="items-center justify-center flex-1">
+                        <span class="text-white flex justify-center items-center font-[600]">Completed</span>
+                    </div>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Cards List (ScheduleProduct.tsx - Exact) -->
+    <div class="flex-1 overflow-y-auto hide-scrollbar no-horizontal-scroll mobile-scrollable instant-load" id="ordersList"
+        style="background-color: var(--bg-color); gap: 6px;">
+        <!-- Loading Skeleton -->
+        <div id="loadingSkeleton" class="p-4 space-y-3">
+            <div class="skeleton skeleton-card"></div>
+            <div class="skeleton skeleton-card"></div>
+            <div class="skeleton skeleton-card"></div>
+        </div>
+        <!-- Cards rendered by JS -->
+    </div>
+
+    <!-- Floating Bottle Return Button -->
+    <div id="floatingBottleBtn" class="floating-return-btn instant-load" onclick="openMyBottlesSheet()">
+        <div class="badge" id="bottleCounter">0</div>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+        </svg>
     </div>
 
     <!-- Menu Overlay -->
@@ -551,61 +700,6 @@
             <span class="text-lg font-semibold text-[#808080]">Phluowise</span>
             <span class="text-xs font-medium text-white">version 1.0.0</span>
         </div>
-    </div>
-
-    <!-- Status Tabs Component (Exact from Status.tsx: bg: #101010, height: 40, py-4, px-10) -->
-    <div style="background-color: #101010;">
-        <div class="py-4 px-10 overflow-x-auto">
-            <div class="flex flex-row items-center gap-1 min-w-max justify-start">
-                <!-- Status Button -->
-                <button onclick="setStatusView('status')" id="btn-status" class="rounded-lg px-4" style="height: 40px; min-width: 80px;">
-                    <div class="items-center justify-center flex flex-1">
-                        <span class="text-white flex justify-center items-center font-[600]">Status</span>
-                    </div>
-                </button>
-                <!-- Ongoing Button -->
-                <button onclick="setStatusView('ongoing')" id="btn-ongoing" class="rounded-lg px-4"
-                    style="height: 40px; background-color: transparent; min-width: 80px;">
-                    <div class="items-center justify-center flex-1">
-                        <span class="text-white flex justify-center items-center font-[600]">Ongoing</span>
-                    </div>
-                </button>
-                <!-- Denied Button -->
-                <button onclick="setStatusView('denied')" id="btn-denied" class="rounded-lg px-4"
-                    style="height: 40px; background-color: transparent; min-width: 80px;">
-                    <div class="items-center justify-center flex-1">
-                        <span class="text-white flex justify-center items-center font-[600]">Denied</span>
-                    </div>
-                </button>
-                <!-- Completed Button -->
-                <button onclick="setStatusView('completed')" id="btn-completed" class="rounded-lg px-4"
-                    style="height: 40px; background-color: transparent; min-width: 80px;">
-                    <div class="items-center justify-center flex-1">
-                        <span class="text-white flex justify-center items-center font-[600]">Completed</span>
-                    </div>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Order Cards List (ScheduleProduct.tsx - Exact) -->
-    <div class="flex-1 overflow-y-auto hide-scrollbar no-horizontal-scroll mobile-scrollable" id="ordersList"
-        style="background-color: var(--bg-color); gap: 6px;">
-        <!-- Loading Skeleton -->
-        <div id="loadingSkeleton" class="p-4 space-y-3">
-            <div class="skeleton skeleton-card"></div>
-            <div class="skeleton skeleton-card"></div>
-            <div class="skeleton skeleton-card"></div>
-        </div>
-        <!-- Cards rendered by JS -->
-    </div>
-
-    <!-- Floating Bottle Return Button -->
-    <div id="floatingBottleBtn" class="floating-return-btn" onclick="openMyBottlesSheet()">
-        <div class="badge" id="bottleCounter">0</div>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-        </svg>
     </div>
 
     <!-- Order Status Modal (Exact from schedulepickup.tsx) -->
@@ -838,6 +932,8 @@
 
     <script src="js/appwriteConfig.js"></script>
     <script src="js/theme.js"></script>
+    <script src="js/companyData.js"></script>
+    <script src="js/cacheManager.js"></script>
     <script src="js/orderManager.js"></script>
     <script>
         let currentView = 'status';
@@ -847,15 +943,856 @@
         let orderManager = new OrderManager();
         let isInitialLoad = true;
         let isLoading = false;
+        let cachedOrders = null;
+        let dataLoadInProgress = false;
+
+        // Import Query from Appwrite SDK
+        const Query = window.Query;
+
+        // Instant initialization
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set theme immediately
+            const savedTheme = localStorage.getItem('theme') || 'dark';
+            document.body.classList.remove('dark-theme', 'gray-theme', 'light-theme');
+            document.body.classList.add(savedTheme + '-theme');
+
+            // Set active tab
+            setStatusView('status');
+            
+            // Show UI immediately
+            document.querySelectorAll('.instant-load').forEach(el => {
+                el.classList.add('data-loaded');
+            });
+
+            // Start loading data in background
+            setTimeout(() => {
+                loadInitialData();
+            }, 50);
+            
+            // Preload essential functions
+            preloadEssentialFunctions();
+        });
 
         // Preload essential functions
         function preloadEssentialFunctions() {
             window.setStatusView = setStatusView;
             window.toggleMenu = toggleMenu;
             window.closeMenu = closeMenu;
-            window.openMyBottlesSheet = openMyBottlesSheet;
-            window.logout = logout;
-            window.navigateToPage = navigateToPage;
+        }
+
+        // Listen for storage events from services.html
+        window.addEventListener('storage', function(e) {
+            console.log('🔄 Storage event detected in schedule-history.html');
+            // Reload orders when storage changes (new order saved from services.html)
+            loadInitialData();
+            
+            // Show brief notification about new orders
+            const newOrderNotification = document.createElement('div');
+            newOrderNotification.className = 'fixed top-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 transition-all duration-300';
+            newOrderNotification.innerHTML = 'New orders loaded!';
+            newOrderNotification.style.transform = 'translateX(200%)';
+            document.body.appendChild(newOrderNotification);
+            
+            // Remove notification after 3 seconds
+            setTimeout(() => {
+                if (newOrderNotification.parentNode) {
+                    newOrderNotification.style.transform = 'translateX(0)';
+                    setTimeout(() => {
+                        if (newOrderNotification.parentNode) {
+                            newOrderNotification.remove();
+                        }
+                    }, 300);
+                }
+            }, 3000);
+        });
+
+        window.openMyBottlesSheet = openMyBottlesSheet;
+        window.logout = logout;
+        window.navigateToPage = navigateToPage;
+        window.loadInitialData = loadInitialData;
+
+        // Optimized data loading algorithm - INSTANT LOAD
+        async function loadInitialData() {
+            if (dataLoadInProgress) return;
+            dataLoadInProgress = true;
+            
+            try {
+                // Try cache manager first for instant load
+                if (window.cacheManager) {
+                    const customerId = getCustomerId();
+                    if (customerId) {
+                        const cachedOrders = window.cacheManager.getCache('orders', customerId);
+                        if (cachedOrders && cachedOrders.length > 0) {
+                            console.log('📦 Loading orders from cache manager:', cachedOrders.length);
+                            orders = cachedOrders;
+                            renderOrders();
+                            updateFloatingButton();
+                        }
+                    }
+                }
+                
+                // Fallback to regular localStorage cache
+                if (orders.length === 0) {
+                    const cached = localStorage.getItem('phluowiseOrdersCache');
+                    const cacheTimestamp = localStorage.getItem('phluowiseOrdersCacheTime');
+                    const now = Date.now();
+                    
+                    // Use cache if less than 5 minutes old
+                    if (cached && cacheTimestamp && (now - parseInt(cacheTimestamp)) < 5 * 60 * 1000) {
+                        orders = JSON.parse(cached);
+                        renderOrders(); // Render immediately from cache
+                    }
+                }
+                
+                // Show skeleton only if no cache
+                if (orders.length === 0) {
+                    showLoadingSkeleton();
+                }
+                
+                // Load bottles from localStorage (instant)
+                await loadBottlesFromStorage();
+                
+                // Load company data first (needed for company names and images)
+                if (window.companyDataManager) {
+                    await window.companyDataManager.fetchCompanyData();
+                    console.log('✅ Company data loaded:', window.companyDataManager.companies.length, 'companies');
+                }
+                
+                // Load fresh data in background
+                await Promise.all([
+                    loadOrdersFromDatabase()
+                ]);
+                
+            } catch (error) {
+                console.error('Error loading data:', error);
+                // Try cache manager as fallback
+                if (window.cacheManager && orders.length === 0) {
+                    const customerId = getCustomerId();
+                    if (customerId) {
+                        const cachedOrders = window.cacheManager.getCache('orders', customerId);
+                        if (cachedOrders && cachedOrders.length > 0) {
+                            console.log('📦 Using cache manager as fallback:', cachedOrders.length);
+                            orders = cachedOrders;
+                            renderOrders();
+                            updateFloatingButton();
+                            return;
+                        }
+                    }
+                }
+                
+                // Final fallback to regular localStorage
+                const cached = localStorage.getItem('phluowiseOrdersCache');
+                if (cached) {
+                    orders = JSON.parse(cached);
+                    renderOrders();
+                } else {
+                    showOfflineState();
+                }
+            } finally {
+                hideLoadingSkeleton();
+                dataLoadInProgress = false;
+            }
+        }
+
+        // Fast database loading with optimized queries and step-by-step loading
+        async function loadOrdersFromDatabase() {
+            if (!navigator.onLine) {
+                console.log('📴 Offline mode - using cached data only');
+                showOfflineState();
+                return;
+            }
+            
+            try {
+                let customerId = getCustomerId();
+                
+                if (!customerId) {
+                    console.log('No customer ID found');
+                    return;
+                }
+                
+                console.log('🔄 Loading orders with web2app cache-first strategy...');
+                
+                // STEP 1: Always try cache first for instant UI
+                if (window.cacheManager) {
+                    const cachedOrders = window.cacheManager.getCache('orders', customerId);
+                    if (cachedOrders && cachedOrders.length > 0) {
+                        // Filter out dummy data from cache
+                        const filteredCache = cachedOrders.filter(order => !isDummyOrder(order));
+                        console.log('📦 Loading orders from cache for instant UI:', filteredCache.length, '(filtered from', cachedOrders.length, 'total)');
+                        orders = filteredCache;
+                        renderOrders();
+                        updateFloatingButton();
+                        
+                        // STEP 2: Background step-by-step refresh
+                        setTimeout(() => refreshOrdersStepByStep(customerId), 1000);
+                        return;
+                    }
+                }
+                
+                // STEP 3: No cache available - load step-by-step from database
+                await loadOrdersStepByStepFromDatabase(customerId);
+                
+            } catch (error) {
+                console.error('❌ Error in loadOrdersFromDatabase:', error);
+                showOfflineState();
+            }
+        }
+
+        // Step-by-step refresh: new orders first, then older orders
+        async function refreshOrdersStepByStep(customerId) {
+            if (!navigator.onLine) {
+                console.log('📴 Offline - skipping step-by-step refresh');
+                return;
+            }
+            
+            try {
+                console.log('🔄 Step-by-step refresh - checking for new orders...');
+                
+                // Get current orders to compare against
+                const currentOrderIds = new Set(orders.map(o => o.$id || o.orderId));
+                
+                // Step 1: Load newest orders first (last 7 days)
+                const recentOrders = await loadOrdersByDateRange(customerId, 7);
+                
+                // Identify truly new orders
+                const newOrders = recentOrders.filter(order => {
+                    const orderId = order.$id || order.orderId;
+                    return !currentOrderIds.has(orderId);
+                });
+                
+                let allOrders = [...recentOrders];
+                
+                // Update UI with new orders immediately and show notification
+                if (newOrders.length > 0) {
+                    console.log('🆕 Found NEW orders:', newOrders.length, 'out of', recentOrders.length, 'total recent');
+                    
+                    // Show notification for new orders
+                    showNewOrdersNotification(newOrders.length);
+                    
+                    // Highlight new orders in the data
+                    newOrders.forEach(order => {
+                        order.isNew = true;
+                        order.newOrderTimestamp = Date.now();
+                    });
+                    
+                    orders = allOrders;
+                    renderOrders();
+                    updateFloatingButton();
+                    
+                    // Cache the updated orders
+                    if (window.cacheManager) {
+                        window.cacheManager.setCache('orders', allOrders, customerId);
+                    }
+                } else if (recentOrders.length > 0) {
+                    console.log('📋 Found updated recent orders (no new ones):', recentOrders.length);
+                    orders = allOrders;
+                    renderOrders();
+                    updateFloatingButton();
+                    
+                    // Cache the updated orders
+                    if (window.cacheManager) {
+                        window.cacheManager.setCache('orders', allOrders, customerId);
+                    }
+                }
+                
+                // Step 2: Load older orders in background (last 30 days)
+                setTimeout(async () => {
+                    const olderOrders = await loadOrdersByDateRange(customerId, 30, 7);
+                    if (olderOrders.length > 0) {
+                        console.log('📅 Found older orders:', olderOrders.length);
+                        allOrders = [...allOrders, ...olderOrders];
+                        
+                        // Sort by date (newest first)
+                        allOrders.sort((a, b) => {
+                            const dateA = new Date(a.$createdAt || a.orderDate || 0);
+                            const dateB = new Date(b.$createdAt || b.orderDate || 0);
+                            return dateB - dateA;
+                        });
+                        
+                        orders = allOrders;
+                        renderOrders();
+                        updateFloatingButton();
+                        
+                        // Update cache
+                        if (window.cacheManager) {
+                            window.cacheManager.setCache('orders', allOrders, customerId);
+                        }
+                    }
+                }, 2000);
+                
+                // Step 3: Load all remaining orders if needed
+                setTimeout(async () => {
+                    const allRemainingOrders = await loadAllOrdersForCustomer(customerId);
+                    if (allRemainingOrders.length > 0) {
+                        console.log('📚 Found remaining orders:', allRemainingOrders.length);
+                        
+                        // Merge and sort
+                        const mergedOrders = [...orders];
+                        allRemainingOrders.forEach(order => {
+                            if (!mergedOrders.find(o => o.$id === order.$id)) {
+                                mergedOrders.push(order);
+                            }
+                        });
+                        
+                        mergedOrders.sort((a, b) => {
+                            const dateA = new Date(a.$createdAt || a.orderDate || 0);
+                            const dateB = new Date(b.$createdAt || b.orderDate || 0);
+                            return dateB - dateA;
+                        });
+                        
+                        orders = mergedOrders;
+                        renderOrders();
+                        updateFloatingButton();
+                        
+                        // Final cache update
+                        if (window.cacheManager) {
+                            window.cacheManager.setCache('orders', mergedOrders, customerId);
+                        }
+                    }
+                }, 4000);
+                
+            } catch (error) {
+                console.error('❌ Step-by-step refresh failed:', error);
+                // Don't break UI - cache still working
+            }
+        }
+
+        // Load orders by date range
+        async function loadOrdersByDateRange(customerId, daysAgo, skipDays = 0) {
+            try {
+                const cutoffDate = new Date();
+                cutoffDate.setDate(cutoffDate.getDate() - daysAgo);
+                
+                const skipDate = new Date();
+                skipDate.setDate(skipDate.getDate() - skipDays);
+                
+                console.log(`📅 Loading orders from ${skipDays} to ${daysAgo} days ago`);
+                
+                // Try OrderManager first
+                try {
+                    const ordersFromDB = await orderManager.getOrdersByCustomer(customerId);
+                    const filteredOrders = ordersFromDB.filter(order => {
+                        const orderDate = new Date(order.$createdAt || order.orderDate);
+                        return orderDate <= skipDate && orderDate >= cutoffDate;
+                    });
+                    
+                    const minimalOrders = [];
+                    for (const order of filteredOrders) {
+                        try {
+                            const minimalOrder = processOrderMinimal(order);
+                            if (minimalOrder && !isDummyOrder(minimalOrder)) {
+                                minimalOrders.push(minimalOrder);
+                            } else if (isDummyOrder(minimalOrder)) {
+                                console.log('🗑️ Filtering out dummy order:', minimalOrder.orderId || minimalOrder.$id);
+                            }
+                        } catch (error) {
+                            console.warn('Error processing order:', order.$id, error);
+                        }
+                    }
+                    
+                    return minimalOrders;
+                } catch (orderManagerError) {
+                    console.warn('OrderManager failed, trying direct query:', orderManagerError);
+                }
+                
+                // Fallback to direct query
+                const response = await window.databases.listDocuments(
+                    window.appwriteConfig.DATABASE_ID,
+                    window.appwriteConfig.ORDERS_TABLE,
+                    [
+                        Query.equal('customer_id', customerId),
+                        Query.orderDesc('$createdAt'),
+                        Query.limit(100)
+                    ]
+                );
+                
+                const filteredOrders = response.documents.filter(order => {
+                    const orderDate = new Date(order.$createdAt || order.orderDate);
+                    return orderDate <= skipDate && orderDate >= cutoffDate;
+                });
+                
+                const minimalOrders = [];
+                for (const order of filteredOrders) {
+                    try {
+                        const minimalOrder = processOrderMinimal(order);
+                        if (minimalOrder && !isDummyOrder(minimalOrder)) {
+                            minimalOrders.push(minimalOrder);
+                        } else if (isDummyOrder(minimalOrder)) {
+                            console.log('🗑️ Filtering out dummy order:', minimalOrder.orderId || minimalOrder.$id);
+                        }
+                    } catch (error) {
+                        console.warn('Error processing order:', order.$id, error);
+                    }
+                }
+                
+                return minimalOrders;
+                
+            } catch (error) {
+                console.error(`❌ Error loading orders for ${daysAgo} days:`, error);
+                return [];
+            }
+        }
+
+        // Filter out dummy/sample orders
+        function isDummyOrder(order) {
+            if (!order) return true;
+            
+            // Check for dummy order patterns
+            const dummyPatterns = [
+                /test/i,
+                /demo/i,
+                /sample/i,
+                /dummy/i,
+                /fake/i,
+                /mock/i,
+                /example/i,
+                /12345/,
+                /00000/,
+                /xxxx/i,
+                /yyyy/i
+            ];
+            
+            // Check order ID
+            if (order.orderId && dummyPatterns.some(pattern => pattern.test(order.orderId))) {
+                return true;
+            }
+            
+            // Check customer name
+            if (order.customerName && dummyPatterns.some(pattern => pattern.test(order.customerName))) {
+                return true;
+            }
+            
+            // Check recipient name
+            if (order.recipientName && dummyPatterns.some(pattern => pattern.test(order.recipientName))) {
+                return true;
+            }
+            
+            // Check for obvious dummy amounts (like 0.01, 999.99, etc.)
+            if (order.total && (order.total === 0.01 || order.total === 999.99 || order.total === 0)) {
+                return true;
+            }
+            
+            // Check for test phone numbers
+            if (order.recipientPhone && (
+                order.recipientPhone.includes('123') ||
+                order.recipientPhone.includes('000') ||
+                order.recipientPhone.includes('555') ||
+                order.recipientPhone.includes('xxx')
+            )) {
+                return true;
+            }
+            
+            // Check for test emails
+            if (order.recipientEmail && (
+                order.recipientEmail.includes('test') ||
+                order.recipientEmail.includes('demo') ||
+                order.recipientEmail.includes('example') ||
+                order.recipientEmail.includes('sample')
+            )) {
+                return true;
+            }
+            
+            // Check for very old orders (more than 2 years old) that might be test data
+            if (order.$createdAt || order.orderDate) {
+                const orderDate = new Date(order.$createdAt || order.orderDate);
+                const twoYearsAgo = new Date();
+                twoYearsAgo.setFullYear(twoYearsAgo.getFullYear() - 2);
+                if (orderDate < twoYearsAgo) {
+                    console.log('🗑️ Filtering out very old order (possible test data):', order.orderId || order.$id);
+                    return true;
+                }
+            }
+            
+            return false;
+        }
+
+        // Show notification for new orders
+        function showNewOrdersNotification(count) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center space-x-2 animate-pulse';
+            notification.innerHTML = `
+                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM10 18a3 3 0 01-3-3h6a3 3 0 01-3 3z"/>
+                </svg>
+                <span class="font-medium">🎉 ${count} new order${count > 1 ? 's' : ''} found!</span>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.remove();
+                }
+            }, 5000);
+            
+            // Also show in console
+            console.log(`🎉 NOTIFICATION: ${count} new order${count > 1 ? 's' : ''} found!`);
+        }
+
+        // Load all orders for customer
+        async function loadAllOrdersForCustomer(customerId) {
+            try {
+                console.log('📚 Loading all remaining orders for customer...');
+                
+                const response = await window.databases.listDocuments(
+                    window.appwriteConfig.DATABASE_ID,
+                    window.appwriteConfig.ORDERS_TABLE,
+                    [
+                        Query.equal('customer_id', customerId),
+                        Query.orderDesc('$createdAt'),
+                        Query.limit(200)
+                    ]
+                );
+                
+                const minimalOrders = [];
+                for (const order of response.documents) {
+                    try {
+                        const minimalOrder = processOrderMinimal(order);
+                        if (minimalOrder) {
+                            minimalOrders.push(minimalOrder);
+                        }
+                    } catch (error) {
+                        console.warn('Error processing order:', order.$id, error);
+                    }
+                }
+                
+                return minimalOrders;
+                
+            } catch (error) {
+                console.error('❌ Error loading all orders:', error);
+                return [];
+            }
+        }
+
+        // Step-by-step loading from database when no cache exists
+        async function loadOrdersStepByStepFromDatabase(customerId) {
+            try {
+                console.log('📡 No cache available - loading step-by-step from database...');
+                
+                // Show loading state
+                showLoadingSkeleton();
+                
+                // Step 1: Load recent orders first (instant UI)
+                const recentOrders = await loadOrdersByDateRange(customerId, 7);
+                if (recentOrders.length > 0) {
+                    console.log('📦 Loaded recent orders:', recentOrders.length);
+                    orders = recentOrders;
+                    renderOrders();
+                    updateFloatingButton();
+                    
+                    // Cache recent orders immediately
+                    if (window.cacheManager) {
+                        window.cacheManager.setCache('orders', recentOrders, customerId);
+                    }
+                } else {
+                    // Try to get any orders at all
+                    const anyOrders = await loadAllOrdersForCustomer(customerId);
+                    if (anyOrders.length > 0) {
+                        orders = anyOrders.slice(0, 10); // Show first 10 immediately
+                        renderOrders();
+                        updateFloatingButton();
+                        
+                        if (window.cacheManager) {
+                            window.cacheManager.setCache('orders', orders, customerId);
+                        }
+                        
+                        // Load rest in background
+                        setTimeout(() => {
+                            orders = anyOrders;
+                            renderOrders();
+                            updateFloatingButton();
+                            
+                            if (window.cacheManager) {
+                                window.cacheManager.setCache('orders', anyOrders, customerId);
+                            }
+                        }, 1000);
+                    } else {
+                        console.log('📭 No orders found for customer');
+                        renderOrders(); // Show empty state
+                    }
+                }
+                
+                // Step 2: Continue loading in background
+                setTimeout(() => refreshOrdersStepByStep(customerId), 2000);
+                
+            } catch (error) {
+                console.error('❌ Step-by-step database load failed:', error);
+                
+                // Fallback to cache if available
+                if (window.cacheManager) {
+                    const cachedOrders = window.cacheManager.getCache('orders', customerId);
+                    if (cachedOrders && cachedOrders.length > 0) {
+                        console.log('📦 Using cache as fallback:', cachedOrders.length);
+                        orders = cachedOrders;
+                        renderOrders();
+                        updateFloatingButton();
+                        return;
+                    }
+                }
+                
+                showOfflineState();
+            } finally {
+                hideLoadingSkeleton();
+            }
+        }
+
+        // Minimal order processing for instant display
+        function processOrderMinimal(order) {
+            try {
+                // Extract basic order information
+                const orderId = order.$id || order.orderId || order.id || 'N/A';
+                const orderStatus = order.orderStatus || order.status || 'pending';
+                const deliveryName = order.deliveryName || order.companyName || order.branchName || 'Unknown Company';
+                const deliveryAddress = order.deliveryAddress || order.address || order.location || 'Accra, Ghana';
+                const paymentMethod = order.paymentMethod || order.payment || 'Mobile Money';
+                const deliveryTime = order.deliveryTime || 'N/A';
+                const deliveryDate = order.deliveryDate || order.date || order.$createdAt || 'N/A';
+                const total = order.total || order.amount || order.price || 0;
+                const productName = order.productName || order.product || deliveryName; // Use company/branch name as product name
+                const productQty = order.productQty || order.quantity || 1;
+                
+                // Transform status
+                let transformedStatus = 'pending';
+                let statusText = 'Pending';
+                let statusColor = '#F2A78C';
+                
+                if (orderStatus === 'confirmed' || orderStatus === 'accepted' || orderStatus === 'accepted') {
+                    transformedStatus = 'accepted';
+                    statusText = 'Accepted';
+                    statusColor = '#2C9043';
+                } else if (orderStatus === 'ongoing' || orderStatus === 'completed' || orderStatus === 'completed') {
+                    transformedStatus = 'ongoing';
+                    statusText = 'Completed';
+                    statusColor = '#2CAA48';
+                } else if (orderStatus === 'denied' || orderStatus === 'rejected' || orderStatus === 'denied') {
+                    transformedStatus = 'denied';
+                    statusText = 'Denied';
+                    statusColor = '#F85D5D';
+                }
+                
+                // Try to get company image from merged company data
+                let companyImage = null;
+                let finalCompanyName = deliveryName;
+                
+                if (window.companyDataManager && order.branchId) {
+                    try {
+                        // Use the merged data from companyDataManager
+                        const mergedData = window.companyDataManager.mergeCompanyAndBranchData();
+                        const branch = mergedData.find(c => 
+                            c.branch_id === order.branchId || 
+                            c.id === order.branchId || 
+                            c.$id === order.branchId
+                        );
+                        
+                        if (branch) {
+                            // Use the branch name from merged data
+                            finalCompanyName = branch.branch_name || branch.name || deliveryName;
+                            
+                            // Get the profile image
+                            if (branch.profile_image) {
+                                companyImage = branch.profile_image.startsWith('http') ? 
+                                    branch.profile_image : 
+                                    `https://nyc.cloud.appwrite.io/v1/storage/buckets/68b1c57b001542be7fbe/files/${branch.profile_image}/view?project=68b17582003582da69c8`;
+                            }
+                            
+                            console.log(`🔍 Found branch for order ${orderId}:`, finalCompanyName, 'Image:', companyImage ? 'Yes' : 'No');
+                        } else {
+                            console.warn(`⚠️ Branch not found for branchId: ${order.branchId}`);
+                        }
+                    } catch (error) {
+                        console.warn('Could not fetch company image:', error);
+                    }
+                }
+                
+                return {
+                    orderId: orderId,
+                    company: finalCompanyName,
+                    companyImage: companyImage,
+                    location: deliveryAddress,
+                    payment: paymentMethod,
+                    time: deliveryTime,
+                    date: deliveryDate,
+                    price: total ? `GH₵${parseFloat(total).toFixed(2)}` : 'GH₵0.00',
+                    status: transformedStatus,
+                    statusText: statusText,
+                    statusColor: statusColor,
+                    total: parseFloat(total) || 0,
+                    timestamp: order.$createdAt || new Date().toISOString(),
+                    transactionId: order.transactionId || orderId,
+                    deliveryInstructions: order.orderComment || order.instructions || '',
+                    deliveryDate: order.deliveryDate,
+                    deliveryTime: order.deliveryTime,
+                    product: finalCompanyName, // Use company/branch name as product
+                    quantity: productQty,
+                    // Minimal data for instant display
+                    _loadedDetails: false
+                };
+            } catch (error) {
+                console.error('Error in minimal order processing:', error);
+                return null;
+            }
+        }
+
+        // Load additional details in background
+        async function loadOrderDetailsBackground(minimalOrders) {
+            for (let i = 0; i < minimalOrders.length; i++) {
+                if (i >= 10) break; // Limit to first 10 for performance
+                
+                const order = minimalOrders[i];
+                if (order && !order._loadedDetails) {
+                    try {
+                        await enrichOrderDetails(order);
+                        order._loadedDetails = true;
+                        
+                        // Update cache with enriched data
+                        localStorage.setItem('phluowiseOrdersCache', JSON.stringify(orders));
+                        
+                        // Re-render to show updated details
+                        renderOrders();
+                    } catch (error) {
+                        console.warn('Background detail loading failed for order:', order.orderId);
+                    }
+                }
+            }
+        }
+
+        // Enrich order with additional details
+        async function enrichOrderDetails(order) {
+            try {
+                // Get order items if orderManager is available
+                if (orderManager && typeof orderManager.getOrderItems === 'function') {
+                    const orderItems = await orderManager.getOrderItems(order.orderId);
+                    
+                    if (orderItems && orderItems.length > 0) {
+                        order.products = orderItems.map(item => ({
+                            id: item.productId || item.productName,
+                            name: item.productName || 'Unknown Product',
+                            price: item.productPrice || 0,
+                            quantity: item.productQty || 1,
+                            image: item.productImage,
+                            type: item.productType || 'product'
+                        }));
+                        
+                        // Calculate totals
+                        order.subtotal = orderItems.reduce((sum, item) => sum + (item.productPrice || 0) * (item.productQty || 1), 0);
+                        order.serviceFee = 5;
+                        order.total = order.subtotal + order.serviceFee;
+                        order.price = `GH₵${order.total.toFixed(2)}`;
+                    }
+                }
+                
+                // Get recipient info if available
+                if (orderManager && typeof orderManager.getPurchaseRecipientInfo === 'function') {
+                    const recipientInfo = await orderManager.getPurchaseRecipientInfo(order.orderId);
+                    if (recipientInfo) {
+                        order.recipient = {
+                            type: recipientInfo.purchase_recipient_type,
+                            name: recipientInfo.recipient_name,
+                            phone: recipientInfo.recipient_phone,
+                            email: recipientInfo.recipient_email,
+                            address: recipientInfo.recipient_address,
+                            businessName: recipientInfo.business_name,
+                            businessType: recipientInfo.business_type
+                        };
+                    }
+                }
+                
+            } catch (error) {
+                console.warn('Could not enrich order details:', order.orderId, error);
+            }
+        }
+
+        // Fast customer ID extraction
+        function getCustomerId() {
+            // Check multiple possible sources quickly
+            const sources = [
+                () => {
+                    const customerData = JSON.parse(localStorage.getItem('customerData') || '{}');
+                    return customerData.$id || customerData.uid || customerData.id;
+                },
+                () => {
+                    const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+                    return userProfile.$id || userProfile.uid || userProfile.id;
+                },
+                () => localStorage.getItem('currentUserId'),
+                () => {
+                    const userStr = localStorage.getItem('user');
+                    if (userStr) {
+                        try {
+                            const user = JSON.parse(userStr);
+                            return user.$id || user.uid || user.id || user.userId;
+                        } catch (e) {
+                            return null;
+                        }
+                    }
+                    return null;
+                },
+                () => {
+                    // Check for any localStorage key containing 'id' or 'user'
+                    for (let i = 0; i < localStorage.length; i++) {
+                        const key = localStorage.key(i);
+                        if (key.includes('id') || key.includes('user') || key.includes('customer')) {
+                            try {
+                                const value = JSON.parse(localStorage.getItem(key));
+                                if (value && (value.$id || value.uid || value.id || value.userId)) {
+                                    return value.$id || value.uid || value.id || value.userId;
+                                }
+                            } catch (e) {
+                                // Not JSON, try as string
+                                const value = localStorage.getItem(key);
+                                if (value && value.length > 10 && value.length < 50) {
+                                    // Looks like an ID
+                                    return value;
+                                }
+                            }
+                        }
+                    }
+                    return null;
+                }
+            ];
+            
+            for (const source of sources) {
+                try {
+                    const id = source();
+                    if (id && id !== 'null' && id !== 'undefined') {
+                        console.log('Found customer ID:', id);
+                        return id;
+                    }
+                } catch (e) {
+                    continue;
+                }
+            }
+            
+            console.log('No customer ID found in localStorage');
+            return null;
+        }
+
+        // Load bottles from localStorage
+        function loadBottlesFromStorage() {
+            return new Promise((resolve) => {
+                setTimeout(() => {
+                    const savedBottles = localStorage.getItem('phluowiseBottles');
+                    if (savedBottles) {
+                        try {
+                            myBottles = JSON.parse(savedBottles);
+                        } catch (parseError) {
+                            myBottles = [];
+                        }
+                    } else {
+                        myBottles = [];
+                    }
+                    updateFloatingButton();
+                    resolve();
+                }, 0);
+            });
+        }
+
+        // Backward compatibility function
+        function loadBottles() {
+            console.warn('loadBottles() is deprecated, use loadBottlesFromStorage() instead');
+            return loadBottlesFromStorage();
         }
 
         // Show loading skeleton
@@ -878,290 +1815,31 @@
             }
         }
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            preloadEssentialFunctions();
-            
-            // Set theme immediately
-            const savedTheme = localStorage.getItem('theme') || 'dark';
-            document.body.classList.remove('dark-theme', 'gray-theme', 'light-theme');
-            document.body.classList.add(savedTheme + '-theme');
-
-            // Set initial view immediately
-            setStatusView('status');
-            
-            // Show loading skeleton immediately
-            showLoadingSkeleton();
-            
-            // Load initial data
-            await loadInitialData();
-            
-            isInitialLoad = false;
-        });
-
-        // Optimized data loading algorithm
-        async function loadInitialData() {
-            if (isLoading) return;
-            
-            isLoading = true;
-            
-            try {
-                // Load data in parallel
-                await Promise.all([
-                    loadOrders(),
-                    loadBottles()
-                ]);
-                
-                // Render orders immediately after data loads
-                renderOrders();
-                
-            } catch (error) {
-                // Show offline/error state
-                showOfflineState();
-            } finally {
-                hideLoadingSkeleton();
-                isLoading = false;
-            }
-        }
-
-        // Load orders from database
-        async function loadOrders() {
-            if (!navigator.onLine) {
-                orders = [];
-                return;
-            }
-            
-            try {
-                let customerId = null;
-                
-                // Fast customer ID extraction
-                const customerData = JSON.parse(localStorage.getItem('customerData') || '{}');
-                customerId = customerData.$id || customerData.uid;
-                
-                if (!customerId) {
-                    const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
-                    customerId = userProfile.$id || userProfile.uid;
-                }
-                
-                if (!customerId && window.account) {
-                    try {
-                        const user = await window.account.get();
-                        customerId = user.$id;
-                    } catch (authError) {}
-                }
-                
-                if (!customerId) {
-                    orders = [];
-                    return;
-                }
-                
-                // Fetch orders from database
-                const ordersFromDB = await orderManager.getOrdersByCustomer(customerId);
-                
-                // Process orders sequentially to avoid errors
-                const processedOrders = [];
-                for (const order of ordersFromDB) {
-                    try {
-                        const processedOrder = await processOrderData(order);
-                        if (processedOrder) {
-                            processedOrders.push(processedOrder);
-                        }
-                    } catch (error) {
-                        console.warn('Error processing order:', order.$id, error);
-                    }
-                }
-                
-                orders = processedOrders;
-                
-                updateFloatingButton();
-                
-            } catch (error) {
-                console.error('Error loading orders:', error);
-                orders = [];
-            }
-        }
-
-        // Process single order data efficiently
-        async function processOrderData(order) {
-            try {
-                // Get order items and recipient info
-                const orderItems = await orderManager.getOrderItems(order.$id);
-                const recipientInfo = await orderManager.getPurchaseRecipientInfo(order.$id);
-                
-                let branchName = 'Unknown Company';
-                let branchImage = null;
-                
-                // Get branch information if available
-                if (order.branchId) {
-                    try {
-                        const branchResponse = await window.databases.listDocuments(
-                            window.appwriteConfig.DATABASE_ID,
-                            window.appwriteConfig.BRANCHES_TABLE,
-                            [window.Query.equal('branch_id', order.branchId)]
-                        );
-                        
-                        if (branchResponse.documents && branchResponse.documents.length > 0) {
-                            const branch = branchResponse.documents[0];
-                            branchName = branch.branch_name || branch.name || 'Unknown Company';
-                            branchImage = branch.profile_image || branch.header_image || null;
-                        } else {
-                            branchName = order.deliveryName || 'Unknown Company';
-                        }
-                    } catch (error) {
-                        branchName = order.deliveryName || 'Unknown Company';
-                    }
-                } else {
-                    branchName = order.deliveryName || 'Unknown Company';
-                }
-                
-                // Process products
-                const products = orderItems.map(item => ({
-                    id: item.productId || item.productName,
-                    name: item.productName || 'Unknown Product',
-                    price: item.productPrice || 0,
-                    quantity: item.productQty || 1,
-                    image: item.productImage,
-                    type: item.productType || 'product'
-                }));
-                
-                // Calculate totals
-                const subtotal = order.total || products.reduce((sum, p) => sum + (p.price * p.quantity), 0);
-                const serviceFee = order.serviceFee || 5;
-                const total = order.total || (subtotal + serviceFee);
-                
-                // Process recipient info
-                const recipient = recipientInfo ? {
-                    type: recipientInfo.purchase_recipient_type,
-                    name: recipientInfo.recipient_name,
-                    phone: recipientInfo.recipient_phone,
-                    email: recipientInfo.recipient_email,
-                    address: recipientInfo.recipient_address,
-                    businessName: recipientInfo.business_name,
-                    businessType: recipientInfo.business_type
-                } : null;
-                
-                // Transform status
-                let transformedStatus = 'pending';
-                let statusText = 'Pending';
-                let statusColor = '#F2A78C';
-                
-                if (order.orderStatus === 'confirmed' || order.orderStatus === 'accepted') {
-                    transformedStatus = 'accepted';
-                    statusText = 'Accepted';
-                    statusColor = '#2C9043';
-                } else if (order.orderStatus === 'ongoing') {
-                    transformedStatus = 'ongoing';
-                    statusText = 'Completed';
-                    statusColor = '#2CAA48';
-                } else if (order.orderStatus === 'denied' || order.orderStatus === 'rejected') {
-                    transformedStatus = 'denied';
-                    statusText = 'Denied';
-                    statusColor = '#F85D5D';
-                }
-                
-                return {
-                    orderId: order.$id || order.orderId,
-                    company: branchName,
-                    companyImage: branchImage,
-                    location: recipient?.address || order.deliveryAddress || 'Accra, Ghana',
-                    payment: order.paymentMethod || 'Mobile Money',
-                    time: order.deliveryTime || 'N/A',
-                    date: order.deliveryDate || 'N/A',
-                    price: `GH₵${total.toFixed(2)}`,
-                    status: transformedStatus,
-                    statusText: statusText,
-                    statusColor: statusColor,
-                    products: products,
-                    subtotal: subtotal,
-                    serviceFee: serviceFee,
-                    total: total,
-                    recipient: recipient,
-                    paymentDetails: { network: order.paymentMethod },
-                    timestamp: order.$createdAt,
-                    transactionId: order.transactionId,
-                    deliveryInstructions: order.orderComment,
-                    deliveryDate: order.deliveryDate,
-                    deliveryTime: order.deliveryTime,
-                    product: products.length > 0 ? products[0].name : 'Unknown Product',
-                    quantity: products.reduce((sum, p) => sum + p.quantity, 0)
-                };
-            } catch (error) {
-                console.error('Error in processOrderData for order:', order.$id, error);
-                return null;
-            }
-        }
-
         // Show offline state
         function showOfflineState() {
             const container = document.getElementById('ordersList');
-            container.innerHTML = `
-                <div class="flex flex-col items-center justify-center h-full text-white text-center p-8">
-                    <div class="mb-4">
-                        <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" class="text-gray-400">
-                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                        </svg>
+            if (!container.innerHTML.includes('No orders found')) {
+                container.innerHTML = `
+                    <div class="flex flex-col items-center justify-center h-full text-white text-center p-8">
+                        <div class="mb-4">
+                            <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1.5" class="text-gray-400">
+                                <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-xl font-semibold mb-2">Connection Error</h3>
+                        <p class="text-gray-400 mb-4">Unable to load orders. Please check your connection.</p>
+                        <button onclick="loadInitialData()" class="mt-4 px-6 py-2 backdrop-blur-xl bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition-all duration-300 shadow-lg flex items-center gap-2">
+                            <span class="loading-spinner" id="refreshSpinner" style="display: none;"></span>
+                            Retry
+                        </button>
                     </div>
-                    <h3 class="text-xl font-semibold mb-2">Connection Error</h3>
-                    <p class="text-gray-400 mb-4">Unable to load orders. Please check your connection.</p>
-                    <button onclick="loadInitialData()" class="mt-4 px-6 py-2 backdrop-blur-xl bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition-all duration-300 shadow-lg flex items-center gap-2">
-                        <span class="loading-spinner" id="refreshSpinner" style="display: none;"></span>
-                        Retry
-                    </button>
-                </div>
-            `;
-        }
-
-        // Load bottles from localStorage
-        function loadBottles() {
-            return new Promise((resolve) => {
-                setTimeout(() => {
-                    const savedBottles = localStorage.getItem('phluowiseBottles');
-                    if (savedBottles) {
-                        try {
-                            myBottles = JSON.parse(savedBottles);
-                        } catch (parseError) {
-                            myBottles = [];
-                        }
-                    } else {
-                        myBottles = [];
-                    }
-                    resolve();
-                }, 0);
-            });
+                `;
+            }
         }
 
         // Save bottles to localStorage
         function saveBottles() {
             localStorage.setItem('phluowiseBottles', JSON.stringify(myBottles));
-        }
-
-        // Save orders to localStorage
-        function saveOrders() {
-            localStorage.setItem('phluowiseOrders', JSON.stringify(orders));
-        }
-
-        // Get payment method text
-        function getPaymentMethodText(method) {
-            const methods = {
-                'card': 'Credit/Debit Card',
-                'mobile': 'Mobile Money',
-                'bank': 'Bank Transfer'
-            };
-            return methods[method] || method;
-        }
-
-        // Format full date for display
-        function formatFullDate(dateString) {
-            try {
-                const date = new Date(dateString);
-                return date.toLocaleDateString('en-US', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                });
-            } catch (e) {
-                return dateString || 'N/A';
-            }
         }
 
         // Format short date for display
@@ -1174,6 +1852,40 @@
                 return `${month}/${day}/${year}`;
             } catch (e) {
                 return dateString || 'N/A';
+            }
+        }
+
+        // Format order sent time
+        function formatOrderSentTime(timestamp) {
+            try {
+                if (!timestamp) return 'Order sent: N/A';
+                
+                const date = new Date(timestamp);
+                const now = new Date();
+                const diffMs = now - date;
+                const diffMins = Math.floor(diffMs / 60000);
+                const diffHours = Math.floor(diffMs / 3600000);
+                const diffDays = Math.floor(diffMs / 86400000);
+                
+                if (diffMins < 1) {
+                    return 'Order sent: Just now';
+                } else if (diffMins < 60) {
+                    return `Order sent: ${diffMins} minute${diffMins > 1 ? 's' : ''} ago`;
+                } else if (diffHours < 24) {
+                    return `Order sent: ${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+                } else if (diffDays < 7) {
+                    return `Order sent: ${diffDays} day${diffDays > 1 ? 's' : ''} ago`;
+                } else {
+                    // Show actual date for older orders
+                    const month = String(date.getMonth() + 1).padStart(2, '0');
+                    const day = String(date.getDate()).padStart(2, '0');
+                    const year = date.getFullYear();
+                    const hours = String(date.getHours()).padStart(2, '0');
+                    const mins = String(date.getMinutes()).padStart(2, '0');
+                    return `Order sent: ${month}/${day}/${year} at ${hours}:${mins}`;
+                }
+            } catch (e) {
+                return 'Order sent: N/A';
             }
         }
 
@@ -1203,7 +1915,9 @@
                     );
                 } catch (error) {}
 
-                saveOrders();
+                // Update cache
+                localStorage.setItem('phluowiseOrdersCache', JSON.stringify(orders));
+                
                 renderOrders();
             }
         }
@@ -1286,8 +2000,6 @@
                 container.removeChild(container.firstChild);
             }
 
-            let renderedCount = 0;
-            
             // Filter orders based on current view
             const filteredOrders = orders.filter(order => {
                 if (currentView === 'status') {
@@ -1327,65 +2039,154 @@
             }
             
             // Create and append order cards
-            filteredOrders.forEach((order) => {
-                renderedCount++;
-
+            filteredOrders.forEach((order, index) => {
                 const card = document.createElement('button');
-                card.className = 'w-full flex items-center justify-center px-4 mb-3 animate-slide-up';
+                card.className = 'w-full flex items-center justify-center px-4 mb-3 animate-slide-up relative';
                 card.style.height = '120px';
                 card.style.backgroundColor = 'var(--bg-second)';
                 card.dataset.orderId = order.orderId;
 
-                // Set click handler
-                if (order.status === 'ongoing') {
-                    card.onclick = () => openReturnPickupsSheet(order);
-                } else {
-                    card.onclick = () => openOrderModal(order.status, order);
+                // Add special styling for new orders
+                if (order.isNew) {
+                    card.style.border = '2px solid #10b981';
+                    card.style.boxShadow = '0 0 20px rgba(16, 185, 129, 0.3)';
+                    
+                    // Add "NEW" badge for new orders
+                    const newBadge = document.createElement('div');
+                    newBadge.className = 'absolute top-2 right-2 bg-green-500 text-white text-xs px-2 py-1 rounded-full font-bold animate-pulse';
+                    newBadge.textContent = 'NEW';
+                    newBadge.style.zIndex = '10';
+                    card.appendChild(newBadge);
                 }
 
+                // Set click handler - all cards use order modal
+                card.onclick = () => openOrderModal(order.status, order);
+
                 // Determine display image
-                let displayImage = order.companyImage;
-                if (!displayImage) {
-                    if (order.product && (order.product.toLowerCase().includes('dispenser') || order.product.toLowerCase().includes('bottle'))) {
-                        displayImage = 'images/products/large-bottle.jpg';
-                    }
+                let displayImage = null;
+                if (order.companyImage) {
+                    displayImage = order.companyImage;
+                } else {
+                    // Fallback to default company icon
+                    displayImage = null;
                 }
 
                 card.innerHTML = `
                     <div class="flex flex-row w-full items-center gap-2">
-                        <!-- Company/Product Image Container -->
+                        <!-- Company Image Container -->
                         <div class="w-20 h-20 rounded-lg overflow-hidden flex-shrink-0">
                             ${displayImage ? 
                                 `<img src="${displayImage}" class="w-full h-full object-cover" alt="${order.company}" loading="lazy">` :
                                 `<div class="w-full h-full bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 flex items-center justify-center">
                                     <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                                     </svg>
                                 </div>`
                             }
                         </div>
                         
-                        <!-- Info Section (width: 44%) -->
-                        <div class="flex flex-col ml-2 items-start" style="width: 44%; gap: 2px;">
-                            <span class="text-white text-xl font-[500] truncate text-left w-full">${order.company || 'Unknown Company'}<span class="material-symbols-outlined verified-checkmark">verified</span></span>
-                            <span class="text-white text-lg font-[500] truncate text-left w-full">${order.location || 'N/A'}</span>
-                            ${order.payment ? `<span class="text-white text-base font-[500] truncate text-left w-full">${order.payment}</span>` : ''}
-                            <div class="text-white flex flex-row gap-3 text-left">
-                                <span class="font-[400] text-sm text-left">${order.time}</span>
-                                <span class="font-[400] text-sm text-left">${formatShortDate(order.date)}</span>
+                        <!-- Info Section -->
+                        <div class="flex flex-col ml-2 items-start flex-1" style="gap: 2px;">
+                            <!-- Company Name with Verified Icon -->
+                            <div class="company-name-container">
+                                <span class="company-name-text">${order.company || 'Unknown Company'}</span>
+                                <span class="material-symbols-outlined verified-icon">verified</span>
+                            </div>
+                            
+                            <!-- Payment Method (Network) -->
+                            ${order.payment ? `<span class="text-white/80 text-base font-[400]">${order.payment}</span>` : ''}
+                            
+                            <!-- Order Sent Date/Time -->
+                            <div class="text-white/60 text-sm">
+                                ${formatOrderSentTime(order.timestamp)}
                             </div>
                         </div>
                         
-                        <!-- Price & Status Section (width: 25%, height: 60) -->
-                        <div class="flex flex-col items-center justify-center gap-1" style="height: 60px; width: 25%;">
-                            <span class="text-xl font-[700] text-center text-white">${order.price || 'GH₵0.00'}</span>
-                            <span class="text-sm font-[500] text-center" style="color: ${order.statusColor || '#F2A78C'};">${order.statusText || 'Pending'}</span>
+                        <!-- Price & Status Section -->
+                        <div class="flex flex-col items-center justify-end gap-1" style="min-width: 80px;">
+                            <span class="text-xl font-[700] text-white text-right">${order.price || 'GH₵0.00'}</span>
+                            <span class="text-sm font-[500] text-right" style="color: ${order.statusColor || '#F2A78C'};">${order.statusText || 'Pending'}</span>
                         </div>
                     </div>
                 `;
 
                 container.appendChild(card);
+                
+                // Stagger animations for better performance
+                if (index < 10) {
+                    card.style.animationDelay = `${index * 0.05}s`;
+                }
             });
+        }
+
+        // Update floating button
+        function updateFloatingButton() {
+            const bottleBtn = document.getElementById('floatingBottleBtn');
+            const counter = document.getElementById('bottleCounter');
+            
+            const pendingBottles = myBottles.filter(bottle => bottle.status === 'pending').length;
+            
+            if (pendingBottles > 0) {
+                bottleBtn.style.display = 'flex';
+                counter.textContent = pendingBottles;
+            } else {
+                bottleBtn.style.display = 'flex';
+                counter.textContent = '0';
+            }
+        }
+
+        // Show notification
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            
+            const typeStyles = {
+                success: {
+                    bg: 'bg-green-500/20',
+                    border: 'border-green-500/50',
+                    text: 'text-green-500',
+                    icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />'
+                },
+                error: {
+                    bg: 'bg-red-500/20',
+                    border: 'border-red-500/50',
+                    text: 'text-red-500',
+                    icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />'
+                },
+                info: {
+                    bg: 'bg-blue-500/20',
+                    border: 'border-blue-500/50',
+                    text: 'text-blue-500',
+                    icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />'
+                }
+            };
+            
+            const style = typeStyles[type] || typeStyles.info;
+            
+            notification.className = `fixed top-4 right-4 glass border ${style.border} text-foreground px-4 py-3 rounded-lg shadow-lg z-50 animate-slide-up max-w-sm`;
+            notification.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 ${style.bg} rounded-full flex items-center justify-center">
+                        <svg viewBox="0 0 24 24" class="w-5 h-5 ${style.text}" fill="none" stroke="currentColor" stroke-width="2">
+                            ${style.icon}
+                        </svg>
+                    </div>
+                    <div>
+                        <p class="text-sm font-medium">${message}</p>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.opacity = '0';
+                notification.style.transition = 'opacity 0.3s';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        document.body.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
         }
 
         // Order modal
@@ -1519,76 +2320,6 @@
                 
                 showNotification('❌ Failed to mark order as complete. Please try again.', 'error');
             }
-        }
-
-        // Update floating button
-        function updateFloatingButton() {
-            const bottleBtn = document.getElementById('floatingBottleBtn');
-            const counter = document.getElementById('bottleCounter');
-            
-            const pendingBottles = myBottles.filter(bottle => bottle.status === 'pending').length;
-            
-            if (pendingBottles > 0) {
-                bottleBtn.style.display = 'flex';
-                counter.textContent = pendingBottles;
-            } else {
-                bottleBtn.style.display = 'flex';
-                counter.textContent = '0';
-            }
-        }
-
-        // Show notification
-        function showNotification(message, type = 'info') {
-            const notification = document.createElement('div');
-            
-            const typeStyles = {
-                success: {
-                    bg: 'bg-green-500/20',
-                    border: 'border-green-500/50',
-                    text: 'text-green-500',
-                    icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />'
-                },
-                error: {
-                    bg: 'bg-red-500/20',
-                    border: 'border-red-500/50',
-                    text: 'text-red-500',
-                    icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />'
-                },
-                info: {
-                    bg: 'bg-blue-500/20',
-                    border: 'border-blue-500/50',
-                    text: 'text-blue-500',
-                    icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />'
-                }
-            };
-            
-            const style = typeStyles[type] || typeStyles.info;
-            
-            notification.className = `fixed top-4 right-4 glass border ${style.border} text-foreground px-4 py-3 rounded-lg shadow-lg z-50 animate-slide-up max-w-sm`;
-            notification.innerHTML = `
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 ${style.bg} rounded-full flex items-center justify-center">
-                        <svg viewBox="0 0 24 24" class="w-5 h-5 ${style.text}" fill="none" stroke="currentColor" stroke-width="2">
-                            ${style.icon}
-                        </svg>
-                    </div>
-                    <div>
-                        <p class="text-sm font-medium">${message}</p>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.style.opacity = '0';
-                notification.style.transition = 'opacity 0.3s';
-                setTimeout(() => {
-                    if (notification.parentNode) {
-                        document.body.removeChild(notification);
-                    }
-                }, 300);
-            }, 3000);
         }
 
         // My Bottles Bottom Sheet Functions
@@ -1981,26 +2712,47 @@
                     </div>
                     
                     <!-- Recipient Information -->
-                    ${currentOrderForDetails.recipient ? `
+                    ${currentOrderForDetails.purchase_recipient_type || currentOrderForDetails.recipient_type || currentOrderForDetails.recipient ? `
                     <div class="bg-gray-800/50 rounded-xl p-4">
                         <h3 class="text-white text-lg font-bold mb-3">Recipient Information</h3>
                         <div class="space-y-2">
                             <div class="flex justify-between">
+                                <span class="text-gray-400">Recipient Type:</span>
+                                <span class="text-white font-medium capitalize">${(currentOrderForDetails.purchase_recipient_type || currentOrderForDetails.recipient_type || currentOrderForDetails.recipient?.type || 'you').replace('_', ' ')}</span>
+                            </div>
+                            ${(currentOrderForDetails.purchase_recipient_type || currentOrderForDetails.recipient_type || currentOrderForDetails.recipient?.type) !== 'you' ? `
+                            <div class="flex justify-between">
                                 <span class="text-gray-400">Name:</span>
-                                <span class="text-white font-medium">${currentOrderForDetails.recipient.name || 'N/A'}</span>
+                                <span class="text-white font-medium">${currentOrderForDetails.recipient_name || currentOrderForDetails.recipient?.name || 'N/A'}</span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-gray-400">Phone:</span>
-                                <span class="text-white font-medium">${currentOrderForDetails.recipient.phone || 'N/A'}</span>
+                                <span class="text-white font-medium">${currentOrderForDetails.recipient_phone || currentOrderForDetails.recipient?.phone || 'N/A'}</span>
                             </div>
-                            ${currentOrderForDetails.recipient.email ? `
                             <div class="flex justify-between">
                                 <span class="text-gray-400">Email:</span>
-                                <span class="text-white font-medium">${currentOrderForDetails.recipient.email}</span>
+                                <span class="text-white font-medium">${currentOrderForDetails.recipient_email || currentOrderForDetails.recipient?.email || 'N/A'}</span>
+                            </div>` : `
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Name:</span>
+                                <span class="text-white font-medium">${currentOrderForDetails.customer?.full_name || 'N/A'}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Phone:</span>
+                                <span class="text-white font-medium">${currentOrderForDetails.customer?.phone_number || 'N/A'}</span>
+                            </div>
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Email:</span>
+                                <span class="text-white font-medium">${currentOrderForDetails.customer?.email || 'N/A'}</span>
+                            </div>`}
+                            ${(currentOrderForDetails.purchase_recipient_type || currentOrderForDetails.recipient_type || currentOrderForDetails.recipient?.type) === 'business' ? `
+                            <div class="flex justify-between">
+                                <span class="text-gray-400">Business Name:</span>
+                                <span class="text-white font-medium">${currentOrderForDetails.business_name || currentOrderForDetails.recipient?.businessName || 'N/A'}</span>
                             </div>` : ''}
                             <div class="flex justify-between">
                                 <span class="text-gray-400">Delivery Location:</span>
-                                <span class="text-white font-medium">${currentOrderForDetails.recipient.address || currentOrderForDetails.location || 'N/A'}</span>
+                                <span class="text-white font-medium">${currentOrderForDetails.recipient_address || currentOrderForDetails.recipient?.address || currentOrderForDetails.location || 'N/A'}</span>
                             </div>
                         </div>
                     </div>
@@ -2021,6 +2773,20 @@
             sheet.classList.remove('opacity-0', 'pointer-events-none');
             sheet.classList.add('opacity-100', 'z-50');
             setTimeout(() => content.classList.remove('translate-y-full'), 10);
+        }
+
+        function formatFullDate(dateString) {
+            try {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('en-US', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+            } catch (e) {
+                return dateString || 'N/A';
+            }
         }
 
         function closeOrderDetailsSheet() {

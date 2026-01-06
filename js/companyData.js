@@ -216,7 +216,7 @@ class CompanyDataManager {
                     working_days: branchWorkingDays, // Add working days
                     products: branchProducts.map(product => ({
                         ...product,
-                        image: product.product_image || null // Map product_image to image field
+                        image: this.getProductImageUrl(product.product_image) // Convert to full URL
                     })), // Add products with corrected image field
                     social_media: branchSocialMedia, // Add social media links
                     // Additional fields for compatibility
@@ -366,6 +366,25 @@ class CompanyDataManager {
     // Get social media for a specific company
     getSocialMediaForCompany(companyId) {
         return this.socialMedia.filter(sm => sm.company_id === companyId);
+    }
+
+    // Convert product image path to full Appwrite URL
+    getProductImageUrl(imagePath) {
+        if (!imagePath) return '';
+        
+        // If it's already a full URL, return as-is
+        if (imagePath.startsWith('http')) {
+            return imagePath;
+        }
+        
+        // Convert relative path to full Appwrite URL
+        const { PROJECT_ID, DATABASE_ID, BUCKETS } = window.appwriteConfig;
+        if (BUCKETS && BUCKETS.PRODUCTS) {
+            return `https://nyc.cloud.appwrite.io/v1/storage/buckets/${BUCKETS.PRODUCTS}/files/${imagePath}/view?project=${PROJECT_ID}`;
+        }
+        
+        // Fallback if bucket config not available
+        return `https://nyc.cloud.appwrite.io/v1/storage/buckets/68b1c57b001542be7fbe/files/${imagePath}/view?project=${PROJECT_ID}`;
     }
 }
 

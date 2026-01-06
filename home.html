@@ -638,6 +638,7 @@
     <script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.0"></script>
     <script src="js/appwriteConfig.js"></script>
     <script src="js/companyData.js"></script>
+    <script src="js/cacheManager.js"></script>
     <script src="js/theme.js"></script>
     <script>
         let cardSingle = true; // true = list view, false = grid view
@@ -1057,14 +1058,20 @@
 
         async function refreshCompaniesData(previousState) {
             try {
-                console.log('🔄 Refreshing company data from database...');
+                console.log('🔄 Manual refresh - loading fresh data...');
                 
-                // Fetch fresh data from database
-                const freshData = await window.companyDataManager.refreshCompanyData();
+                // Force refresh from database (ignore cache for manual refresh)
+                const freshData = await window.companyDataManager.fetchCompanyData();
                 
                 // Update local companies array
                 companies = freshData;
                 companiesDataLoaded = true;
+
+                // Update cache with fresh data
+                if (window.cacheManager) {
+                    window.cacheManager.setCache('companies', freshData);
+                    console.log('💾 Cache updated with fresh data from manual refresh');
+                }
 
                 // Re-render with current filters and search
                 renderCompanies();
@@ -1075,22 +1082,155 @@
                     renderCompanies();
                 }
 
-                // Log refresh activity
-                console.log('✅ Company data refreshed successfully from database');
-
                 return { status: 'success', timestamp: Date.now() };
             } catch (error) {
-                console.error('❌ Database refresh error:', error);
+                console.error('❌ Manual refresh failed:', error);
+                
+                // Don't break the UI - keep existing data
+                if (companies.length > 0) {
+                    console.log('📦 Keeping existing data - refresh failed but UI works');
+                    return { status: 'partial', timestamp: Date.now() };
+                }
+                
+                // Last resort - try cache
+                if (window.cacheManager) {
+                    const cachedCompanies = window.cacheManager.getCache('companies');
+                    if (cachedCompanies && cachedCompanies.length > 0) {
+                        console.log('📦 Using cache as fallback for refresh');
+                        companies = cachedCompanies;
+                        companiesDataLoaded = true;
+                        renderCompanies();
+                        return { status: 'fallback', timestamp: Date.now() };
+                    }
+                }
+                
                 throw error;
             }
         }
 
         async function updateCompaniesData() {
-            // This function is now handled by companyDataManager
-            if (!companiesDataLoaded) {
-                console.log('📦 Loading company data from database...');
+            console.log('🔄 Loading companies with web2app cache-first strategy...');
+            
+            // STEP 1: Always try cache first for instant UI
+            if (window.cacheManager) {
+                const cachedCompanies = window.cacheManager.getCache('companies');
+                if (cachedCompanies && cachedCompanies.length > 0) {
+                    console.log('📦 Loading companies from cache for instant UI:', cachedCompanies.length);
+                    companies = cachedCompanies;
+                    companiesDataLoaded = true;
+                    renderCompanies();
+                    
+                    // STEP 2: Background refresh - check if cache needs update
+                    setTimeout(() => refreshCompaniesInBackground(), 1000);
+                    return;
+                }
+            }
+            
+            // STEP 3: No cache available - load from database with fallback
+            console.log('📡 No cache available - loading from database...');
+            await loadCompaniesFromDatabaseWithFallback();
+        }
+
+        // Background refresh to update cache without blocking UI
+        async function refreshCompaniesInBackground() {
+            if (!navigator.onLine) {
+                console.log('📴 Offline - skipping background refresh');
+                return;
+            }
+            
+            try {
+                console.log('🔄 Background refresh - checking for new data...');
+                const freshData = await window.companyDataManager.fetchCompanyData();
+                
+                // Check if data has changed
+                if (hasCompaniesChanged(freshData, companies)) {
+                    console.log('🆕 New data detected - updating cache and UI');
+                    companies = freshData;
+                    companiesDataLoaded = true;
+                    
+                    // Update cache
+                    if (window.cacheManager) {
+                        window.cacheManager.setCache('companies', freshData);
+                        console.log('💾 Cache updated with fresh data');
+                    }
+                    
+                    // Update UI
+                    renderCompanies();
+                } else {
+                    console.log('📊 No new data - cache is current');
+                }
+            } catch (error) {
+                console.error('❌ Background refresh failed:', error);
+                // Don't show error to user - UI already working with cache
+            }
+        }
+
+        // Check if companies data has changed
+        function hasCompaniesChanged(newData, oldData) {
+            if (!oldData || oldData.length === 0) return true;
+            if (!newData || newData.length === 0) return false;
+            if (newData.length !== oldData.length) return true;
+            
+            // Check for updated timestamps or new companies
+            for (let i = 0; i < newData.length; i++) {
+                const newCompany = newData[i];
+                const oldCompany = oldData.find(c => c.company_id === newCompany.company_id);
+                
+                if (!oldCompany) return true; // New company found
+                
+                // Check for updates
+                if (newCompany.$updatedAt && oldCompany.$updatedAt) {
+                    if (newCompany.$updatedAt !== oldCompany.$updatedAt) return true;
+                }
+            }
+            
+            return false;
+        }
+
+        // Load from database with multiple fallback layers
+        async function loadCompaniesFromDatabaseWithFallback() {
+            try {
+                // Try database first
+                console.log('📡 Loading from database...');
                 companies = await window.companyDataManager.fetchCompanyData();
                 companiesDataLoaded = true;
+                
+                // Cache the loaded companies
+                if (window.cacheManager) {
+                    window.cacheManager.setCache('companies', companies);
+                    console.log('💾 Companies cached for offline access');
+                }
+                
+                renderCompanies();
+                console.log(`✅ Loaded ${companies.length} companies from database`);
+                
+            } catch (error) {
+                console.error('❌ Database load failed:', error);
+                
+                // Fallback 1: Try cache manager again
+                if (window.cacheManager) {
+                    const cachedCompanies = window.cacheManager.getCache('companies');
+                    if (cachedCompanies && cachedCompanies.length > 0) {
+                        console.log('📦 Using cache manager as fallback:', cachedCompanies.length);
+                        companies = cachedCompanies;
+                        companiesDataLoaded = true;
+                        renderCompanies();
+                        return;
+                    }
+                }
+                
+                // Fallback 2: Use companyDataManager fallback data
+                console.log('🔄 Using companyDataManager fallback data...');
+                companies = window.companyDataManager.getFallbackData();
+                companiesDataLoaded = true;
+                
+                // Cache fallback data
+                if (window.cacheManager) {
+                    window.cacheManager.setCache('companies', companies);
+                }
+                
+                renderCompanies();
+                console.log('⚠️ Using fallback data - app works offline');
             }
         }
 
