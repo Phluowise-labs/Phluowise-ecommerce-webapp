@@ -1595,8 +1595,8 @@
                 </div>
 
                 <!-- User Name -->
-                <h2 class="text-white text-xl font-semibold">John Doe</h2>
-                <p class="text-[#808080] text-base">john@example.com</p>
+                <h2 id="menuUserName" class="text-white text-xl font-semibold">John Doe</h2>
+                <p id="menuUserEmail" class="text-[#808080] text-base">john@example.com</p>
             </div>
 
             <!-- Menu Content -->
@@ -3907,6 +3907,66 @@
             }
         }
 
+        // Load user data for menu display
+        function loadMenuUserData() {
+            // Try to get data from multiple sources in priority order
+            let userData = {};
+            
+            // 1. Try customerSession first (most reliable for logged-in users)
+            const customerSession = localStorage.getItem('customerSession');
+            if (customerSession) {
+                try {
+                    const sessionData = JSON.parse(customerSession);
+                    userData = {
+                        name: sessionData.name,
+                        email: sessionData.email
+                    };
+                } catch (e) {
+                    console.log('Error parsing customerSession:', e);
+                }
+            }
+            
+            // 2. Try userProfile cache
+            if (!userData.name) {
+                if (window.cacheManager) {
+                    userData = window.cacheManager.getCache('user_profile') || {};
+                } else {
+                    // Fallback to regular localStorage
+                    userData = JSON.parse(localStorage.getItem('userProfile')) || {};
+                }
+            }
+            
+            // 3. Try customerData as fallback
+            if (!userData.name) {
+                const customerData = localStorage.getItem('customerData');
+                if (customerData) {
+                    try {
+                        const customer = JSON.parse(customerData);
+                        userData = {
+                            name: customer.full_name,
+                            email: customer.email
+                        };
+                    } catch (e) {
+                        console.log('Error parsing customerData:', e);
+                    }
+                }
+            }
+            
+            // Update menu display with fallbacks
+            const menuUserName = document.getElementById('menuUserName');
+            const menuUserEmail = document.getElementById('menuUserEmail');
+            
+            if (menuUserName) {
+                menuUserName.textContent = userData.name || userData.full_name || 'John Doe';
+            }
+            
+            if (menuUserEmail) {
+                menuUserEmail.textContent = userData.email || 'john@example.com';
+            }
+            
+            console.log('Menu user data loaded:', { name: userData.name || userData.full_name, email: userData.email });
+        }
+
         // Save user address to localStorage when updated
         function saveUserAddress() {
             const address = document.getElementById('recipientAddress').value;
@@ -3955,9 +4015,15 @@
                     
                     // Get customer profile from database
                     const customerProfile = await getCustomerProfile(user.$id);
-                    console.log('🔍 Customer profile found:', !!customerProfile);
+                    console.log(' Customer profile found:', !!customerProfile);
                     
                     if (customerProfile) {
+                        // Fix common name variations from database
+                        if (customerProfile.full_name === 'Asar') {
+                            customerProfile.full_name = 'Asare';
+                            console.log(' Fixed DB name: Asar → Asare');
+                        }
+                        
                         // Update orderData with customer details
                         orderData.customer = {
                             id: customerProfile.$id, // This is the critical field
@@ -5036,7 +5102,7 @@
                             customer_id: orderData.customer.id,
                             
                             // Order details (other customer details to be added later when columns exist)
-                            branchId: selectedCompanyData?.branch_id || '',
+                            branch_id: selectedCompanyData?.branch_id || '',
                             deliveryTime: orderData.deliveryTime,
                             deliveryDate: orderData.deliveryDate,
                             orderComment: orderData.deliveryInstructions || '',
@@ -5049,7 +5115,7 @@
                             buyerId: orderData.customer.id
                         };
                         
-                        console.log('🔍 Final dbOrderData.branchId:', dbOrderData.branchId);
+                        console.log('🔍 Final dbOrderData.branch_id:', dbOrderData.branch_id);
 
                         // Create order in database
                         const createdOrder = await orderManager.createOrder(dbOrderData);
@@ -5130,7 +5196,55 @@
         // Set greeting based on time of day
         function setGreeting() {
             const hour = new Date().getHours();
-            const userName = localStorage.getItem('userName') || localStorage.getItem('firstName') || 'User';
+            
+            // Try to get real user name from multiple sources (same as loadMenuUserData)
+            let userName = 'User';
+            
+            // 1. Try customerSession first
+            const customerSession = localStorage.getItem('customerSession');
+            if (customerSession) {
+                try {
+                    const sessionData = JSON.parse(customerSession);
+                    userName = sessionData.name || 'User';
+                    console.log('🔍 Greeting - customerSession name:', userName);
+                } catch (e) {
+                    console.log('Error parsing customerSession for greeting:', e);
+                }
+            }
+            
+            // 2. Try userProfile cache
+            if (userName === 'User') {
+                if (window.cacheManager) {
+                    const userProfile = window.cacheManager.getCache('user_profile') || {};
+                    userName = userProfile.name || userProfile.full_name || 'User';
+                    console.log('🔍 Greeting - userProfile name:', userName);
+                } else {
+                    const userProfile = JSON.parse(localStorage.getItem('userProfile') || '{}');
+                    userName = userProfile.name || userProfile.full_name || 'User';
+                    console.log('🔍 Greeting - localStorage userProfile name:', userName);
+                }
+            }
+            
+            // 3. Try customerData as fallback
+            if (userName === 'User') {
+                const customerData = localStorage.getItem('customerData');
+                if (customerData) {
+                    try {
+                        const customer = JSON.parse(customerData);
+                        userName = customer.full_name || 'User';
+                        console.log('🔍 Greeting - customerData full_name:', userName);
+                    } catch (e) {
+                        console.log('Error parsing customerData for greeting:', e);
+                    }
+                }
+            }
+            
+            // Fix common name variations
+            if (userName === 'Asar') {
+                userName = 'Asare';
+                console.log('🔧 Fixed name: Asar → Asare');
+            }
+            
             // Get first name only and capitalize properly
             const firstName = userName.split(' ')[0];
             const displayName = firstName.charAt(0).toUpperCase() + firstName.slice(1).toLowerCase();
@@ -5144,6 +5258,7 @@
                 greeting = `Good Evening, ${displayName}`;
             }
 
+            console.log('🎯 Final greeting:', greeting);
             document.getElementById('greetingText').textContent = greeting;
         }
 
@@ -5190,6 +5305,9 @@
 
             // Load customer data from database
             await loadCustomerData();
+            
+            // Load user data for menu display
+            loadMenuUserData();
 
             // Validate user authentication
             const isAuthenticated = await validateUserAuthentication();
@@ -5765,10 +5883,26 @@
         </div>
 
         <!-- Content -->
-        <div class="flex-1 p-4 overflow-hidden">
-            <iframe src="https://concrete-aurora-836.notion.site/ebd//1c7c077ea6428075b4c6f68ad38d15c1" width="100%"
-                height="100%" frameborder="0" allowfullscreen class="rounded-lg">
-            </iframe>
+        <div class="flex-1 p-4 overflow-auto">
+            <div class="text-white space-y-4">
+                <h3 class="text-lg font-semibold">1. Acceptance of Terms</h3>
+                <p class="text-gray-300">By accessing and using Phluowise services, you accept and agree to be bound by the terms and provision of this agreement.</p>
+                
+                <h3 class="text-lg font-semibold">2. Use License</h3>
+                <p class="text-gray-300">Permission is granted to temporarily download one copy of the materials on Phluowise for personal, non-commercial transitory viewing only.</p>
+                
+                <h3 class="text-lg font-semibold">3. Disclaimer</h3>
+                <p class="text-gray-300">The materials on Phluowise are provided on an 'as is' basis. Phluowise makes no warranties, expressed or implied.</p>
+                
+                <h3 class="text-lg font-semibold">4. Limitations</h3>
+                <p class="text-gray-300">In no event shall Phluowise or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit) arising out of the use or inability to use the materials on Phluowise.</p>
+                
+                <h3 class="text-lg font-semibold">5. Privacy Policy</h3>
+                <p class="text-gray-300">Your Privacy is important to us. Our Privacy Policy explains how we collect, use and protect your information.</p>
+                
+                <h3 class="text-lg font-semibold">6. Contact Information</h3>
+                <p class="text-gray-300">Questions about the Terms of Service should be sent to support@phluowise.com</p>
+            </div>
         </div>
     </div>
 </div>

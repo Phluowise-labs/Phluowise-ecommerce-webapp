@@ -1,0 +1,29 @@
+{
+  "name": "Phluowise - Smart Water Delivery",
+  "short_name": "Phluowise",
+  "description": "Your smart water delivery companion. Schedule, track, and manage your water orders with ease.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#060606",
+  "theme_color": "#007ACC",
+  "orientation": "portrait",
+  "scope": "/",
+  "icons": [
+    {
+      "src": "images/logo.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "images/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["lifestyle", "utilities", "business"],
+  "lang": "en",
+  "dir": "ltr",
+  "prefer_related_applications": false
+}

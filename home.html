@@ -14,6 +14,13 @@
   gtag('config', 'G-TRV3R43NQZ');
 </script>
     <title>Phluowise - Home</title>
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="manifest.json">
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#007ACC">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Phluowise">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet"
         href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=verified" />
@@ -1602,6 +1609,243 @@
             window.location.href = 'signin.html';
         }
 
+        // Delete Account Confirmation function
+        window.showDeleteConfirm = function() {
+            // Create modal overlay following the existing pattern
+            const modalOverlay = document.createElement('div');
+            modalOverlay.id = 'deleteAccountModal';
+            modalOverlay.className = 'fixed inset-0 z-50 flex items-center justify-center p-9';
+            modalOverlay.style.cssText = 'display: flex; backdrop-filter: blur(20px); background-color: rgba(0,0,0,0.5);';
+            
+            // Create modal content following existing modal pattern
+            const modalContent = document.createElement('div');
+            modalContent.className = 'rounded-[30px] w-full max-w-[350px] px-10 py-7 flex flex-col items-center justify-center border-[0.2px]';
+            modalContent.style.cssText = 'background-color: var(--modal-bg); border-color: var(--modal-border);';
+            
+            modalContent.innerHTML = `
+                <div class="flex flex-col items-center justify-center w-full h-full">
+                    <!-- Warning Icon Section -->
+                    <div class="flex flex-col items-center justify-center mb-6">
+                        <div class="w-[80px] h-[80px] rounded-full flex items-center justify-center mb-4"
+                             style="background-color: rgba(245, 125, 125, 0.1);">
+                            <svg class="w-[40px] h-[40px] text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                        </div>
+                        
+                        <h2 class="text-white text-[20px] font-bold text-center mb-3">Delete Account</h2>
+                        <p class="text-gray-400 text-[14px] text-center leading-[20px] mb-6">
+                            Are you sure you want to delete your account? This action cannot be undone and will permanently delete:
+                        </p>
+                        
+                        <div class="w-full text-left mb-6">
+                            <div class="text-gray-400 text-[13px] space-y-2">
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-[4px] h-[4px] text-red-500" fill="currentColor" viewBox="0 0 8 8">
+                                        <circle cx="4" cy="4" r="2"/>
+                                    </svg>
+                                    <span>Your profile information</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-[4px] h-[4px] text-red-500" fill="currentColor" viewBox="0 0 8 8">
+                                        <circle cx="4" cy="4" r="2"/>
+                                    </svg>
+                                    <span>Order history</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-[4px] h-[4px] text-red-500" fill="currentColor" viewBox="0 0 8 8">
+                                        <circle cx="4" cy="4" r="2"/>
+                                    </svg>
+                                    <span>Saved preferences</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-[4px] h-[4px] text-red-500" fill="currentColor" viewBox="0 0 8 8">
+                                        <circle cx="4" cy="4" r="2"/>
+                                    </svg>
+                                    <span>All associated data</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Button Section -->
+                    <div class="w-full flex items-center gap-3">
+                        <!-- Cancel Button -->
+                        <button onclick="cancelDeleteAccount()"
+                                class="h-[37px] flex-1 rounded-[100px] flex items-center justify-center border transition-all hover:opacity-80"
+                                style="background-color: var(--btn-second-color); border-color: var(--btn-second-border);">
+                            <span class="text-white text-base font-semibold capitalize">Cancel</span>
+                        </button>
+                        
+                        <!-- Delete Button -->
+                        <button onclick="confirmDeleteAccount()"
+                                class="h-[37px] flex-1 rounded-[100px] flex items-center justify-center border transition-all hover:opacity-80"
+                                style="background-color: #F57D7D; border-color: #F57D7D;">
+                            <span class="text-white text-base font-semibold capitalize">Delete</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            modalOverlay.appendChild(modalContent);
+            document.body.appendChild(modalOverlay);
+            
+            // Close modal when clicking overlay
+            modalOverlay.addEventListener('click', function(e) {
+                if (e.target === modalOverlay) {
+                    cancelDeleteAccount();
+                }
+            });
+        };
+
+        // Show delete success modal
+        window.showDeleteSuccessModal = function() {
+            // Close the delete confirmation modal first
+            const deleteModal = document.getElementById('deleteAccountModal');
+            if (deleteModal) {
+                deleteModal.remove();
+            }
+            
+            // Create success modal overlay
+            const modalOverlay = document.createElement('div');
+            modalOverlay.id = 'deleteSuccessModal';
+            modalOverlay.className = 'fixed inset-0 z-50 flex items-center justify-center p-9';
+            modalOverlay.style.cssText = 'display: flex; backdrop-filter: blur(20px); background-color: rgba(0,0,0,0.5);';
+            
+            // Create modal content
+            const modalContent = document.createElement('div');
+            modalContent.className = 'rounded-[30px] w-full max-w-[350px] px-10 py-7 flex flex-col items-center justify-center border-[0.2px]';
+            modalContent.style.cssText = 'background-color: var(--modal-bg); border-color: var(--modal-border);';
+            
+            modalContent.innerHTML = `
+                <div class="flex flex-col items-center justify-center w-full h-full">
+                    <!-- Success Icon Section -->
+                    <div class="flex flex-col items-center justify-center mb-6">
+                        <div class="w-[80px] h-[80px] rounded-full flex items-center justify-center mb-4"
+                             style="background-color: rgba(34, 197, 94, 0.1);">
+                            <svg class="w-[40px] h-[40px] text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </div>
+                        
+                        <h2 class="text-white text-[20px] font-bold text-center mb-3">Account Deleted</h2>
+                        <p class="text-gray-400 text-[14px] text-center leading-[20px] mb-4">
+                            Your account has been successfully deleted.
+                        </p>
+                        <p class="text-gray-500 text-[13px] text-center leading-[18px]">
+                            Redirecting to sign-in page...
+                        </p>
+                        
+                        <!-- Loading indicator -->
+                        <div class="flex items-center gap-1 mt-4">
+                            <div class="w-[6px] h-[6px] rounded-full bg-green-500 animate-pulse"></div>
+                            <div class="w-[6px] h-[6px] rounded-full bg-green-500 animate-pulse" style="animation-delay: 0.2s"></div>
+                            <div class="w-[6px] h-[6px] rounded-full bg-green-500 animate-pulse" style="animation-delay: 0.4s"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            modalOverlay.appendChild(modalContent);
+            document.body.appendChild(modalOverlay);
+            
+            // Auto-remove modal after redirect (backup cleanup)
+            setTimeout(() => {
+                const modal = document.getElementById('deleteSuccessModal');
+                if (modal) {
+                    modal.remove();
+                }
+            }, 3000);
+        };
+
+        // Cancel delete account
+        window.cancelDeleteAccount = function() {
+            const modal = document.getElementById('deleteAccountModal');
+            if (modal) {
+                modal.remove();
+            }
+        };
+
+        // Confirm delete account
+        window.confirmDeleteAccount = async function() {
+            try {
+                // Show loading state
+                const deleteBtn = document.querySelector('#deleteAccountModal button[onclick="confirmDeleteAccount()"] span');
+                const originalText = deleteBtn.textContent;
+                deleteBtn.textContent = 'Deleting...';
+                deleteBtn.parentElement.disabled = true;
+                
+                // Get current user
+                const user = await window.account.get();
+                const userEmail = user.email;
+                
+                // Delete from customer_tb first
+                try {
+                    const customerDocs = await window.databases.listDocuments(
+                        window.appwriteConfig.DATABASE_ID,
+                        window.appwriteConfig.CUSTOMER_TABLE,
+                        [window.Query.equal('email', userEmail.toLowerCase())]
+                    );
+                    
+                    // Delete customer records
+                    for (const doc of customerDocs.documents) {
+                        await window.databases.deleteDocument(
+                            window.appwriteConfig.DATABASE_ID,
+                            window.appwriteConfig.CUSTOMER_TABLE,
+                            doc.$id
+                        );
+                    }
+                    console.log('✅ Customer data deleted from database');
+                } catch (dbError) {
+                    console.warn('⚠️ Could not delete customer data:', dbError.message);
+                }
+                
+                // Immediately logout user by deleting all sessions
+                console.log('🔒 Logging out user...');
+                try {
+                    const sessions = await window.account.listSessions();
+                    for (const session of sessions.sessions) {
+                        await window.account.deleteSession(session.$id);
+                    }
+                    console.log('✅ User logged out - all sessions deleted');
+                } catch (sessionError) {
+                    console.warn('⚠️ Could not delete sessions:', sessionError.message);
+                    // Try to delete current session as fallback
+                    try {
+                        await window.account.deleteSession('current');
+                        console.log('✅ User logged out - current session deleted');
+                    } catch (fallbackError) {
+                        console.warn('⚠️ Could not delete current session:', fallbackError.message);
+                    }
+                }
+                
+                // Clear local storage immediately after logout
+                localStorage.clear();
+                console.log('🧹 Local storage cleared');
+                
+                // Show success modal
+                showDeleteSuccessModal();
+                
+                // Redirect to sign-in page after delay
+                setTimeout(() => {
+                    window.location.href = 'signin.html';
+                }, 2500);
+                
+            } catch (error) {
+                console.error('❌ Error deleting account:', error);
+                
+                // Reset button
+                const deleteBtn = document.querySelector('#deleteAccountModal button[onclick="confirmDeleteAccount()"] span');
+                deleteBtn.textContent = 'Delete';
+                deleteBtn.parentElement.disabled = false;
+                
+                // Show error message
+                alert('Failed to delete account. Please try again or contact support. Error: ' + error.message);
+            }
+        };
+
         // Navigation State Management
         function saveCurrentPage() {
             localStorage.setItem('previousPage', window.location.pathname.split('/').pop());
@@ -1628,6 +1872,34 @@
                 localStorage.setItem('previousPage', 'home.html');
             }
         });
+    </script>
+
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then((registration) => {
+                        console.log('Service Worker registered successfully:', registration);
+                        
+                        // Check for updates
+                        registration.addEventListener('updatefound', () => {
+                            const newWorker = registration.installing;
+                            newWorker.addEventListener('statechange', () => {
+                                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                    // New content is available
+                                    if (confirm('New version available! Reload to update?')) {
+                                        window.location.reload();
+                                    }
+                                }
+                            });
+                        });
+                    })
+                    .catch((error) => {
+                        console.log('Service Worker registration failed:', error);
+                    });
+            });
+        }
     </script>
 </body>
 
