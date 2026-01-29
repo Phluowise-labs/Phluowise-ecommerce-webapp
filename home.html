@@ -526,12 +526,33 @@
                 </button>
 
                 <!-- Grid/List Toggle (48x44px, bg #292B2F, border-radius 10px) -->
-                <button id="toggleViewBtn" onclick="toggleCardView()"
+                <!-- Right Section: Toggle Icon + Transport Mode -->
+            <div class="flex items-center gap-3">
+                <!-- Transport Mode Selector -->
+                <div id="transportModeSelector" class="hidden items-center bg-[#292B2F] rounded-[8px] p-1 gap-1">
+                    <button onclick="setTransportMode('car')" id="carMode" 
+                            class="transport-mode-btn flex items-center justify-center px-3 py-2 rounded-[6px] text-xs font-medium transition-all"
+                            style="background-color: var(--btn-color); color: white;">
+                        🚗 Car
+                    </button>
+                    <button onclick="setTransportMode('walking')" id="walkingMode"
+                            class="transport-mode-btn flex items-center justify-center px-3 py-2 rounded-[6px] text-xs font-medium text-gray-400 hover:text-white transition-all">
+                        🚶 Walk
+                    </button>
+                    <button onclick="setTransportMode('cycling')" id="cyclingMode"
+                            class="transport-mode-btn flex items-center justify-center px-3 py-2 rounded-[6px] text-xs font-medium text-gray-400 hover:text-white transition-all">
+                        🚴 Bike
+                    </button>
+                </div>
+                
+                <!-- Toggle Icon -->
+                <button onclick="toggleCardView()"
                     class="flex items-center justify-center rounded-[10px]"
                     style="height: 48px; width: 44px; background-color: #292B2F;">
                     <!-- Icon will be set by JS -->
                     <div id="toggleIconContainer"></div>
                 </button>
+            </div>
             </div>
         </div>
 
@@ -654,24 +675,56 @@
         let userLocation = null;
         let isRefreshing = false;
         let locationPermissionGranted = localStorage.getItem('locationPermissionGranted') === 'true';
+        let currentTransportMode = 'car'; // Default transport mode
 
         // Companies data will be loaded from database
         let companies = [];
         let companiesDataLoaded = false;
 
+        // Set transport mode and update UI
+        async function setTransportMode(mode) {
+            currentTransportMode = mode;
+            
+            // Update button styles
+            const buttons = document.querySelectorAll('.transport-mode-btn');
+            buttons.forEach(btn => {
+                btn.style.backgroundColor = 'transparent';
+                btn.style.color = '#9CA3AF';
+            });
+            
+            const activeBtn = document.getElementById(mode + 'Mode');
+            activeBtn.style.backgroundColor = 'var(--btn-color)';
+            activeBtn.style.color = 'white';
+            
+            // Re-render companies with new transport mode
+            await renderCompanies();
+        }
+
+        // Show/hide transport mode selector based on filter
+        function updateTransportModeVisibility() {
+            const selector = document.getElementById('transportModeSelector');
+            if (currentFilter === 'around' && userLocation) {
+                selector.classList.remove('hidden');
+                selector.classList.add('flex');
+            } else {
+                selector.classList.add('hidden');
+                selector.classList.remove('flex');
+            }
+        }
+
         // Handle search input
-        function handleSearch() {
+        async function handleSearch() {
             const searchInput = document.getElementById('searchInput');
             searchQuery = searchInput.value.toLowerCase();
-            renderCompanies();
+            await renderCompanies();
         }
 
         // Clear search input and reset results
-        function clearSearch() {
+        async function clearSearch() {
             const searchInput = document.getElementById('searchInput');
             searchInput.value = '';
             searchQuery = '';
-            renderCompanies();
+            await renderCompanies();
         }
 
         // Calculate distance between two coordinates using Haversine formula
@@ -686,8 +739,100 @@
             return R * c;
         }
 
+        // Get real-time travel time using OSRM (Open Source Routing Machine)
+        async function getTravelTime(lat1, lng1, lat2, lng2, transportMode = 'car') {
+            try {
+                // OSRM public server - free for development/testing
+                const profile = transportMode === 'walking' ? 'foot' : 'driving';
+                const url = `https://router.project-osrm.org/route/v1/${profile}/${lng1},${lat1};${lng2},${lat2}?overview=false`;
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (data.routes && data.routes.length > 0) {
+                    const route = data.routes[0];
+                    const duration = route.duration; // Duration in seconds
+                    const distance = route.distance; // Distance in meters
+                    
+                    return {
+                        duration: Math.round(duration / 60), // Convert to minutes
+                        distance: Math.round(distance / 1000 * 10) / 10, // Convert to km with 1 decimal
+                        durationText: formatDuration(Math.round(duration / 60)),
+                        distanceText: `${Math.round(distance / 1000 * 10) / 10} km`
+                    };
+                }
+                
+                return null;
+            } catch (error) {
+                console.warn('OSRM routing failed, using fallback calculation:', error);
+                return null;
+            }
+        }
+
+        // Format duration into human-readable text
+        function formatDuration(minutes) {
+            if (minutes < 1) return '< 1 min';
+            if (minutes < 60) return `${minutes} min`;
+            
+            const hours = Math.floor(minutes / 60);
+            const remainingMinutes = minutes % 60;
+            
+            if (remainingMinutes === 0) return `${hours} hour${hours > 1 ? 's' : ''}`;
+            return `${hours} hour${hours > 1 ? 's' : ''} ${remainingMinutes} min`;
+        }
+
+        // Calculate travel time for multiple companies (batch processing)
+        async function calculateTravelTimes(userLat, userLng, companies, transportMode = 'car') {
+            const promises = companies.map(async (company) => {
+                if (!company.coordinates) {
+                    return {
+                        ...company,
+                        travelTime: null,
+                        distance: null,
+                        timeText: company.time || 'Location unknown'
+                    };
+                }
+
+                const travelData = await getTravelTime(
+                    userLat, userLng,
+                    company.coordinates.lat, company.coordinates.lng,
+                    transportMode
+                );
+
+                if (travelData) {
+                    return {
+                        ...company,
+                        travelTime: travelData.duration,
+                        distance: travelData.distance,
+                        timeText: `${travelData.durationText} away`,
+                        distanceText: `${travelData.distanceText} away`
+                    };
+                } else {
+                    // Fallback to straight-line distance calculation
+                    const fallbackDistance = calculateDistance(
+                        userLat, userLng,
+                        company.coordinates.lat, company.coordinates.lng
+                    );
+                    
+                    // Estimate travel time (rough calculation: 50 km/h for car, 5 km/h for walking)
+                    const avgSpeed = transportMode === 'walking' ? 5 : 50;
+                    const estimatedMinutes = Math.round((fallbackDistance / avgSpeed) * 60);
+                    
+                    return {
+                        ...company,
+                        travelTime: estimatedMinutes,
+                        distance: fallbackDistance,
+                        timeText: `${formatDuration(estimatedMinutes)} away`,
+                        distanceText: `${Math.round(fallbackDistance)} km away`
+                    };
+                }
+            });
+
+            return Promise.all(promises);
+        }
+
         // Filter companies based on search query and location
-        function getFilteredCompanies() {
+        async function getFilteredCompanies() {
             let filtered = companies;
 
             // Apply search filter
@@ -698,22 +843,28 @@
                 );
             }
 
-            // Apply location filter
+            // Apply location filter and calculate travel times
             if (currentFilter === 'around' && userLocation) {
-                filtered = filtered.map(company => ({
-                    ...company,
-                    distance: calculateDistance(
-                        userLocation.lat, userLocation.lng,
-                        company.coordinates.lat, company.coordinates.lng
-                    )
-                })).sort((a, b) => a.distance - b.distance);
+                // Calculate real travel times for all companies using current transport mode
+                filtered = await calculateTravelTimes(
+                    userLocation.lat, userLocation.lng, 
+                    filtered, 
+                    currentTransportMode // Use the selected transport mode
+                );
+                
+                // Sort by travel time (more accurate than distance)
+                filtered = filtered.sort((a, b) => {
+                    if (a.travelTime === null) return 1;
+                    if (b.travelTime === null) return -1;
+                    return a.travelTime - b.travelTime;
+                });
             }
 
             return filtered;
         }
 
         // Set filter view (Around you / All)
-        function setViewFilter(filter) {
+        async function setViewFilter(filter) {
             currentFilter = filter;
             const aroundBtn = document.getElementById('aroundBtn');
             const allBtn = document.getElementById('allBtn');
@@ -729,14 +880,18 @@
                 aroundBtn.style.backgroundColor = 'transparent';
                 aroundBtn.style.borderColor = 'transparent';
             }
-            renderCompanies();
+            
+            // Update transport mode selector visibility
+            updateTransportModeVisibility();
+            
+            await renderCompanies();
         }
 
         // Toggle card view (List / Grid)
-        function toggleCardView() {
+        async function toggleCardView() {
             cardSingle = !cardSingle;
             renderToggleIcon();
-            renderCompanies();
+            await renderCompanies();
         }
 
         function renderToggleIcon() {
@@ -767,7 +922,7 @@
         }
 
         // Render companies based on view mode
-        function renderCompanies() {
+        async function renderCompanies() {
             const container = document.getElementById('companiesContainer');
 
             // Show loading indicator while companies are being fetched
@@ -783,7 +938,8 @@
                 return;
             }
 
-            const filteredCompanies = getFilteredCompanies();
+            // Get filtered companies (now async for travel time calculations)
+            const filteredCompanies = await getFilteredCompanies();
             let html = '';
 
             if (filteredCompanies.length === 0) {
@@ -794,34 +950,16 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                             </svg>
                         </div>
-                        <div class="text-white text-center">
-                            <h3 class="text-xl font-medium mb-2">No Services Found</h3>
-                            <p class="text-gray-400 mb-6">
-                                ${searchQuery ? 'No services match your search criteria.' : 
-                                  currentFilter === 'around' ? 'No services found within 50km of your location.' :
-                                  'No water services available in your area.'}
-                            </p>
-                            <div class="space-y-3">
-                                ${searchQuery ? `
-                                    <button onclick="clearSearch()" class="px-4 py-2 bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 rounded-lg hover:bg-gray-700/50 transition-all duration-300 text-sm">
-                                        Clear Search
-                                    </button>
-                                ` : ''}
-                                <button onclick="location.reload()" class="px-4 py-2 bg-blue-600/20 backdrop-blur-sm border border-blue-500/50 rounded-lg hover:bg-blue-600/30 transition-all duration-300 text-sm flex items-center gap-2 mx-auto">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
-                                    </svg>
-                                    Refresh Services
-                                </button>
-                            </div>
-                        </div>
+                        <h3 class="text-white text-xl font-semibold mb-2">No companies found</h3>
+                        <p class="text-gray-400 text-center">Try adjusting your search or location filters</p>
                     </div>
                 `;
             } else if (cardSingle) {
                 // List View
                 html = '<div class="flex flex-col gap-1">';
                 filteredCompanies.forEach((company, index) => {
-                    const distanceText = company.distance ? `${Math.round(company.distance)} km away` : company.time;
+                    // Use the new timeText field which contains accurate travel time
+                    const distanceText = company.timeText || company.distanceText || company.time || 'Location unknown';
                     html += `
                         <a href="schedule.html?branch_id=${company.branch_id}" 
                            class="card-bg w-full flex items-center justify-center px-4"
@@ -860,38 +998,26 @@
                 // Grid View
                 html = `<div class="grid grid-cols-2 gap-[10px] px-[10px] pt-[10px] pb-[100px]">`;
                 filteredCompanies.forEach((company, index) => {
-                    const distanceText = company.distance ? `${Math.round(company.distance)} km away` : company.time;
+                    // Use the new timeText field which contains accurate travel time
+                    const distanceText = company.timeText || company.distanceText || company.time || 'Location unknown';
                     html += `
                         <a href="schedule.html?branch_id=${company.branch_id}" 
                            class="flex flex-col items-center rounded-[16px] overflow-hidden"
-                           style="height: 175px; margin-bottom: 10px;">
-                            <div class="w-full" style="height: 60%;">
-                                ${company.header_image ? 
-                                    `<img src="${company.header_image}" class="w-full h-full object-cover" alt="${company.name}">` :
-                                    `<div class="w-full h-full bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 flex items-center justify-center">
-                                        <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                        </svg>
-                                    </div>`
+                           style="background-color: var(--bg-second);">
+                            <!-- Image -->
+                            <div class="w-full h-32 bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 flex items-center justify-center">
+                                ${company.profile_image ? 
+                                    `<img src="${company.profile_image}" class="w-full h-full object-cover" alt="${company.name}">` :
+                                    `<svg class="w-12 h-12 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                                    </svg>`
                                 }
                             </div>
-                            <div class="card-bg relative w-full p-3" style="height: 40%;">
-                                <div class="relative rounded-lg overflow-hidden p-[1px]"
-                                     style="height: 52px; width: 55px; top: -35px; background-color: #40444B;">
-                                    ${company.profile_image ? 
-                                        `<img src="${company.profile_image}" class="w-full h-full object-cover" alt="Logo">` :
-                                        `<div class="w-full h-full bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 flex items-center justify-center">
-                                            <svg class="w-6 h-6 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                                            </svg>
-                                        </div>`
-                                    }
-                                </div>
-                                <div class="relative text-left" style="top: -30px;">
-                                    <p class="text-white font-medium text-base text-truncate" style="width: 100%;">
-                                        ${company.name}<span class="material-symbols-outlined verified-checkmark">verified</span>
-                                    </p>
-                                </div>
+                            <!-- Info -->
+                            <div class="p-3 w-full">
+                                <h3 class="text-white text-base font-medium text-truncate">${company.name}<span class="material-symbols-outlined verified-checkmark">verified</span></h3>
+                                <p class="text-gray-400 text-sm text-truncate">${company.location}</p>
+                                <span class="text-blue-400 text-xs font-medium">${distanceText}</span>
                             </div>
                         </a>
                     `;
