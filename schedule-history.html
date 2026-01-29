@@ -536,7 +536,7 @@
     </div>
 
     <!-- Floating Bottle Return Button -->
-    <div id="floatingBottleBtn" class="floating-return-btn instant-load" onclick="openMyBottlesSheet()">
+    <div id="floatingBottleBtn" class="floating-return-btn instant-load" onclick="showComingSoonModal()">
         <div class="badge" id="bottleCounter">0</div>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -875,42 +875,6 @@
         </div>
     </div>
 
-    <!-- My Bottles Bottom Sheet -->
-    <div id="myBottlesSheet"
-        class="fixed inset-0 z-20 flex items-end justify-center pointer-events-none opacity-0 transition-all duration-300 bottom-sheet"
-        style="background-color: rgba(0,0,0,0.5);">
-        <div id="myBottlesContent"
-            class="pointer-events-auto w-full max-w-[400px] transform translate-y-full transition-transform duration-300">
-
-            <!-- Bottom Sheet Container -->
-            <div class="w-full rounded-t-[20px] overflow-hidden backdrop-blur-xl bg-black/40 shadow-2xl"
-                style="border: 1px solid rgba(255, 255, 255, 0.1); max-height: 90vh;">
-
-                <!-- Handle Bar -->
-                <div class="w-full flex justify-center py-3">
-                    <div class="w-12 h-1 rounded-full bg-white/30"></div>
-                </div>
-
-                <!-- Header -->
-                <div class="px-6 pb-4 flex justify-between items-center">
-                    <div class="flex flex-col">
-                        <h2 class="text-white text-2xl font-bold">My Bottles</h2>
-                        <p class="text-[#808080] text-sm mt-1">Track your bottle returns</p>
-                    </div>
-                    <button onclick="closeMyBottlesSheet()"
-                        class="text-white text-2xl backdrop-blur-xl bg-white/10 border border-white/20 rounded-lg hover:bg-white/20 transition-all duration-300 shadow-lg p-2">×</button>
-                </div>
-
-                <!-- Bottles Container -->
-                <div class="px-6 pb-6 overflow-y-auto" style="max-height: 70vh;">
-                    <div id="bottlesContainer" class="space-y-5">
-                        <!-- Bottles will be rendered here -->
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
     <!-- Bottom Navigation -->
     <div class="tab-bar fixed bottom-0 left-0 right-0 h-[64px] flex flex-row justify-around items-center px-4 border-t-0 z-40"
         style="background-color: #101010;">
@@ -953,7 +917,6 @@
         let currentView = 'status';
         let orders = [];
         let currentOrderForDetails = null;
-        let myBottles = [];
         let orderManager = new OrderManager();
         let isInitialLoad = true;
         let isLoading = false;
@@ -1021,13 +984,12 @@
             }, 3000);
         });
 
-        window.openMyBottlesSheet = openMyBottlesSheet;
         window.logout = logout;
         window.navigateToPage = navigateToPage;
         window.loadInitialData = loadInitialData;
 
         let currentPage = 0;
-        const ORDERS_PER_PAGE = 20;
+        const ORDERS_PER_PAGE = 1000; // Fetch all orders at once
         let isLoadingMore = false;
         let hasMoreOrders = true;
         let lastOrderId = null;
@@ -1099,7 +1061,7 @@
                 showLoadingSkeleton();
                 
                 // Load company data first
-                // Fetch orders directly from database
+                // Fetch orders directly from database (all at once)
                 await fetchOrdersFromDatabase();
                 
             } catch (error) {
@@ -1151,28 +1113,50 @@
             try {
                 const customerId = getCustomerId();
                 if (!customerId) {
-                    console.error('❌ No customer ID found');
-                    showOfflineState();
+                    console.log('🏁 No customer ID found');
                     return;
                 }
                 
                 console.log(`🔍 Fetching orders page ${currentPage} for customer:`, customerId);
                 
-                const queries = [
-                    Query.equal('customer_id', customerId),
-                    Query.orderDesc('$createdAt'),
-                    Query.limit(ORDERS_PER_PAGE)
-                ];
-                
-                if (lastOrderId && loadMore) {
-                    queries.push(Query.cursorAfter(lastOrderId));
+                // Try Appwrite first, fallback to local API if network fails
+                let response;
+                try {
+                    const queries = [
+                        Query.equal('customer_id', customerId),
+                        Query.orderDesc('$createdAt'),
+                        Query.limit(ORDERS_PER_PAGE)
+                    ];
+                    
+                    if (lastOrderId && loadMore) {
+                        queries.push(Query.cursorAfter(lastOrderId));
+                    }
+                    
+                    response = await window.databases.listDocuments(
+                        window.appwriteConfig.DATABASE_ID,
+                        window.appwriteConfig.ORDERS_TABLE,
+                        queries
+                    );
+                } catch (appwriteError) {
+                    console.warn('⚠️ Appwrite network failed, trying local API:', appwriteError.message);
+                    
+                    // Fallback to local API
+                    try {
+                        const localResponse = await fetch(`${window.location.origin}/api/schedule-history?userId=${customerId}&limit=${ORDERS_PER_PAGE}`);
+                        if (localResponse.ok) {
+                            const localData = await localResponse.json();
+                            response = {
+                                documents: localData.scheduleHistory || [],
+                                total: localData.total || 0
+                            };
+                        } else {
+                            throw new Error('Local API also failed');
+                        }
+                    } catch (localError) {
+                        console.error('❌ Both Appwrite and local API failed:', localError);
+                        throw new Error(`Failed to fetch orders: ${appwriteError.message}`);
+                    }
                 }
-                
-                const response = await window.databases.listDocuments(
-                    window.appwriteConfig.DATABASE_ID,
-                    window.appwriteConfig.ORDERS_TABLE,
-                    queries
-                );
                 
                 console.log(`📊 Retrieved ${response.documents.length} orders from database`);
                 
@@ -1620,93 +1604,6 @@
             }
         }
 
-        async function loadBottlesFromDatabase() {
-            try {
-                console.log('🍼 Fetching dispenser orders from database...');
-                
-                const customerId = getCustomerId();
-                if (!customerId) {
-                    console.log('❌ No customer ID found for bottles');
-                    return;
-                }
-                
-                // First, get orders that are completed/ongoing
-                const orderQueries = [
-                    Query.equal('customer_id', customerId),
-                    Query.equal('orderStatus', ['ongoing', 'completed', 'accepted', 'delivered']),
-                    Query.orderDesc('$createdAt'),
-                    Query.limit(100)
-                ];
-                
-                const ordersResponse = await window.databases.listDocuments(
-                    window.appwriteConfig.DATABASE_ID,
-                    window.appwriteConfig.ORDERS_TABLE,
-                    orderQueries
-                );
-                
-                console.log(`📊 Found ${ordersResponse.documents.length} completed/ongoing orders`);
-                
-                const bottles = [];
-                
-                for (const order of ordersResponse.documents) {
-                    try {
-                        // Get order items for this order
-                        const orderItems = await orderManager.getOrderItems(order.orderId || order.$id);
-                        
-                        if (orderItems && orderItems.length > 0) {
-                            for (const item of orderItems) {
-                                // Check if this item is a dispenser/bottle
-                                const productName = item.productName || '';
-                                const productType = item.productType || '';
-                                
-                                const isDispenserOrder = 
-                                    productType.toLowerCase() === 'dispenser' ||
-                                    productName.toLowerCase().includes('dispenser') ||
-                                    productName.toLowerCase().includes('bottle') ||
-                                    productName.toLowerCase().includes('20l') ||
-                                    productName.toLowerCase().includes('large');
-                                
-                                if (isDispenserOrder) {
-                                    const bottle = {
-                                        id: item.$id || order.$id,
-                                        orderId: order.orderId || order.$id,
-                                        company: order.deliveryName || order.companyName || 'Unknown Company',
-                                        product: productName,
-                                        orderDate: order.$createdAt || order.orderDate,
-                                        status: 'pending',
-                                        image: item.productImage,
-                                        quantity: item.productQty || 1,
-                                        price: item.productPrice || 0,
-                                        size: '20L',
-                                        description: `${item.productQty || 1} x ${productName}`,
-                                        purchaseCount: item.productQty || 1,
-                                        isLargeBottle: true,
-                                        dateAdded: new Date().toISOString().split('T')[0]
-                                    };
-                                    
-                                    bottles.push(bottle);
-                                    console.log(`✅ Found dispenser bottle: ${productName} in order ${order.orderId}`);
-                                }
-                            }
-                        }
-                    } catch (error) {
-                        console.error('⚠️ Error processing order for bottles:', order.$id, error);
-                    }
-                }
-                
-                // Update myBottles array
-                myBottles = bottles;
-                
-                console.log(`✅ Loaded ${myBottles.length} bottles from database`);
-                updateFloatingButton();
-                
-            } catch (error) {
-                console.error('❌ Error loading bottles from database:', error);
-                // If database fails, show error state
-                showOfflineState();
-            }
-        }
-
         function showLoadingSkeleton() {
             const container = document.getElementById('ordersList');
             container.innerHTML = `
@@ -1744,11 +1641,6 @@
                     </div>
                 `;
             }
-        }
-
-        function saveBottles() {
-            // Bottles data saved directly from database - no caching
-            console.log('💾 Bottles data saved from database');
         }
 
         function formatShortDate(dateString) {
@@ -1802,19 +1694,6 @@
                 order.statusText = getStatusText(newStatus);
                 order.statusColor = getStatusColor(newStatus);
 
-                if (newStatus === 'ongoing') {
-                    order.completedAt = new Date().toISOString();
-                    
-                    // Check if this is a bottle/dispenser order
-                    if (order.products) {
-                        for (const product of order.products) {
-                            if (product.type === 'dispenser' || product.name.toLowerCase().includes('dispenser') || product.name.toLowerCase().includes('bottle')) {
-                                addBottleFromOrder(order, product);
-                            }
-                        }
-                    }
-                }
-
                 try {
                     await window.databases.updateDocument(
                         window.appwriteConfig.DATABASE_ID,
@@ -1826,34 +1705,6 @@
 
                 renderOrders();
             }
-        }
-
-        function addBottleFromOrder(order, product) {
-            const existingBottle = myBottles.find(b => b.orderId === order.orderId && b.product === product.name);
-            if (existingBottle) {
-                return;
-            }
-
-            const newBottle = {
-                id: 'BOT' + Date.now(),
-                orderId: order.orderId,
-                name: product.name || 'Dispenser Bottle',
-                size: '20L',
-                description: `${product.quantity || 1} ${product.name || 'Dispenser Bottle'}`,
-                price: `GH₵ ${(product.price * (product.quantity || 1)).toFixed(2)}`,
-                purchaseCount: product.quantity || 1,
-                isLargeBottle: true,
-                status: 'pending',
-                dateAdded: new Date().toISOString().split('T')[0],
-                company: order.company,
-                orderDate: order.date,
-                product: product.name
-            };
-
-            myBottles.push(newBottle);
-            saveBottles();
-            updateFloatingButton();
-            showNotification(`Bottle added to return tracker: ${product.name}`);
         }
 
         function getStatusText(status) {
@@ -2032,6 +1883,11 @@
         function updateFloatingButton() {
             const bottleBtn = document.getElementById('floatingBottleBtn');
             const counter = document.getElementById('bottleCounter');
+            
+            // Initialize myBottles if not defined
+            if (typeof myBottles === 'undefined') {
+                window.myBottles = [];
+            }
             
             const pendingBottles = myBottles.filter(bottle => bottle.status === 'pending').length;
             
@@ -2228,231 +2084,130 @@
             }
         }
 
-        function openMyBottlesSheet() {
-            console.log('🍼 Opening My Bottles sheet...');
-            
-            const sheet = document.getElementById('myBottlesSheet');
-            const content = document.getElementById('myBottlesContent');
-            const container = document.getElementById('bottlesContainer');
-
-            if (!sheet || !content || !container) {
-                console.error('❌ Missing elements:', { sheet: !!sheet, content: !!content, container: !!container });
-                return;
-            }
-
-            // Show loading skeleton
-            container.innerHTML = `
-                <div id="bottlesLoadingSkeleton" class="space-y-4">
-                    <div class="skeleton skeleton-card"></div>
-                    <div class="skeleton skeleton-card"></div>
-                    <div class="skeleton skeleton-card"></div>
-                </div>
-            `;
-
-            // Open the sheet
-            sheet.classList.remove('opacity-0', 'pointer-events-none');
-            sheet.classList.add('opacity-100', 'z-50');
-            setTimeout(() => content.classList.remove('translate-y-full'), 10);
-            
-            console.log('✅ Sheet opened!');
-
-            // Load bottles from database
-            loadBottlesFromDatabase().then(() => {
-                container.innerHTML = renderAllBottles();
-                console.log('✅ Bottles rendered from database!');
-            });
-        }
-
-        function closeMyBottlesSheet() {
-            const sheet = document.getElementById('myBottlesSheet');
-            const content = document.getElementById('myBottlesContent');
-            content.classList.add('translate-y-full');
-            setTimeout(() => {
-                sheet.classList.remove('opacity-100', 'z-50');
-                sheet.classList.add('opacity-0', 'pointer-events-none');
-            }, 300);
-        }
-
-        function renderAllBottles() {
-            if (myBottles.length === 0) {
-                return `
-                    <div class="flex flex-col items-center justify-center py-10">
-                        <div class="w-24 h-24 bg-gray-800/50 rounded-full flex items-center justify-center mb-4">
-                            <svg viewBox="0 0 24 24" class="w-12 h-12 text-gray-500" fill="none" stroke="currentColor" stroke-width="1.5">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                            </svg>
-                        </div>
-                        <h3 class="text-white text-lg font-semibold mb-2">No bottles to return</h3>
-                        <p class="text-gray-400 text-center text-sm">Complete dispenser bottle orders to track returns here</p>
-                    </div>
-                `;
-            }
-
-            return myBottles.map(bottle => renderBottleCard(bottle)).join('');
-        }
-
-        function renderBottleCard(bottle) {
-            const addedDate = formatShortDate(bottle.dateAdded);
-            
-            let actionButton = '';
-            let additionalInfo = '';
-
-            if (bottle.status === 'pending') {
-                actionButton = `
-                    <button onclick="handleBottleReturn('${bottle.id}')" 
-                        class="w-full glass-button-blue text-white font-medium rounded-lg py-3.5 transition-all duration-200 flex items-center justify-center gap-2 text-base">
-                        <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3 3m0 0l-3-3m3 3V4" />
-                        </svg>
-                        Return Dispenser bottle
-                    </button>
-                `;
-            } else if (bottle.status === 'requested') {
-                actionButton = `
-                    <button disabled
-                        class="w-full glass border border-border text-white font-medium rounded-lg py-3.5 transition-all duration-200 flex items-center justify-center gap-2 text-base">
-                        <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                        </svg>
-                        Request Sent
-                    </button>
-                `;
-            } else if (bottle.status === 'accepted') {
-                const deliveryDisplay = bottle.deliveryTime && bottle.deliveryDate 
-                    ? `${bottle.deliveryTime} / ${formatShortDate(bottle.deliveryDate)}` 
-                    : 'Time / Date';
+        async function fetchCompleteOrderDetails(orderId) {
+            try {
+                console.log(`🔍 Fetching complete order details for: ${orderId}`);
+                
+                // Try Appwrite first, fallback to local API
+                let orderDetails;
+                try {
+                    const response = await window.databases.getDocument(
+                        window.appwriteConfig.DATABASE_ID,
+                        window.appwriteConfig.ORDERS_TABLE,
+                        orderId
+                    );
+                    orderDetails = response;
+                } catch (appwriteError) {
+                    console.warn('⚠️ Appwrite fetch failed, trying local API:', appwriteError.message);
                     
-                actionButton = `
-                    <button disabled 
-                        class="w-full glass bg-green-500/10 text-green-400 font-medium rounded-lg py-3.5 cursor-not-allowed border border-green-500/20 flex items-center justify-center gap-2 text-base">
-                        <svg viewBox="0 0 24 24" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
-                        </svg>
-                        Return accepted
-                    </button>
-                `;
+                    // Fallback to local API
+                    try {
+                        const localResponse = await fetch(`${window.location.origin}/api/order-details?orderId=${orderId}`);
+                        if (localResponse.ok) {
+                            const localData = await localResponse.json();
+                            orderDetails = localData.order;
+                        } else {
+                            throw new Error('Local API also failed');
+                        }
+                    } catch (localError) {
+                        console.error('❌ Both Appwrite and local API failed:', localError);
+                        throw new Error(`Failed to fetch order details: ${appwriteError.message}`);
+                    }
+                }
                 
-                additionalInfo = `
-                    <div class="space-y-4 mt-5 animate-fade-in">
-                        <div class="glass rounded-lg p-4">
-                            <p class="text-gray-400 text-xs font-medium mb-1">Delivery Status</p>
-                            <p class="text-white font-medium">${deliveryDisplay}</p>
-                        </div>
+                console.log('✅ Fetched complete order details:', orderDetails);
+                return orderDetails;
+                
+            } catch (error) {
+                console.error('❌ Error fetching complete order details:', error);
+                throw error;
+            }
+        }
+
+        async function fetchRelatedOrderData(orderDetails) {
+            try {
+                console.log('🔍 Fetching related order data...');
+                
+                const enrichedData = { ...orderDetails };
+                
+                // Fetch customer details if customer_id exists
+                if (orderDetails.customer_id) {
+                    try {
+                        const customerResponse = await window.databases.listDocuments(
+                            window.appwriteConfig.DATABASE_ID,
+                            window.appwriteConfig.CUSTOMER_TABLE || 'customer_tb',
+                            [Query.equal('uid', orderDetails.customer_id)]
+                        );
                         
-                        <div class="glass rounded-lg p-4">
-                            <p class="text-gray-400 text-xs font-medium mb-2">Additional Information from Company</p>
-                            <p class="text-white text-sm leading-relaxed">
-                                ${bottle.additionalInfo || 'Your return has been processed successfully. You will receive further updates via notification.'}
-                            </p>
-                        </div>
-                    </div>
-                `;
-            }
-
-            let bottleImage = 'images/products/dispenser.jpg';
-            if (bottle.image) {
-                bottleImage = bottle.image;
-            } else if (bottle.isLargeBottle || bottle.size === '20L') {
-                bottleImage = 'images/products/large-bottle.jpg';
-            }
-
-            let statusTag = '';
-            switch(bottle.status) {
-                case 'pending':
-                    statusTag = '<span class="glass-tag tag-pending px-3 py-1 rounded-full text-xs font-medium">Pending Return</span>';
-                    break;
-                case 'requested':
-                    statusTag = '<span class="glass-tag tag-requested px-3 py-1 rounded-full text-xs font-medium">Request Sent</span>';
-                    break;
-                case 'accepted':
-                    statusTag = '<span class="glass-tag tag-accepted px-3 py-1 rounded-full text-xs font-medium">Return Accepted</span>';
-                    break;
-            }
-
-            return `
-                <div class="bg-[#1D1D1D] border border-[#40444B] rounded-xl p-5 animate-slide-up">
-                    <!-- Status Tag -->
-                    <div class="flex justify-between items-start mb-5">
-                        ${statusTag}
-                        <span class="text-xs text-gray-400">${addedDate}</span>
-                    </div>
-
-                    <!-- Combined Product Card with Image and Details -->
-                    <div class="bg-black/90 rounded-xl p-4 mb-5 border border-[#40444B]/50">
-                        <div class="flex items-center gap-5">
-                            <!-- Bottle Image -->
-                            <div class="w-24 h-24 bg-gradient-to-br from-blue-500/20 to-blue-500/5 rounded-xl overflow-hidden flex-shrink-0">
-                                <img src="${bottleImage}" class="w-full h-full object-cover" loading="lazy">
-                            </div>
-                            
-                            <!-- Product Details -->
-                            <div class="flex-1">
-                                <div class="space-y-3">
-                                    <!-- Size and Name -->
-                                    <div>
-                                        <p class="text-white font-bold text-2xl">${bottle.size || '20L'}</p>
-                                        <p class="text-blue-400 font-semibold text-lg">${bottle.product || bottle.name || 'Dispenser Bottle'}</p>
-                                    </div>
-                                    
-                                    <!-- Price -->
-                                    <div class="space-y-1">
-                                        <p class="text-gray-400 text-xs font-medium">Price:</p>
-                                        <p class="text-white font-bold text-2xl">GH₵${parseFloat(bottle.price || 0).toFixed(2)}</p>
-                                    </div>
-                                    
-                                    <!-- Description -->
-                                    <p class="text-gray-400 text-sm">${bottle.description || `${bottle.quantity || 1} x ${bottle.product || 'Dispenser Bottle'}`}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Purchase Count -->
-                    <div class="glass border border-[#40444B]/30 rounded-lg p-4 mb-5">
-                        <div class="flex items-center justify-between">
-                            <div>
-                                <p class="text-gray-400 text-xs font-medium mb-1">Number of purchase</p>
-                                <p class="text-white font-bold text-xl">${bottle.purchaseCount || bottle.quantity || 1}</p>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span class="text-xs text-gray-400">Order: ${bottle.orderId || 'N/A'}</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Action Button -->
-                    ${actionButton}
-                    ${additionalInfo}
-                </div>
-            `;
-        }
-
-        function handleBottleReturn(bottleId) {
-            const bottle = myBottles.find(b => b.id === bottleId);
-            if (bottle && bottle.status === 'pending') {
-                bottle.status = 'requested';
+                        if (customerResponse.documents.length > 0) {
+                            enrichedData.customerDetails = customerResponse.documents[0];
+                            console.log('✅ Found customer details');
+                        }
+                    } catch (error) {
+                        console.warn('⚠️ Could not fetch customer details:', error);
+                    }
+                }
                 
-                const now = new Date();
-                const deliveryDate = new Date();
-                deliveryDate.setDate(deliveryDate.getDate() + 3);
+                // Fetch recipient details if order has recipient info
+                if (orderDetails.recipient_id || orderDetails.purchase_recipient_id) {
+                    try {
+                        const recipientId = orderDetails.recipient_id || orderDetails.purchase_recipient_id;
+                        const recipientResponse = await window.databases.listDocuments(
+                            window.appwriteConfig.DATABASE_ID,
+                            'purchase_recipient_info',
+                            [Query.equal('order_id', orderDetails.$id)]
+                        );
+                        
+                        if (recipientResponse.documents.length > 0) {
+                            enrichedData.recipientDetails = recipientResponse.documents[0];
+                            console.log('✅ Found recipient details');
+                        }
+                    } catch (error) {
+                        console.warn('⚠️ Could not fetch recipient details:', error);
+                    }
+                }
                 
-                const hours = Math.floor(Math.random() * 9) + 8;
-                const minutes = Math.random() > 0.5 ? '00' : '30';
+                // Fetch order items if available
+                try {
+                    const orderItemsResponse = await window.databases.listDocuments(
+                        window.appwriteConfig.DATABASE_ID,
+                        'order_items',
+                        [Query.equal('orderId', orderDetails.$id)] // Use 'orderId' as confirmed by schema
+                    );
+                    
+                    if (orderItemsResponse.documents.length > 0) {
+                        enrichedData.orderItems = orderItemsResponse.documents;
+                        console.log(`✅ Found ${orderItemsResponse.documents.length} order items`);
+                    }
+                } catch (error) {
+                    console.warn('⚠️ Could not fetch order items (collection may not exist):', error.message);
+                }
                 
-                bottle.deliveryTime = `${hours}:${minutes}`;
-                bottle.deliveryDate = deliveryDate.toISOString().split('T')[0];
+                // Fetch ratings if available
+                try {
+                    const ratingsResponse = await window.databases.listDocuments(
+                        window.appwriteConfig.DATABASE_ID,
+                        'ratings',
+                        [Query.equal('order_id', orderDetails.$id)]
+                    );
+                    
+                    if (ratingsResponse.documents.length > 0) {
+                        enrichedData.rating = ratingsResponse.documents[0];
+                        console.log('✅ Found order rating');
+                    }
+                } catch (error) {
+                    console.warn('⚠️ Could not fetch rating:', error);
+                }
                 
-                saveBottles();
-                updateFloatingButton();
+                return enrichedData;
                 
-                closeMyBottlesSheet();
-                showNotification(`Return request sent for ${bottle.product || bottle.name}`);
-                
-                setTimeout(() => openMyBottlesSheet(), 100);
+            } catch (error) {
+                console.error('❌ Error fetching related order data:', error);
+                return orderDetails; // Return basic order details if related data fetch fails
             }
         }
 
-        function openOrderDetailsSheet() {
+        async function openOrderDetailsSheet() {
             closeOrderModal();
 
             if (!currentOrderForDetails) {
@@ -2460,12 +2215,73 @@
             }
 
             if (!currentOrderForDetails) {
+                console.warn('⚠️ No order selected for details');
                 return;
             }
 
             const sheet = document.getElementById('orderDetailsSheet');
             const content = document.getElementById('orderDetailsContent');
             const detailsArea = document.getElementById('orderDetailsContentArea');
+
+            try {
+                // Show loading state
+                detailsArea.innerHTML = `
+                    <div class="flex items-center justify-center h-64">
+                        <div class="text-center">
+                            <div class="w-8 h-8 border-2 border-blue-500/30 border-t-blue-500 rounded-full animate-spin mx-auto mb-4"></div>
+                            <p class="text-white/60">Loading order details...</p>
+                        </div>
+                    </div>
+                `;
+                
+                // Open the sheet with loading state
+                sheet.classList.remove('opacity-0', 'pointer-events-none');
+                sheet.classList.add('opacity-100', 'z-50');
+                setTimeout(() => content.classList.remove('translate-y-full'), 10);
+
+                // Fetch complete order details from database
+                const orderId = currentOrderForDetails.orderId || currentOrderForDetails.$id;
+                const completeOrderDetails = await fetchCompleteOrderDetails(orderId);
+                const enrichedOrderDetails = await fetchRelatedOrderData(completeOrderDetails);
+                
+                // Update currentOrderForDetails with complete data
+                currentOrderForDetails = enrichedOrderDetails;
+                
+                // Now render the complete order details
+                renderOrderDetailsSheet();
+                
+            } catch (error) {
+                console.error('❌ Error loading order details:', error);
+                
+                // Show error state
+                detailsArea.innerHTML = `
+                    <div class="flex items-center justify-center h-64">
+                        <div class="text-center">
+                            <div class="w-16 h-16 bg-red-500/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                                <svg class="w-8 h-8 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                </svg>
+                            </div>
+                            <p class="text-white/60 mb-2">Failed to load order details</p>
+                            <p class="text-white/40 text-sm">${error.message}</p>
+                            <button onclick="closeOrderDetailsSheet()" class="mt-4 px-4 py-2 bg-gray-600 text-white rounded-lg">
+                                Close
+                            </button>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function renderOrderDetailsSheet() {
+            const detailsArea = document.getElementById('orderDetailsContentArea');
+            
+            // Debug: Log the entire order structure
+            console.log('🔍 Full order structure:', JSON.stringify(currentOrderForDetails, null, 2));
+            console.log('🔍 Order keys:', Object.keys(currentOrderForDetails));
+            console.log('🔍 Products exists:', !!currentOrderForDetails.products);
+            console.log('🔍 Products type:', typeof currentOrderForDetails.products);
+            console.log('🔍 Products is array:', Array.isArray(currentOrderForDetails.products));
 
             const isNewOrderStructure = currentOrderForDetails.products && Array.isArray(currentOrderForDetails.products);
             
@@ -2476,7 +2292,22 @@
                 unitPrice: 0
             };
 
-            if (isNewOrderStructure && currentOrderForDetails.products.length > 0) {
+            // Try to get product info from orderItems first (new structure)
+            if (currentOrderForDetails.orderItems && Array.isArray(currentOrderForDetails.orderItems) && currentOrderForDetails.orderItems.length > 0) {
+                const firstItem = currentOrderForDetails.orderItems[0];
+                const totalQuantity = currentOrderForDetails.orderItems.reduce((sum, item) => sum + (item.productQty || 1), 0);
+                
+                productInfo = {
+                    name: currentOrderForDetails.orderItems.length > 1 ? 
+                        `${currentOrderForDetails.orderItems.length} products` : 
+                        firstItem.productName || 'N/A',
+                    image: firstItem.productImage || null,
+                    quantity: totalQuantity,
+                    unitPrice: firstItem.productPrice || 0
+                };
+            }
+            // Fallback to products array if it exists
+            else if (isNewOrderStructure && currentOrderForDetails.products.length > 0) {
                 productInfo = {
                     name: currentOrderForDetails.products.length > 1 ? 
                         `${currentOrderForDetails.products.length} products` : 
@@ -2487,25 +2318,53 @@
                 };
             }
 
-            let displayImage = currentOrderForDetails.companyImage;
-            if (!displayImage && productInfo.image) {
+            let displayImage = null;
+            
+            // First try: product image from orderItems
+            if (productInfo.image) {
                 displayImage = productInfo.image;
+                if (displayImage.includes('appwrite.io/v1/storage/buckets/')) {
+                    // Try preview endpoint first
+                    const projectId = window.appwriteConfig.PROJECT_ID || '695f826500067c381616';
+                    displayImage = displayImage.replace('/view?', '/preview?') + '&width=200&height=200&quality=80';
+                }
             }
+            
+            // Second try: company image from enriched data
+            if (!displayImage && currentOrderForDetails.companyImage) {
+                displayImage = currentOrderForDetails.companyImage;
+            }
+            
+            // Third try: get company image from original order list
+            if (!displayImage) {
+                const originalOrder = orders.find(o => (o.orderId === currentOrderForDetails.orderId) || (o.$id === currentOrderForDetails.$id));
+                if (originalOrder && originalOrder.companyImage) {
+                    displayImage = originalOrder.companyImage;
+                }
+            }
+            
+            // Final fallback: placeholder based on product name (always use this for water products)
             if (!displayImage && productInfo.name) {
-                if (productInfo.name.toLowerCase().includes('dispenser') || productInfo.name.toLowerCase().includes('bottle')) {
+                if (productInfo.name.toLowerCase().includes('water') || productInfo.name.toLowerCase().includes('bottle')) {
                     displayImage = 'images/products/large-bottle.jpg';
                 }
             }
+            
+            // If still no image and it's a water product, use placeholder anyway
+            if (!displayImage && productInfo.name && productInfo.name.toLowerCase().includes('water')) {
+                displayImage = 'images/products/large-bottle.jpg';
+            }
 
-            const subtotal = currentOrderForDetails.subtotal || 0;
-            const serviceFee = currentOrderForDetails.serviceFee || 0;
-            const total = currentOrderForDetails.total || 0;
+            const subtotal = parseFloat(currentOrderForDetails.subtotal) || 0;
+            const serviceFee = parseFloat(currentOrderForDetails.serviceFee) || 0;
+            const total = parseFloat(currentOrderForDetails.total) || 0;
             
             // Calculate service fee if not already calculated
             let calculatedServiceFee = serviceFee;
             let calculatedSubtotal = subtotal;
             
-            if (isNewOrderStructure && currentOrderForDetails.products) {
+            // Always try to calculate from products if available
+            if (currentOrderForDetails.products && Array.isArray(currentOrderForDetails.products) && currentOrderForDetails.products.length > 0) {
                 calculatedSubtotal = currentOrderForDetails.products.reduce((sum, product) => {
                     const price = parseFloat(product.price) || 0;
                     const qty = parseInt(product.quantity) || 1;
@@ -2516,6 +2375,14 @@
                     const qty = parseInt(product.quantity) || 1;
                     return sum + (0.10 * qty); // GHS0.10 per item
                 }, 0);
+            } else {
+                // If no products array, try to calculate from total amount
+                // Assume service fee is 10% of items, and we can estimate from total
+                if (total > 0) {
+                    // Estimate: If total is 27.30, likely subtotal is around 27.20 (0.10 service fee)
+                    calculatedServiceFee = 0.10; // Default service fee
+                    calculatedSubtotal = total - calculatedServiceFee;
+                }
             }
             
             const calculatedTotal = calculatedSubtotal + calculatedServiceFee;
@@ -2523,6 +2390,37 @@
             const displaySubtotal = subtotal > 0 ? subtotal : calculatedSubtotal;
             
             console.log(`🧮 Price Breakdown: Subtotal: ${displaySubtotal.toFixed(2)}, Service Fee: ${calculatedServiceFee.toFixed(2)}, Total: ${displayTotal.toFixed(2)}`);
+            console.log(`🔍 Debug: isNewOrderStructure=${isNewOrderStructure}, products=${!!currentOrderForDetails.products}, products.length=${currentOrderForDetails.products?.length || 0}`);
+            
+            // Debug company and image data
+            console.log('🏢 Company Data Debug:');
+            console.log('  - deliveryName:', currentOrderForDetails.deliveryName);
+            console.log('  - company:', currentOrderForDetails.company);
+            console.log('  - companyImage:', currentOrderForDetails.companyImage);
+            console.log('  - productInfo.image:', productInfo.image);
+            console.log('  - displayImage:', displayImage);
+            console.log('  - orderItems:', currentOrderForDetails.orderItems);
+
+            // Transform the status for consistent display
+            let transformedStatus = 'pending';
+            let statusText = 'Pending';
+            let statusColor = '#F2A78C';
+            
+            const orderStatus = currentOrderForDetails.orderStatus || currentOrderForDetails.status || 'pending';
+            
+            if (orderStatus === 'confirmed' || orderStatus === 'accepted') {
+                transformedStatus = 'accepted';
+                statusText = 'Accepted';
+                statusColor = '#2C9043';
+            } else if (orderStatus === 'ongoing' || orderStatus === 'completed') {
+                transformedStatus = 'ongoing';
+                statusText = 'Completed';
+                statusColor = '#2CAA48';
+            } else if (orderStatus === 'denied' || orderStatus === 'rejected') {
+                transformedStatus = 'denied';
+                statusText = 'Denied';
+                statusColor = '#F85D5D';
+            }
 
             detailsArea.innerHTML = `
                 <div class="space-y-4">
@@ -2532,7 +2430,14 @@
                         <div class="flex items-center space-x-4">
                             <div class="rounded-[10px] bg-[#808080] overflow-hidden flex-shrink-0" style="width: 80px; height: 80px;">
                                 ${displayImage ? 
-                                    `<img src="${displayImage}" class="w-full h-full object-cover" alt="${currentOrderForDetails.company}" loading="lazy">` :
+                                    `<img src="${displayImage}" class="w-full h-full object-cover" alt="${currentOrderForDetails.deliveryName || 'Product'}" loading="lazy" 
+                                     onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
+                                     onload="console.log('✅ Image loaded successfully:', this.src);">
+                                    <div class="w-full h-full bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 flex items-center justify-center" style="display:none;">
+                                        <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                        </svg>
+                                    </div>` :
                                     `<div class="w-full h-full bg-gray-800/50 backdrop-blur-sm border border-gray-700/50 flex items-center justify-center">
                                         <svg class="w-8 h-8 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
@@ -2541,25 +2446,26 @@
                                 }
                             </div>
                             <div class="flex-1">
-                                <h4 class="text-white text-lg font-semibold">${currentOrderForDetails.company || 'N/A'}<span class="material-symbols-outlined verified-checkmark" style="font-size: 16px; margin-left: 2px;">verified</span></h4>
+                                <h4 class="text-white text-lg font-semibold">${currentOrderForDetails.deliveryName || currentOrderForDetails.company || 'N/A'}<span class="material-symbols-outlined verified-checkmark" style="font-size: 16px; margin-left: 2px;">verified</span></h4>
                                 <p class="text-gray-400 text-sm">${productInfo.name}</p>
                                 <p class="text-gray-400 text-sm">Quantity: ${productInfo.quantity}</p>
                             </div>
                         </div>
                     </div>
                     
-                    ${isNewOrderStructure && currentOrderForDetails.products.length > 1 ? `
-                    <!-- Detailed Product List -->
+                    ${currentOrderForDetails.orderItems && currentOrderForDetails.orderItems.length > 0 ? `
+                    <!-- Order Items -->
                     <div class="bg-gray-800/50 rounded-xl p-4">
-                        <h3 class="text-white text-lg font-bold mb-3">Product Details</h3>
+                        <h3 class="text-white text-lg font-bold mb-3">Order Items</h3>
                         <div class="space-y-3">
-                            ${currentOrderForDetails.products.map((product, index) => `
+                            ${currentOrderForDetails.orderItems.map((item, index) => `
                                 <div class="flex justify-between items-center py-2 border-b border-gray-700">
                                     <div class="flex-1">
-                                        <p class="text-white font-medium">${product.name || 'Unknown Product'}</p>
-                                        <p class="text-gray-400 text-sm">Qty: ${product.quantity || 1}</p>
+                                        <p class="text-white font-medium">${item.productName || 'Unknown Product'}</p>
+                                        <p class="text-gray-400 text-sm">Qty: ${item.productQty || 1}</p>
+                                        <p class="text-gray-400 text-sm">Type: ${item.productType || 'N/A'}</p>
                                     </div>
-                                    <p class="text-white font-medium">GHS${((product.price || 0) * (product.quantity || 1)).toFixed(2)}</p>
+                                    <p class="text-white font-medium">GHS${((item.productPrice || 0) * (item.productQty || 1)).toFixed(2)}</p>
                                 </div>
                             `).join('')}
                         </div>
@@ -2575,30 +2481,30 @@
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-gray-400">Company:</span>
-                                <span class="text-white font-medium">${currentOrderForDetails.company || 'N/A'}<span class="material-symbols-outlined verified-checkmark" style="font-size: 14px; margin-left: 2px;">verified</span></span>
+                                <span class="text-white font-medium">${currentOrderForDetails.deliveryName || 'N/A'}<span class="material-symbols-outlined verified-checkmark" style="font-size: 14px; margin-left: 2px;">verified</span></span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-gray-400">Product:</span>
-                                <span class="text-white font-medium">${productInfo.name}</span>
+                                <span class="text-white font-medium">${currentOrderForDetails.orderItems && currentOrderForDetails.orderItems.length > 0 ? currentOrderForDetails.orderItems[0].productName : productInfo.name}</span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-gray-400">Quantity:</span>
-                                <span class="text-white font-medium">${productInfo.quantity}</span>
+                                <span class="text-white font-medium">${currentOrderForDetails.orderItems ? currentOrderForDetails.orderItems.reduce((sum, item) => sum + (item.productQty || 0), 0) : productInfo.quantity}</span>
                             </div>
                             ${currentOrderForDetails.deliveryDate ? `
                             <div class="flex justify-between">
                                 <span class="text-gray-400">Delivery Date:</span>
-                                <span class="text-white font-medium">${currentOrderForDetails.deliveryDate}</span>
+                                <span class="text-white font-medium">${new Date(currentOrderForDetails.deliveryDate).toLocaleDateString()}</span>
                             </div>` : ''}
                             ${currentOrderForDetails.deliveryTime ? `
                             <div class="flex justify-between">
                                 <span class="text-gray-400">Delivery Time:</span>
                                 <span class="text-white font-medium">${currentOrderForDetails.deliveryTime}</span>
                             </div>` : ''}
-                            ${currentOrderForDetails.deliveryInstructions ? `
+                            ${currentOrderForDetails.orderComment ? `
                             <div class="flex justify-between">
-                                <span class="text-gray-400">Delivery Instructions:</span>
-                                <span class="text-white font-medium text-right" style="max-width: 60%;">${currentOrderForDetails.deliveryInstructions}</span>
+                                <span class="text-gray-400">Instructions:</span>
+                                <span class="text-white font-medium text-right" style="max-width: 60%;">${currentOrderForDetails.orderComment}</span>
                             </div>` : ''}
                         </div>
                     </div>
@@ -2612,7 +2518,7 @@
                                 <span class="text-white font-medium">GHS${displaySubtotal.toFixed(2)}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-gray-400">Service Fee (GHS0.10 per item):</span>
+                                <span class="text-gray-400">Service Fee:</span>
                                 <span class="text-white font-medium">GHS${calculatedServiceFee.toFixed(2)}</span>
                             </div>
                             <div class="flex justify-between pt-2 border-t border-gray-700">
@@ -2628,73 +2534,42 @@
                         <div class="space-y-2">
                             <div class="flex justify-between">
                                 <span class="text-gray-400">Payment Method:</span>
-                                <span class="text-white font-medium">${currentOrderForDetails.payment || 'N/A'}</span>
+                                <span class="text-white font-medium">${currentOrderForDetails.paymentMethod || 'N/A'}</span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-gray-400">Status:</span>
-                                <span class="font-medium" style="color: ${currentOrderForDetails.statusColor || '#F2A78C'};">${currentOrderForDetails.statusText || 'Pending'}</span>
+                                <span class="font-medium" style="color: ${statusColor};">${statusText}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-gray-400">Delivery Date:</span>
-                                <span class="text-white font-medium">${currentOrderForDetails.deliveryDate ? formatFullDate(currentOrderForDetails.deliveryDate) : (currentOrderForDetails.date || 'N/A')}</span>
+                                <span class="text-gray-400">Transaction ID:</span>
+                                <span class="text-white font-medium">${currentOrderForDetails.transactionId || 'N/A'}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-gray-400">Delivery Time:</span>
-                                <span class="text-white font-medium">${currentOrderForDetails.deliveryTime || (currentOrderForDetails.time || 'N/A')}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-400">Order Placed:</span>
-                                <span class="text-white font-medium">${currentOrderForDetails.date || 'N/A'}</span>
+                                <span class="text-gray-400">Delivery Address:</span>
+                                <span class="text-white font-medium">${currentOrderForDetails.deliveryAddress || 'N/A'}</span>
                             </div>
                         </div>
                     </div>
                     
-                    <!-- Recipient Information -->
-                    ${currentOrderForDetails.purchase_recipient_type || currentOrderForDetails.recipient_type || currentOrderForDetails.recipient ? `
+                    <!-- Customer Information -->
+                    ${currentOrderForDetails.customerDetails ? `
                     <div class="bg-gray-800/50 rounded-xl p-4">
-                        <h3 class="text-white text-lg font-bold mb-3">Recipient Information</h3>
+                        <h3 class="text-white text-lg font-bold mb-3">Customer Information</h3>
                         <div class="space-y-2">
                             <div class="flex justify-between">
-                                <span class="text-gray-400">Recipient Type:</span>
-                                <span class="text-white font-medium capitalize">${(currentOrderForDetails.purchase_recipient_type || currentOrderForDetails.recipient_type || currentOrderForDetails.recipient?.type || 'you').replace('_', ' ')}</span>
-                            </div>
-                            ${(currentOrderForDetails.purchase_recipient_type || currentOrderForDetails.recipient_type || currentOrderForDetails.recipient?.type) !== 'you' ? `
-                            <div class="flex justify-between">
                                 <span class="text-gray-400">Name:</span>
-                                <span class="text-white font-medium">${currentOrderForDetails.recipient_name || currentOrderForDetails.recipient?.name || 'N/A'}</span>
+                                <span class="text-white font-medium">${currentOrderForDetails.customerDetails.full_name || 'N/A'}</span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-gray-400">Phone:</span>
-                                <span class="text-white font-medium">${currentOrderForDetails.recipient_phone || currentOrderForDetails.recipient?.phone || 'N/A'}</span>
+                                <span class="text-white font-medium">${currentOrderForDetails.customerDetails.phone_number || 'N/A'}</span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-gray-400">Email:</span>
-                                <span class="text-white font-medium">${currentOrderForDetails.recipient_email || currentOrderForDetails.recipient?.email || 'N/A'}</span>
-                            </div>` : `
-                            <div class="flex justify-between">
-                                <span class="text-gray-400">Name:</span>
-                                <span class="text-white font-medium">${currentOrderForDetails.customer?.full_name || 'N/A'}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-400">Phone:</span>
-                                <span class="text-white font-medium">${currentOrderForDetails.customer?.phone_number || 'N/A'}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-400">Email:</span>
-                                <span class="text-white font-medium">${currentOrderForDetails.customer?.email || 'N/A'}</span>
-                            </div>`}
-                            ${(currentOrderForDetails.purchase_recipient_type || currentOrderForDetails.recipient_type || currentOrderForDetails.recipient?.type) === 'business' ? `
-                            <div class="flex justify-between">
-                                <span class="text-gray-400">Business Name:</span>
-                                <span class="text-white font-medium">${currentOrderForDetails.business_name || currentOrderForDetails.recipient?.businessName || 'N/A'}</span>
-                            </div>` : ''}
-                            <div class="flex justify-between">
-                                <span class="text-gray-400">Delivery Location:</span>
-                                <span class="text-white font-medium">${currentOrderForDetails.recipient_address || currentOrderForDetails.recipient?.address || currentOrderForDetails.location || 'N/A'}</span>
+                                <span class="text-white font-medium">${currentOrderForDetails.customerDetails.email || 'N/A'}</span>
                             </div>
                         </div>
-                    </div>
-                    ` : ''}
+                    </div>` : ''}
                     
                     <!-- Actions -->
                     <div class="flex space-x-3">
@@ -2708,9 +2583,15 @@
                 </div>
             `;
 
-            sheet.classList.remove('opacity-0', 'pointer-events-none');
-            sheet.classList.add('opacity-100', 'z-50');
-            setTimeout(() => content.classList.remove('translate-y-full'), 10);
+            // Get the sheet and content elements from the DOM
+            const sheet = document.getElementById('orderDetailsSheet');
+            const content = document.getElementById('orderDetailsContent');
+            
+            if (sheet && content) {
+                sheet.classList.remove('opacity-0', 'pointer-events-none');
+                sheet.classList.add('opacity-100', 'z-50');
+                setTimeout(() => content.classList.remove('translate-y-full'), 10);
+            }
         }
 
         function formatFullDate(dateString) {
@@ -2972,6 +2853,97 @@
                 localStorage.setItem('previousPage', 'schedule-history.html');
             }
         });
+
+        // Show Coming Soon Modal for Bottle Returns
+        window.showComingSoonModal = function() {
+            // Create modal overlay following the existing pattern
+            const modalOverlay = document.createElement('div');
+            modalOverlay.id = 'comingSoonModal';
+            modalOverlay.className = 'fixed inset-0 z-50 flex items-center justify-center p-9';
+            modalOverlay.style.cssText = 'display: flex; backdrop-filter: blur(20px); background-color: rgba(0,0,0,0.5);';
+            
+            // Create modal content following existing modal pattern
+            const modalContent = document.createElement('div');
+            modalContent.className = 'rounded-[30px] w-full max-w-[350px] px-10 py-7 flex flex-col items-center justify-center border-[0.2px]';
+            modalContent.style.cssText = 'background-color: var(--modal-bg); border-color: var(--modal-border);';
+            
+            modalContent.innerHTML = `
+                <div class="flex flex-col items-center justify-center w-full h-full">
+                    <!-- Bottle Icon Section -->
+                    <div class="flex flex-col items-center justify-center mb-6">
+                        <div class="w-[80px] h-[80px] rounded-full flex items-center justify-center mb-4"
+                             style="background-color: rgba(59, 116, 255, 0.1);">
+                            <svg class="w-[40px] h-[40px] text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                            </svg>
+                        </div>
+                        
+                        <h2 class="text-white text-[20px] font-bold text-center mb-3">Coming Soon!</h2>
+                        <p class="text-gray-400 text-[14px] text-center leading-[20px] mb-6">
+                            We're working on an exciting new feature for returning dispenser bottles to companies after use. This will help you easily manage returns and contribute to sustainability.
+                        </p>
+                        
+                        <div class="w-full text-left mb-6">
+                            <div class="text-gray-400 text-[13px] space-y-2">
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-[4px] h-[4px] text-blue-500" fill="currentColor" viewBox="0 0 8 8">
+                                        <circle cx="4" cy="4" r="2"/>
+                                    </svg>
+                                    <span>Easy bottle return scheduling</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-[4px] h-[4px] text-blue-500" fill="currentColor" viewBox="0 0 8 8">
+                                        <circle cx="4" cy="4" r="2"/>
+                                    </svg>
+                                    <span>Track return status</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-[4px] h-[4px] text-blue-500" fill="currentColor" viewBox="0 0 8 8">
+                                        <circle cx="4" cy="4" r="2"/>
+                                    </svg>
+                                    <span>Eco-friendly recycling program</span>
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <svg class="w-[4px] h-[4px] text-blue-500" fill="currentColor" viewBox="0 0 8 8">
+                                        <circle cx="4" cy="4" r="2"/>
+                                    </svg>
+                                    <span>Rewards for returns</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Button Section -->
+                    <div class="w-full flex items-center">
+                        <!-- Got it Button -->
+                        <button onclick="closeComingSoonModal()"
+                                class="h-[37px] flex-1 rounded-[100px] flex items-center justify-center border transition-all hover:opacity-80"
+                                style="background-color: rgba(59, 116, 255, 0.25); border-color: rgba(59, 116, 255, 0.3);">
+                            <span class="text-white text-base font-semibold capitalize">Got it!</span>
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            modalOverlay.appendChild(modalContent);
+            document.body.appendChild(modalOverlay);
+            
+            // Close modal when clicking overlay
+            modalOverlay.addEventListener('click', function(e) {
+                if (e.target === modalOverlay) {
+                    closeComingSoonModal();
+                }
+            });
+        };
+
+        // Close coming soon modal function
+        window.closeComingSoonModal = function() {
+            const modal = document.getElementById('comingSoonModal');
+            if (modal) {
+                modal.remove();
+            }
+        };
     </script>
     <script src="js/notifications.js"></script>
 

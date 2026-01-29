@@ -9,6 +9,7 @@ class CompanyDataManager {
         this.products = [];
         this.socialMedia = [];
         this.verifications = [];
+        this.ratings = [];
         this.isLoading = false;
         this.lastFetchTime = null;
         this.cacheTimeout = 5 * 60 * 1000; // 5 minutes cache
@@ -29,14 +30,15 @@ class CompanyDataManager {
         try {
             console.log('🔄 Fetching company data from database...');
             
-            // Fetch companies, branches, working days, products, social media, and verification in parallel
-            const [companiesResponse, branchesResponse, workingDaysResponse, productsResponse, socialMediaResponse, verificationResponse] = await Promise.all([
+            // Fetch companies, branches, working days, products, social media, verification and ratings in parallel
+            const [companiesResponse, branchesResponse, workingDaysResponse, productsResponse, socialMediaResponse, verificationResponse, ratingsResponse] = await Promise.all([
                 this.fetchCompanies(),
                 this.fetchBranches(),
                 this.fetchWorkingDays(),
                 this.fetchProducts(),
                 this.fetchSocialMedia(),
-                this.fetchVerifications()
+                this.fetchVerifications(),
+                this.fetchRatings()
             ]);
 
             this.companies = companiesResponse;
@@ -45,12 +47,13 @@ class CompanyDataManager {
             this.products = productsResponse;
             this.socialMedia = socialMediaResponse;
             this.verifications = verificationResponse;
+            this.ratings = ratingsResponse;
             this.lastFetchTime = Date.now();
 
             // Process and merge data
             const mergedData = this.mergeCompanyAndBranchData();
             
-            console.log(`✅ Successfully loaded ${mergedData.length} companies with branches, working days, products, and social media`);
+            console.log(`✅ Successfully loaded ${mergedData.length} companies with branches, working days, products, social media, and ratings`);
             return mergedData;
 
         } catch (error) {
@@ -226,8 +229,13 @@ class CompanyDataManager {
                     working_days: branchWorkingDays, // Add working days
                     products: branchProducts.map(product => ({
                         ...product,
-                        image: this.getProductImageUrl(product.product_image) // Convert to full URL
-                    })), // Add products with corrected image field
+                        name: product.name || product.product_name || product.productName || 'Unknown Product',
+                        price: product.price || product.product_price || product.productPrice || 0,
+                        type: product.type || product.product_type || product.productType || 'product',
+                        minQuantity: product.minQuantity || product.min_quantity || 1,
+                        rating: this.getProductRating(product),
+                        image: this.getProductImageUrl(product.product_image || product.image)
+                    })),
                     social_media: branchSocialMedia, // Add social media links
                     // Additional fields for compatibility
                     time: this.generateTimeText(),
@@ -367,6 +375,59 @@ class CompanyDataManager {
             console.error('❌ Error fetching verification data:', error);
             return [];
         }
+    }
+
+    // Fetch ratings from ratings table
+    async fetchRatings() {
+        try {
+            const response = await window.databases.listDocuments(
+                window.appwriteConfig.DATABASE_ID,
+                window.appwriteConfig.RATINGS_TABLE
+            );
+            console.log(`⭐ Found ${response.documents.length} rating records`);
+            return response.documents;
+        } catch (error) {
+            console.error('❌ Error fetching ratings:', error);
+            return [];
+        }
+    }
+
+    // Get rating for a product based on product tags
+    getProductRating(product) {
+        // Get product tags from various possible field names
+        const productTags = product.tags || product.product_tags || product.tag || [];
+        
+        if (!productTags || productTags.length === 0) {
+            return 0; // Return 0 if no tags
+        }
+
+        // Find ratings that match any of the product tags
+        const matchingRatings = this.ratings.filter(rating => {
+            const ratingTags = rating.tags || rating.product_tags || rating.tag || [];
+            if (!ratingTags || ratingTags.length === 0) return false;
+            
+            // Check if any product tag matches any rating tag
+            return productTags.some(productTag => 
+                ratingTags.some(ratingTag => 
+                    productTag.toLowerCase() === ratingTag.toLowerCase()
+                )
+            );
+        });
+
+        if (matchingRatings.length === 0) {
+            return 0; // Return 0 if no matching ratings
+        }
+
+        // Calculate average rating from all matching ratings
+        const totalStars = matchingRatings.reduce((sum, rating) => {
+            const stars = parseFloat(rating.stars || rating.rating || rating.star || 0);
+            return sum + stars;
+        }, 0);
+
+        const averageRating = totalStars / matchingRatings.length;
+        
+        // Round to 1 decimal place and ensure it's between 0 and 5
+        return Math.round(Math.max(0, Math.min(5, averageRating)) * 10) / 10;
     }
 
     // Get products for a specific company

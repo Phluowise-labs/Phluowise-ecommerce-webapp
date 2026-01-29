@@ -2127,7 +2127,7 @@
 
                     <div class="terms-container">
                         <p class="info-text">
-                            By continuing you agree to our <a href="#" onclick="openTermsOfService()"
+                            By continuing you agree to our <a href="about.html" onclick="navigateToPage('about.html')"
                                 class="text-blue-400 hover:text-blue-300 underline">terms of service</a>
                         </p>
                     </div>
@@ -2993,9 +2993,9 @@
             
             // Create products HTML
             const productsHTML = (service.products || []).map(product => `
-                <div class="flex flex-col items-center gap-3 flex-shrink-0">
-                    <div class="product-item bg-[#292B2F] rounded-[10px] flex items-center justify-center" style="height: 95px; width: 95px; ${product.image ? `background-image: url('${product.image}'); background-size: cover; background-position: center;` : ''}"
-                        onclick="toggleServiceProduct(this, '${service.name}', '${product.name}', ${parseFloat(product.price) || 0}, '${product.image || ''}', '${product.type || 'product'}')">
+                <div class="flex flex-col items-center gap-3 flex-shrink-0" style="scroll-snap-align: start;">
+                    <div class="product-item bg-[#292B2F] rounded-[12px] flex items-center justify-center transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl" style="height: 100px; width: 100px; ${product.image ? `background-image: url('${product.image}'); background-size: cover; background-position: center;` : ''}"
+                        onclick="toggleServiceProduct(this, '${service.name.replace(/'/g, "\\'")}', '${(product.name || product.product_name || 'Unknown Product').replace(/'/g, "\\'")}', ${parseFloat(product.price) || 0}, '${(product.image || '').replace(/'/g, "\\'")}', '${(product.type || 'product').replace(/'/g, "\\'")}')">
                         ${product.image ? '' : `
                             <div class="text-center">
                                 <svg class="w-8 h-8 mx-auto mb-1 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -3005,12 +3005,12 @@
                             </div>
                         `}
                     </div>
-                    <span class="text-white text-base font-bold">GHS ${(parseFloat(product.price) || 0).toFixed(2)}</span>
+                    <span class="text-white text-sm font-semibold">GHS ${(parseFloat(product.price) || 0).toFixed(2)}</span>
                     <div class="flex flex-row items-center justify-center">
                         <svg class="w-4 h-4 mt-1" fill="white" viewBox="0 0 24 24">
                             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z" />
                         </svg>
-                        <span class="text-white text-base font-medium">${product.rating || '4.5'}</span>
+                        <span class="text-white text-base font-medium">${product.rating > 0 ? product.rating.toFixed(1) : '0.0'}</span>
                     </div>
                 </div>
             `).join('');
@@ -3059,9 +3059,9 @@
                 <!-- Products Section -->
                 <p class="px-5 text-white text-lg mt-4 font-medium">Select products to Schedule order</p>
 
-                <!-- Product Scroll (horizontal, gap: 5px, px: 20px) -->
+                <!-- Enhanced Product Scroll with snap behavior -->
                 <div class="w-full flex justify-center items-center">
-                    <div class="w-full flex flex-row gap-[5px] overflow-x-auto px-5 mt-3 hide-scrollbar">
+                    <div class="w-full flex flex-row gap-[8px] overflow-x-auto px-5 mt-3 hide-scrollbar scroll-smooth" style="scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;">
                         ${productsHTML}
                     </div>
                 </div>
@@ -3339,17 +3339,17 @@
                 </div>
                 <p class="px-5 text-white text-lg mt-4 font-medium">Select products to Schedule order</p>
                 <div class="w-full flex justify-center items-center">
-                    <div class="w-full flex flex-row gap-[5px] overflow-x-auto px-5 mt-3 hide-scrollbar">
+                    <div class="w-full flex flex-row gap-[8px] overflow-x-auto px-5 mt-3 hide-scrollbar scroll-smooth" style="scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;">
                         ${service.products.map((p, idx) => {
                 // Check if this product is selected
-                const isSelected = selectedForService.some(sp => sp.name === p.name);
-                const quantity = isSelected ? selectedForService.find(sp => sp.name === p.name).quantity : 0;
+                const isSelected = selectedForService.some(sp => sp.name === (p.name || p.product_name));
+                const quantity = isSelected ? selectedForService.find(sp => sp.name === (p.name || p.product_name)).quantity : 0;
 
                 return `
-                                <div class="flex flex-col items-center gap-3 flex-shrink-0">
-                                    <div class="swipe-product-item rounded-[10px] flex items-center justify-center ${isSelected ? 'selected' : ''}" 
-                                         style="height: 95px; width: 95px; ${p.image ? `background-image: url('${p.image}'); background-size: cover; background-position: center;` : ''}"
-                                         onclick="toggleSwipeProduct(this, '${service.name}', '${p.name}', ${parseFloat(p.price) || 0}, '${p.image}', '${p.type}')">
+                                <div class="flex flex-col items-center gap-3 flex-shrink-0" style="scroll-snap-align: start;">
+                                    <div class="swipe-product-item rounded-[12px] flex items-center justify-center ${isSelected ? 'selected' : ''} transition-all duration-200 hover:scale-105 active:scale-95 shadow-lg hover:shadow-xl" 
+                                         style="height: 100px; width: 100px; ${p.image ? `background-image: url('${p.image}'); background-size: cover; background-position: center;` : ''}"
+                                         onclick="toggleSwipeProduct(this, '${service.name.replace(/'/g, "\\'")}', '${(p.name || p.product_name || 'Unknown Product').replace(/'/g, "\\'")}', ${parseFloat(p.price) || 0}, '${(p.image || '').replace(/'/g, "\\'")}', '${(p.type || 'product').replace(/'/g, "\\'")}')">
                                         ${isSelected ? `<div class="product-item-quantity">${quantity}</div>` : ''}
                                         ${p.image ? '' : `
                                             <div class="text-center">
@@ -3365,7 +3365,7 @@
                                         <svg class="w-4 h-4 mt-1" fill="white" viewBox="0 0 24 24">
                                             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
                                         </svg>
-                                        <span class="text-white text-base font-medium">${p.rating}</span>
+                                        <span class="text-white text-base font-medium">${p.rating > 0 ? p.rating.toFixed(1) : '0.0'}</span>
                                     </div>
                                 </div>
                             `;
@@ -3423,15 +3423,9 @@
             let products = serviceProducts[companyName] || [];
             
             if (products.length === 0) {
-                // If no products selected, select first available product
-                const service = services.find(s => s.name === companyName);
-                if (service && service.products && service.products.length > 0) {
-                    // Add quantity to the product
-                    const firstProduct = { ...service.products[0] };
-                    firstProduct.quantity = firstProduct.minQuantity || 1;
-                    serviceProducts[companyName] = [firstProduct];
-                    products = [firstProduct];
-                }
+                // No products selected - show error and don't open schedule flow
+                showError('Please select at least one product first before scheduling an order.');
+                return;
             }
 
             // Update selectedProducts with the products for this company
@@ -4853,7 +4847,7 @@
                     selectedItem.innerHTML = `
                         ${imageHtml}
                         <div class="selected-product-details">
-                            <div class="selected-product-name">${product.name}</div>
+                            <div class="selected-product-name">${product.name || product.product_name || 'Unknown Product'}</div>
                             <div class="selected-product-price">GHS ${parseFloat(product.price).toFixed(2)} each</div>
                         </div>
                         <div class="selected-product-quantity">
@@ -4907,7 +4901,7 @@
 
                 // Validate minimum quantity
                 if (newQuantity < minQuantity) {
-                    showError(`Minimum quantity for ${product.name} is ${minQuantity} item${minQuantity > 1 ? 's' : ''}`);
+                    showError(`Minimum quantity for ${product.name || product.product_name || 'Unknown Product'} is ${minQuantity} item${minQuantity > 1 ? 's' : ''}`);
                     return;
                 }
 
@@ -5117,9 +5111,9 @@
                 const productItem = document.createElement('div');
                 productItem.className = 'review-product-item';
                 productItem.innerHTML = `
-                    <img src="${product.image}" alt="${product.name}" class="review-product-image">
+                    <img src="${product.image}" alt="${product.name || product.product_name || 'Unknown Product'}" class="review-product-image">
                     <div class="review-product-details">
-                        <div class="review-product-name">${product.quantity}x ${product.name}</div>
+                        <div class="review-product-name">${product.quantity}x ${product.name || product.product_name || 'Unknown Product'}</div>
                         <div class="review-product-price">GHS ${(parseFloat(product.price) * product.quantity).toFixed(2)}</div>
                     </div>
                 `;
@@ -5913,23 +5907,6 @@
         // Load user profile data
         loadUserProfileData();
 
-        // Open Terms of Service function
-        function openTermsOfService() {
-            // For now, you can redirect to a terms page or open a modal
-            // You can customize this to open a modal or navigate to a separate terms page
-            document.getElementById('termsModal').classList.remove('opacity-0', 'pointer-events-none');
-            document.getElementById('termsModal').classList.add('opacity-100', 'pointer-events-auto');
-            document.getElementById('termsModalContent').classList.remove('scale-95');
-            document.getElementById('termsModalContent').classList.add('scale-100');
-        }
-
-        function closeTermsModal() {
-            document.getElementById('termsModal').classList.remove('opacity-100', 'pointer-events-auto');
-            document.getElementById('termsModal').classList.add('opacity-0', 'pointer-events-none');
-            document.getElementById('termsModalContent').classList.remove('scale-100');
-            document.getElementById('termsModalContent').classList.add('scale-95');
-        }
-
         // Navigation State Management
         function saveCurrentPage() {
             localStorage.setItem('previousPage', window.location.pathname.split('/').pop());
@@ -6470,44 +6447,6 @@
     </script>
 
 </body>
-
-<!-- Terms of Service Modal -->
-<div id="termsModal"
-    class="fixed inset-0 z-[10003] flex items-center justify-center pointer-events-none opacity-0 transition-all duration-300"
-    style="background-color: rgba(0,0,0,0.8);">
-    <div class="bg-[#060606] rounded-[20px] w-[95%] h-[90%] max-w-4xl flex flex-col transform scale-95 transition-transform duration-300"
-        id="termsModalContent">
-        <!-- Header -->
-        <div class="flex justify-between items-center p-4 border-b border-gray-700">
-            <h2 class="text-white text-xl font-bold">Terms of Service</h2>
-            <button onclick="closeTermsModal()"
-                class="text-white text-2xl hover:text-gray-300 transition-colors">×</button>
-        </div>
-
-        <!-- Content -->
-        <div class="flex-1 p-4 overflow-auto">
-            <div class="text-white space-y-4">
-                <h3 class="text-lg font-semibold">1. Acceptance of Terms</h3>
-                <p class="text-gray-300">By accessing and using Phluowise services, you accept and agree to be bound by the terms and provision of this agreement.</p>
-                
-                <h3 class="text-lg font-semibold">2. Use License</h3>
-                <p class="text-gray-300">Permission is granted to temporarily download one copy of the materials on Phluowise for personal, non-commercial transitory viewing only.</p>
-                
-                <h3 class="text-lg font-semibold">3. Disclaimer</h3>
-                <p class="text-gray-300">The materials on Phluowise are provided on an 'as is' basis. Phluowise makes no warranties, expressed or implied.</p>
-                
-                <h3 class="text-lg font-semibold">4. Limitations</h3>
-                <p class="text-gray-300">In no event shall Phluowise or its suppliers be liable for any damages (including, without limitation, damages for loss of data or profit) arising out of the use or inability to use the materials on Phluowise.</p>
-                
-                <h3 class="text-lg font-semibold">5. Privacy Policy</h3>
-                <p class="text-gray-300">Your Privacy is important to us. Our Privacy Policy explains how we collect, use and protect your information.</p>
-                
-                <h3 class="text-lg font-semibold">6. Contact Information</h3>
-                <p class="text-gray-300">Questions about the Terms of Service should be sent to support@phluowise.com</p>
-            </div>
-        </div>
-    </div>
-</div>
 
 <!-- Appwrite SDK and Config -->
 <script src="https://cdn.jsdelivr.net/npm/appwrite@13.0.1"></script>
